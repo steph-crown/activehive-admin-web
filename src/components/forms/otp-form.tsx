@@ -56,6 +56,12 @@ export function OtpForm({ className, ...props }: React.ComponentProps<"form">) {
         >
           Verify email
         </Button>
+
+        <button className="flex justify-end -mt-3 cursor-pointer">
+          <p className="ml-auto text-sm underline-offset-4 hover:underline">
+            Resend OTP
+          </p>
+        </button>
       </div>
     </form>
   );
