@@ -4,38 +4,42 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "react-router-dom";
 
-export function LoginForm({
+export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
   return (
     <form className={cn("flex flex-col gap-6", className)} {...props}>
       <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-2xl font-bold">Login to your account</h1>
+        <h1 className="text-2xl font-bold">Join ActiveHive Now</h1>
         <p className="text-muted-foreground text-sm text-balance">
-          Enter your email below to login to your account
+          Enter your email and a password to create an ActiveHive account for
+          your gym
         </p>
       </div>
+
       <div className="grid gap-6">
         <div className="grid gap-3">
           <Label htmlFor="email">Email</Label>
           <Input id="email" type="email" placeholder="ade@mail.com" required />
         </div>
+
         <div className="grid gap-3">
           <div className="flex items-center">
             <Label htmlFor="password">Password</Label>
-            <a
+            {/* <a
               href="#"
               className="ml-auto text-sm underline-offset-4 hover:underline"
             >
               Forgot your password?
-            </a>
+            </a> */}
           </div>
           <Input id="password" type="password" required />
         </div>
         <Button type="submit" className="w-full hover:scale-105" size={"lg"}>
-          Login
+          Create account
         </Button>
+
         <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
           <span className="bg-background text-muted-foreground relative z-10 px-2">
             Or continue with
@@ -65,13 +69,14 @@ export function LoginForm({
               d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
             />
           </svg>
-          Login with Google
+          Sign up with Google
         </Button>
       </div>
+
       <div className="text-center text-sm">
-        Don&apos;t have an account?{" "}
-        <Link to="/signup" className="underline underline-offset-4">
-          Sign up
+        Already have an account?{" "}
+        <Link to="/login" className="underline underline-offset-4">
+          Log in
         </Link>
       </div>
     </form>

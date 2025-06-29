@@ -15,14 +15,20 @@ const gymImages = [img1, img2, img3, img4, img5, img6, img7];
 const transitions = [
   // { opacity: 0, x: 100 }, // slide from right
   // { opacity: 0, x: -100 }, // slide from left
-  { opacity: 0, scale: 0.8 }, // slide from right
-  { opacity: 0, scale: 1.2 }, // slide from left
-  { opacity: 0, scale: 0.8 }, // zoom in
-  { opacity: 0, scale: 1.2 }, // zoom out
-  { opacity: 0, scale: 0.8 }, // slide from bottom
-  { opacity: 0, scale: 1.2 }, // slide from top
+  // { opacity: 0, scale: 0.8 }, // slide from right
+  // { opacity: 0, scale: 1.2 }, // slide from left
+  // { opacity: 0, scale: 0.8 }, // zoom in
+  // { opacity: 0, scale: 1.2 }, // zoom out
+  // { opacity: 0, scale: 0.8 }, // slide from bottom
+  // { opacity: 0, scale: 1.2 }, // slide from top
   // { opacity: 0, y: 100 }, // slide from bottom
   // { opacity: 0, y: -100 }, // slide from top
+  { opacity: 0 }, // fade
+  { opacity: 0 }, // fade
+  { opacity: 0 }, // fade
+  { opacity: 0 }, // fade
+  { opacity: 0 }, // fade
+  { opacity: 0 }, // fade
   { opacity: 0 }, // fade
 ];
 
@@ -32,7 +38,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
   useEffect(() => {
     const interval = setInterval(() => {
       setIndex((prev) => (prev + 1) % gymImages.length);
-    }, 10000); // 3.5 seconds per image
+    }, 13000); // 13 seconds per image
     return () => clearInterval(interval);
   }, []);
 
@@ -43,7 +49,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           <Logo />
         </div>
         <div className="flex flex-1 items-center justify-center">
-          <div className="w-full max-w-xs">
+          <div className="w-full max-w-sm">
             {children}
             {/* <LoginForm /> */}
           </div>
@@ -63,7 +69,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           />
         </AnimatePresence>
 
-        <div className="absolute inset-0 bg-black/60 z-10 pointer-events-none" />
+        <div className="absolute inset-0 bg-black/50 z-10 pointer-events-none" />
       </div>
     </div>
   );
