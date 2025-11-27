@@ -7,6 +7,23 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useLoginMutation } from "../../services";
 import { useAuthStore } from "@/store";
+import type { AuthResponse } from "../../types";
+
+const resolveSession = (response: AuthResponse) => {
+  const token =
+    response.token ??
+    response.access_token ??
+    response.data?.token ??
+    response.data?.access_token;
+
+  const user = response.user ?? response.data?.user;
+
+  if (!token || !user) {
+    throw new Error(response.message ?? "Invalid login response from server");
+  }
+
+  return { token, user };
+};
 
 export function LoginForm({
   className,
@@ -15,7 +32,7 @@ export function LoginForm({
   const navigate = useNavigate();
   const { showSuccess, showError } = useToast();
   const { mutateAsync: login, isPending } = useLoginMutation();
-  const setUser = useAuthStore((state) => state.setUser);
+  const setSession = useAuthStore((state) => state.setSession);
   const [formError, setFormError] = useState<string | null>(null);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -34,12 +51,15 @@ export function LoginForm({
 
     try {
       const response = await login({ email, password });
-      setUser(response.user);
+      const session = resolveSession(response);
+      setSession(session);
       showSuccess("Success", "Login successful");
       navigate("/dashboard");
       form.reset();
-    } catch {
-      showError("Error", "Unable to login. Try again.");
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unable to login. Try again.";
+      showError("Error", message);
     }
   };
 

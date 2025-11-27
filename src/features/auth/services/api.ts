@@ -1,30 +1,16 @@
 import { apiClient } from "@/lib/api-client";
-import type { AuthCredentials, AuthResponse, SignupPayload } from "../types";
+import type {
+  AuthCredentials,
+  AuthResponse,
+  RegisterResponse,
+  SignupPayload,
+} from "../types";
 
-const basePath = "/auth";
-
-const mockResponse = (payload: AuthCredentials): AuthResponse => ({
-  token: crypto.randomUUID(),
-  user: {
-    id: crypto.randomUUID(),
-    email: payload.email,
-    name: payload.email.split("@")[0] ?? "ActiveHive User",
-  },
-});
+const basePath = "/api/auth";
 
 export const authApi = {
-  login: async (payload: AuthCredentials): Promise<AuthResponse> => {
-    try {
-      return await apiClient.post<AuthResponse>(`${basePath}/login`, payload);
-    } catch {
-      return mockResponse(payload);
-    }
-  },
-  signup: async (payload: SignupPayload): Promise<AuthResponse> => {
-    try {
-      return await apiClient.post<AuthResponse>(`${basePath}/signup`, payload);
-    } catch {
-      return mockResponse(payload);
-    }
-  },
+  login: (payload: AuthCredentials): Promise<AuthResponse> =>
+    apiClient.post<AuthResponse>(`${basePath}/login`, payload),
+  signup: (payload: SignupPayload): Promise<RegisterResponse> =>
+    apiClient.post<RegisterResponse>(`${basePath}/register`, payload),
 };

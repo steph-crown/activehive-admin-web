@@ -1,6 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
 import { authApi } from "./api";
-import type { AuthCredentials, AuthResponse, SignupPayload } from "../types";
+import type {
+  AuthCredentials,
+  AuthResponse,
+  RegisterResponse,
+  SignupPayload,
+} from "../types";
 
 export const useLoginMutation = () =>
   useMutation<AuthResponse, Error, AuthCredentials>({
@@ -8,6 +13,6 @@ export const useLoginMutation = () =>
   });
 
 export const useSignupMutation = () =>
-  useMutation<AuthResponse, Error, SignupPayload>({
+  useMutation<RegisterResponse, Error, SignupPayload>({
     mutationFn: async (payload) => authApi.signup(payload),
   });

@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useSignupMutation } from "../../services";
-import { useAuthStore } from "@/store";
 
 export function SignupForm({
   className,
@@ -15,7 +14,6 @@ export function SignupForm({
   const navigate = useNavigate();
   const { showSuccess, showError } = useToast();
   const { mutateAsync: signup, isPending } = useSignupMutation();
-  const setUser = useAuthStore((state) => state.setUser);
   const [formError, setFormError] = useState<string | null>(null);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -27,8 +25,9 @@ export function SignupForm({
     const lastName = formData.get("lastName")?.toString() ?? "";
     const email = formData.get("email")?.toString() ?? "";
     const password = formData.get("password")?.toString() ?? "";
+    const phoneNumber = formData.get("phoneNumber")?.toString() ?? "";
 
-    if (!firstName || !lastName || !email || !password) {
+    if (!firstName || !lastName || !email || !password || !phoneNumber) {
       setFormError("All fields are required");
       return;
     }
@@ -36,18 +35,26 @@ export function SignupForm({
     setFormError(null);
 
     try {
-      const response = await signup({
+      await signup({
         firstName,
         lastName,
         email,
         password,
+        phoneNumber,
+        role: "member",
       });
-      setUser(response.user);
-      showSuccess("Success", "We've sent a code to your email");
-      navigate("/otp");
+      showSuccess(
+        "Success",
+        "Account created successfully. You can now log in."
+      );
+      navigate("/login");
       form.reset();
-    } catch {
-      showError("Error", "Unable to create account. Try again.");
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unable to create account. Try again.";
+      showError("Error", message);
     }
   };
 
@@ -88,6 +95,16 @@ export function SignupForm({
         <div className="grid gap-3">
           <Label htmlFor="password">Password</Label>
           <Input id="password" name="password" type="password" required />
+        </div>
+        <div className="grid gap-3">
+          <Label htmlFor="phoneNumber">Phone number</Label>
+          <Input
+            id="phoneNumber"
+            name="phoneNumber"
+            type="tel"
+            placeholder="+1 555 123 4567"
+            required
+          />
         </div>
         {formError && (
           <p className="text-destructive text-sm" role="alert">

@@ -8,6 +8,8 @@ export type AuthCredentials = {
 export type SignupPayload = AuthCredentials & {
   firstName: string;
   lastName: string;
+  phoneNumber: string;
+  role?: string;
 };
 
 export type OtpPayload = {
@@ -15,6 +17,17 @@ export type OtpPayload = {
 };
 
 export type AuthResponse = {
-  token: string;
-  user: AuthUser;
+  token?: string;
+  access_token?: string;
+  user?: AuthUser;
+  data?: {
+    token?: string;
+    access_token?: string;
+    user?: AuthUser;
+  };
+  message?: string;
+};
+
+export type RegisterResponse = {
+  message: string;
 };
