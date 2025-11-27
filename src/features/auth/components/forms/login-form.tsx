@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLoginMutation } from "../../services";
 import { useAuthStore } from "@/store";
 import type { AuthResponse } from "../../types";
+import { Eye, EyeOff } from "lucide-react";
 
 const resolveSession = (response: AuthResponse) => {
   const token =
@@ -34,6 +35,7 @@ export function LoginForm({
   const { mutateAsync: login, isPending } = useLoginMutation();
   const setSession = useAuthStore((state) => state.setSession);
   const [formError, setFormError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -96,7 +98,27 @@ export function LoginForm({
               Forgot your password?
             </Link>
           </div>
-          <Input id="password" name="password" type="password" required />
+          <div className="relative">
+            <Input
+              id="password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              required
+              className="pr-11"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="text-muted-foreground absolute inset-y-0 right-0 flex items-center pr-3 transition-colors hover:text-foreground"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? (
+                <EyeOff className="size-4" />
+              ) : (
+                <Eye className="size-4" />
+              )}
+            </button>
+          </div>
         </div>
         {formError && (
           <p className="text-destructive text-sm" role="alert">

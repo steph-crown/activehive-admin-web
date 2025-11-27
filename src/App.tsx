@@ -12,6 +12,11 @@ const Login = lazy(() => import("@/app/(auth)/login/page"));
 const SignUp = lazy(() => import("@/app/(auth)/signup/page"));
 const Otp = lazy(() => import("@/app/(auth)/otp/page"));
 const ForgotPassword = lazy(() => import("@/app/(auth)/forgot-password/page"));
+const VerifyEmail = lazy(() => import("@/app/(auth)/verify-email/page"));
+const Branding = lazy(() => import("@/app/(auth)/gym-branding/page"));
+const Documents = lazy(() => import("@/app/(auth)/compliance-documents/page"));
+const Locations = lazy(() => import("@/app/(auth)/gym-locations/page"));
+const Payments = lazy(() => import("@/app/(auth)/payment-setup/page"));
 const CompleteSetup = lazy(() => import("@/app/(auth)/complete-setup/page"));
 const Dashboard = lazy(() => import("@/app/dashboard/page"));
 
@@ -26,6 +31,11 @@ function App() {
           <Route path="/complete-setup" element={<CompleteSetup />} />
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/gym-branding" element={<Branding />} />
+          <Route path="/compliance-documents" element={<Documents />} />
+          <Route path="/gym-locations" element={<Locations />} />
+          <Route path="/payment-setup" element={<Payments />} />
           <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
       </Suspense>

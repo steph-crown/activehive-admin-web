@@ -5,7 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { useSignupMutation } from "../../services";
+import { Eye, EyeOff } from "lucide-react";
+import { useOwnerStepOneMutation } from "@/features/gym-owner-registration/services";
+import { useGymOwnerRegistrationStore } from "@/store";
 
 export function SignupForm({
   className,
@@ -13,41 +15,61 @@ export function SignupForm({
 }: React.ComponentProps<"form">) {
   const navigate = useNavigate();
   const { showSuccess, showError } = useToast();
-  const { mutateAsync: signup, isPending } = useSignupMutation();
+  const { mutateAsync: register, isPending } = useOwnerStepOneMutation();
+  const setSession = useGymOwnerRegistrationStore((state) => state.setSession);
+  const setStepStatus = useGymOwnerRegistrationStore(
+    (state) => state.setStepStatus
+  );
   const [formError, setFormError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = event.currentTarget;
     const formData = new FormData(form);
 
+    const gymName = formData.get("gymName")?.toString() ?? "";
     const firstName = formData.get("firstName")?.toString() ?? "";
     const lastName = formData.get("lastName")?.toString() ?? "";
     const email = formData.get("email")?.toString() ?? "";
     const password = formData.get("password")?.toString() ?? "";
-    const phoneNumber = formData.get("phoneNumber")?.toString() ?? "";
+    const confirmPassword = formData.get("confirmPassword")?.toString() ?? "";
 
-    if (!firstName || !lastName || !email || !password || !phoneNumber) {
+    if (
+      !gymName ||
+      !firstName ||
+      !lastName ||
+      !email ||
+      !password ||
+      !confirmPassword
+    ) {
       setFormError("All fields are required");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setFormError("Passwords do not match");
       return;
     }
 
     setFormError(null);
 
     try {
-      await signup({
+      const response = await register({
+        gymName,
         firstName,
         lastName,
         email,
         password,
-        phoneNumber,
-        role: "member",
+        confirmPassword,
       });
+      setSession({ sessionId: response.sessionId, email });
+      setStepStatus(2, "pending");
       showSuccess(
-        "Success",
-        "Account created successfully. You can now log in."
+        "Step 1 complete",
+        "Account created. Check your email to verify before continuing."
       );
-      navigate("/login");
+      navigate("/gym-branding");
       form.reset();
     } catch (error) {
       const message =
@@ -65,14 +87,23 @@ export function SignupForm({
       {...props}
     >
       <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-2xl font-bold">Join ActiveHive Now</h1>
+        <h1 className="text-2xl font-bold">Step 1 · Owner account</h1>
         <p className="text-muted-foreground text-sm text-balance">
-          Enter your email and a password to create an ActiveHive account for
-          your gym
+          Tell us about you and your gym. We&apos;ll send a verification email
+          before you continue.
         </p>
       </div>
 
       <div className="grid gap-6">
+        <div className="grid gap-3">
+          <Label htmlFor="gymName">Gym name</Label>
+          <Input
+            id="gymName"
+            name="gymName"
+            placeholder="ActiveHive Gym"
+            required
+          />
+        </div>
         <div className="grid gap-3">
           <Label htmlFor="firstName">First name</Label>
           <Input id="firstName" name="firstName" placeholder="Ade" required />
@@ -94,16 +125,36 @@ export function SignupForm({
 
         <div className="grid gap-3">
           <Label htmlFor="password">Password</Label>
-          <Input id="password" name="password" type="password" required />
+          <div className="relative">
+            <Input
+              id="password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              required
+              className="pr-11"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="text-muted-foreground absolute inset-y-0 right-0 flex items-center pr-3 transition-colors hover:text-foreground"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? (
+                <EyeOff className="size-4" />
+              ) : (
+                <Eye className="size-4" />
+              )}
+            </button>
+          </div>
         </div>
         <div className="grid gap-3">
-          <Label htmlFor="phoneNumber">Phone number</Label>
+          <Label htmlFor="confirmPassword">Confirm password</Label>
           <Input
-            id="phoneNumber"
-            name="phoneNumber"
-            type="tel"
-            placeholder="+1 555 123 4567"
+            id="confirmPassword"
+            name="confirmPassword"
+            type={showPassword ? "text" : "password"}
             required
+            className="pr-11"
           />
         </div>
         {formError && (
