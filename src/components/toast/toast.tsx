@@ -1,8 +1,8 @@
 "use client";
 
-import type { Toast } from "@/contexts/toast-context";
+import type { Toast } from "@/providers/toast-context";
 import { useEffect, useState } from "react";
-import { useToast } from "../hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface ToastProps {
   toast: Toast;

@@ -6,14 +6,14 @@ import {
 } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import "./App.css";
-import { BlockLoader } from "./components/loader/block-loader";
+import { BlockLoader } from "@/components/loader/block-loader";
 
-const SignUp = lazy(() => import("./pages/SignUp"));
-const Otp = lazy(() => import("./pages/Otp"));
-const CompleteSetup = lazy(() => import("./pages/CompleteSetup"));
-const Login = lazy(() => import("./pages/Login"));
-const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
-const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Login = lazy(() => import("@/app/(auth)/login/page"));
+const SignUp = lazy(() => import("@/app/(auth)/signup/page"));
+const Otp = lazy(() => import("@/app/(auth)/otp/page"));
+const ForgotPassword = lazy(() => import("@/app/(auth)/forgot-password/page"));
+const CompleteSetup = lazy(() => import("@/app/(auth)/complete-setup/page"));
+const Dashboard = lazy(() => import("@/app/dashboard/page"));
 
 function App() {
   return (
