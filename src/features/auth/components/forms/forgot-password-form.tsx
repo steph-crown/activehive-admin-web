@@ -37,6 +37,7 @@ export function ForgotPasswordForm({
   });
 
   const onSubmit = (data: ForgotPasswordFormValues) => {
+    void data
     showSuccess(
       "Success",
       "If an account exists, we'll email instructions."

@@ -1,5 +1,4 @@
 import * as yup from "yup";
-import { REGEXP_ONLY_DIGITS } from "input-otp";
 
 // Step 1: Signup schema
 export const signupSchema = yup.object({
@@ -30,7 +29,7 @@ export const otpSchema = yup.object({
     .string()
     .required("OTP is required")
     .length(6, "OTP must be exactly 6 digits")
-    .matches(REGEXP_ONLY_DIGITS, "OTP must contain only digits"),
+    .matches(/^\d+$/, "OTP must contain only digits"),
 });
 
 // Step 2: Branding schema
