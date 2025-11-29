@@ -1,5 +1,7 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
@@ -9,142 +11,161 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import {
   useResendVerificationMutation,
   useVerifyEmailMutation,
 } from "@/features/gym-owner-registration/services";
 import { useGymOwnerRegistrationStore } from "@/store";
+import { MissingSessionCard } from "@/features/gym-owner-registration/components/missing-session-card";
+
+const otpSchema = yup.object({
+  otp: yup
+    .string()
+    .required("OTP is required")
+    .length(6, "OTP must be exactly 6 digits")
+    .matches(/^\d+$/, "OTP must contain only digits"),
+});
+
+type OtpFormValues = yup.InferType<typeof otpSchema>;
 
 export function OtpForm({ className, ...props }: React.ComponentProps<"form">) {
   const navigate = useNavigate();
   const { showSuccess, showError } = useToast();
   const email = useGymOwnerRegistrationStore((state) => state.email);
-  const setSession = useGymOwnerRegistrationStore((state) => state.setSession);
+  const sessionId = useGymOwnerRegistrationStore((state) => state.sessionId);
   const setStepStatus = useGymOwnerRegistrationStore(
     (state) => state.setStepStatus
   );
   const { mutateAsync: verifyEmail, isPending } = useVerifyEmailMutation();
   const { mutateAsync: resendEmail, isPending: isResending } =
     useResendVerificationMutation();
-  const [otp, setOtp] = useState("");
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const form = useForm<OtpFormValues>({
+    resolver: yupResolver(otpSchema),
+    defaultValues: {
+      otp: "",
+    },
+  });
 
-    if (!email) {
-      showError("Error", "Email not found. Please start registration again.");
-      navigate("/signup");
-      return;
-    }
+  if (!sessionId || !email) {
+    return <MissingSessionCard />;
+  }
 
-    if (otp.length !== 6) {
-      showError("Error", "Please enter the complete 6-digit OTP.");
-      return;
-    }
-
+  const onSubmit = async (data: OtpFormValues) => {
     try {
-      const response = await verifyEmail({ email, otp });
-      setSession({ sessionId: response.sessionId, email });
+      const response = await verifyEmail({ email, otp: data.otp });
       setStepStatus(2, "pending");
-      showSuccess("Email verified", "Your account has been created. Continue with setup.");
+      showSuccess(
+        "Success",
+        response.message ?? "Email verified. You can now proceed."
+      );
       navigate("/gym-branding");
+      form.reset();
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Unable to verify email.";
+        error instanceof Error ? error.message : "Unable to verify OTP.";
       showError("Error", message);
     }
   };
 
   const handleResend = async () => {
-    if (!email) {
-      showError("Error", "Email not found. Please start registration again.");
-      navigate("/signup");
-      return;
-    }
-
     try {
-      await resendEmail({ email });
-      showSuccess("Email sent", "Check your inbox for a new OTP.");
-      setOtp("");
+      const response = await resendEmail({ email });
+      showSuccess("Success", response.message ?? "OTP sent. Check your inbox.");
+      form.reset();
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Unable to resend email.";
+        error instanceof Error ? error.message : "Unable to resend OTP.";
       showError("Error", message);
     }
   };
 
   return (
-    <form
-      className={cn("flex flex-col gap-6", className)}
-      onSubmit={handleSubmit}
-      {...props}
-    >
-      <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-2xl font-bold">Verify your email address</h1>
-        <p className="text-muted-foreground text-sm text-balance">
-          Please enter the 6-digit code sent to{" "}
-          {email ? (
+    <Form {...form}>
+      <form
+        className={cn("flex flex-col gap-6", className)}
+        onSubmit={form.handleSubmit(onSubmit)}
+        {...props}
+      >
+        <div className="flex flex-col items-center gap-2 text-center">
+          <h1 className="text-2xl font-bold">Verify your email address</h1>
+          <p className="text-muted-foreground text-sm text-balance">
+            Please enter the confirmation code sent to{" "}
             <span className="font-semibold underline">{email}</span>
-          ) : (
-            <span className="font-semibold underline">your email</span>
-          )}
-        </p>
-      </div>
-
-      <div className="grid gap-6">
-        <div className="grid gap-3">
-          <InputOTP
-            maxLength={6}
-            pattern={REGEXP_ONLY_DIGITS}
-            value={otp}
-            onChange={setOtp}
-            containerClassName="justify-center w-full"
-          >
-            <InputOTPGroup>
-              <InputOTPSlot index={0} />
-              <InputOTPSlot index={1} />
-              <InputOTPSlot index={2} />
-            </InputOTPGroup>
-            <InputOTPSeparator />
-            <InputOTPGroup>
-              <InputOTPSlot index={3} />
-              <InputOTPSlot index={4} />
-              <InputOTPSlot index={5} />
-            </InputOTPGroup>
-          </InputOTP>
+          </p>
         </div>
 
-        <Button
-          type="submit"
-          className="w-full hover:scale-105"
-          size={"lg"}
-          disabled={isPending || otp.length !== 6}
-        >
-          {isPending ? "Verifying..." : "Verify email"}
-        </Button>
+        <div className="grid gap-6">
+          <FormField
+            control={form.control}
+            name="otp"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <InputOTP
+                    maxLength={6}
+                    pattern={REGEXP_ONLY_DIGITS}
+                    containerClassName="justify-center w-full"
+                    value={field.value}
+                    onChange={field.onChange}
+                  >
+                    <InputOTPGroup>
+                      <InputOTPSlot index={0} />
+                      <InputOTPSlot index={1} />
+                      <InputOTPSlot index={2} />
+                    </InputOTPGroup>
+                    <InputOTPSeparator />
+                    <InputOTPGroup>
+                      <InputOTPSlot index={3} />
+                      <InputOTPSlot index={4} />
+                      <InputOTPSlot index={5} />
+                    </InputOTPGroup>
+                  </InputOTP>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <div className="flex justify-between -mt-3 cursor-pointer">
-          <button
-            type="button"
-            className="text-sm underline-offset-4 hover:underline text-left w-max"
-            onClick={() => {
-              navigate("/signup");
-            }}
+          <Button
+            type="submit"
+            className="w-full hover:scale-105"
+            size={"lg"}
+            disabled={isPending}
           >
-            Go back
-          </button>
+            {isPending ? "Verifying..." : "Verify email"}
+          </Button>
 
-          <button
-            type="button"
-            className="ml-auto text-sm underline-offset-4 hover:underline"
-            onClick={handleResend}
-            disabled={isResending}
-          >
-            {isResending ? "Sending..." : "Resend OTP"}
-          </button>
+          <div className="flex justify-between -mt-3 cursor-pointer">
+            <button
+              type="button"
+              className="text-sm underline-offset-4 hover:underline text-left w-max"
+              onClick={() => {
+                navigate("/signup");
+              }}
+            >
+              Go back
+            </button>
+
+            <button
+              type="button"
+              className="ml-auto text-sm underline-offset-4 hover:underline"
+              onClick={handleResend}
+              disabled={isResending}
+            >
+              {isResending ? "Sending..." : "Resend OTP"}
+            </button>
+          </div>
         </div>
-      </div>
-    </form>
+      </form>
+    </Form>
   );
 }

@@ -1,35 +1,45 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useForm, useFieldArray } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { useLocationsStepMutation } from "@/features/gym-owner-registration/services";
 import { useGymOwnerRegistrationStore } from "@/store";
 import { MissingSessionCard } from "../missing-session-card";
 import { cn } from "@/lib/utils";
 
-type LocationFormState = {
-  locationName: string;
-  address: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  country: string;
-  phone: string;
-  email: string;
-};
-
-const createEmptyLocation = (): LocationFormState => ({
-  locationName: "",
-  address: "",
-  city: "",
-  state: "",
-  zipCode: "",
-  country: "",
-  phone: "",
-  email: "",
+const locationSchema = yup.object({
+  locationName: yup.string().required("Location name is required"),
+  address: yup.string().required("Address is required"),
+  city: yup.string().required("City is required"),
+  state: yup.string().required("State/Region is required"),
+  zipCode: yup.string().required("Zip code is required"),
+  country: yup.string().required("Country is required"),
+  phone: yup.string().required("Phone is required"),
+  email: yup
+    .string()
+    .email("Please enter a valid email address")
+    .required("Email is required"),
 });
+
+const locationsSchema = yup.object({
+  locations: yup
+    .array()
+    .of(locationSchema)
+    .min(1, "At least one location is required"),
+});
+
+type LocationsFormValues = yup.InferType<typeof locationsSchema>;
 
 export function LocationsStepForm({
   className,
@@ -43,50 +53,40 @@ export function LocationsStepForm({
   );
   const { mutateAsync: submitLocations, isPending } =
     useLocationsStepMutation();
-  const [locations, setLocations] = useState<LocationFormState[]>([
-    createEmptyLocation(),
-  ]);
+
+  const form = useForm<LocationsFormValues>({
+    resolver: yupResolver(locationsSchema),
+    defaultValues: {
+      locations: [
+        {
+          locationName: "",
+          address: "",
+          city: "",
+          state: "",
+          zipCode: "",
+          country: "",
+          phone: "",
+          email: "",
+        },
+      ],
+    },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "locations",
+  });
 
   if (!sessionId) {
     return <MissingSessionCard />;
   }
 
-  const handleLocationChange = (
-    index: number,
-    field: keyof LocationFormState,
-    value: string
-  ) => {
-    setLocations((prev) =>
-      prev.map((location, idx) =>
-        idx === index ? { ...location, [field]: value } : location
-      )
-    );
-  };
-
-  const handleAddLocation = () => {
-    setLocations((prev) => [...prev, createEmptyLocation()]);
-  };
-
-  const handleRemoveLocation = (index: number) => {
-    setLocations((prev) => {
-      const updated = prev.filter((_, idx) => idx !== index);
-      return updated.length === 0 ? [createEmptyLocation()] : updated;
-    });
-  };
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (locations.some((loc) => Object.values(loc).some((value) => !value))) {
-      showError("Error", "Please complete every field for each location.");
-      return;
-    }
-
+  const onSubmit = async (data: LocationsFormValues) => {
     try {
       await submitLocations({
         sessionId,
-        hasMultipleLocations: locations.length > 1,
-        locations,
+        hasMultipleLocations: data.locations.length > 1,
+        locations: data.locations,
       });
       setStepStatus(4, "completed");
       showSuccess("Locations saved", "Now set up your payout accounts.");
@@ -104,150 +104,192 @@ export function LocationsStepForm({
   };
 
   return (
-    <form
-      className={cn("flex flex-col gap-6", className)}
-      onSubmit={handleSubmit}
-      {...props}
-    >
-      <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-2xl font-bold">Step 4 · Gym locations</h1>
-        <p className="text-muted-foreground text-sm text-balance">
-          Add each address you operate from. You can always come back to add more
-          later.
-        </p>
-      </div>
-      <div className="space-y-6">
-        {locations.map((location, index) => (
-          <div
-            key={index}
-            className="rounded-lg border border-border/60 p-4 space-y-4"
+    <Form {...form}>
+      <form
+        className={cn("flex flex-col gap-6", className)}
+        onSubmit={form.handleSubmit(onSubmit)}
+        {...props}
+      >
+        <div className="flex flex-col items-center gap-2 text-center">
+          <h1 className="text-2xl font-bold">Step 4 · Gym locations</h1>
+          <p className="text-muted-foreground text-sm text-balance">
+            Add each address you operate from. You can always come back to add more
+            later.
+          </p>
+        </div>
+        <div className="space-y-6">
+          {fields.map((field, index) => (
+            <div
+              key={field.id}
+              className="rounded-lg border border-border/60 p-4 space-y-4"
+            >
+              <div className="flex items-center justify-between">
+                <p className="font-medium">Location {index + 1}</p>
+                {fields.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => remove(index)}
+                  >
+                    Remove
+                  </Button>
+                )}
+              </div>
+
+              <FormField
+                control={form.control}
+                name={`locations.${index}.locationName`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Main Gym" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name={`locations.${index}.address`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Address</FormLabel>
+                    <FormControl>
+                      <Input placeholder="123 Main Street" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">
+                <FormField
+                  control={form.control}
+                  name={`locations.${index}.city`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>City</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name={`locations.${index}.state`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>State / Region</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name={`locations.${index}.zipCode`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Zip code</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
+                <FormField
+                  control={form.control}
+                  name={`locations.${index}.country`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Country</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name={`locations.${index}.phone`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone</FormLabel>
+                      <FormControl>
+                        <Input placeholder="+1 (555) 123-4567" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name={`locations.${index}.email`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input type="email" placeholder="location@gym.com" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          ))}
+
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={() =>
+              append({
+                locationName: "",
+                address: "",
+                city: "",
+                state: "",
+                zipCode: "",
+                country: "",
+                phone: "",
+                email: "",
+              })
+            }
           >
-            <div className="flex items-center justify-between">
-              <p className="font-medium">Location {index + 1}</p>
-              {locations.length > 1 && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleRemoveLocation(index)}
-                >
-                  Remove
-                </Button>
-              )}
-            </div>
-            <div className="grid gap-3">
-              <Label>Name</Label>
-              <Input
-                value={location.locationName}
-                onChange={(event) =>
-                  handleLocationChange(index, "locationName", event.target.value)
-                }
-                placeholder="Main Gym"
-                required
-              />
-            </div>
-            <div className="grid gap-3">
-              <Label>Address</Label>
-              <Input
-                value={location.address}
-                onChange={(event) =>
-                  handleLocationChange(index, "address", event.target.value)
-                }
-                placeholder="123 Main Street"
-                required
-              />
-            </div>
-            <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">
-              <div className="grid gap-3">
-                <Label>City</Label>
-                <Input
-                  value={location.city}
-                  onChange={(event) =>
-                    handleLocationChange(index, "city", event.target.value)
-                  }
-                  required
-                />
-              </div>
-              <div className="grid gap-3">
-                <Label>State / Region</Label>
-                <Input
-                  value={location.state}
-                  onChange={(event) =>
-                    handleLocationChange(index, "state", event.target.value)
-                  }
-                  required
-                />
-              </div>
-              <div className="grid gap-3">
-                <Label>Zip code</Label>
-                <Input
-                  value={location.zipCode}
-                  onChange={(event) =>
-                    handleLocationChange(index, "zipCode", event.target.value)
-                  }
-                  required
-                />
-              </div>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
-              <div className="grid gap-3">
-                <Label>Country</Label>
-                <Input
-                  value={location.country}
-                  onChange={(event) =>
-                    handleLocationChange(index, "country", event.target.value)
-                  }
-                  required
-                />
-              </div>
-              <div className="grid gap-3">
-                <Label>Phone</Label>
-                <Input
-                  value={location.phone}
-                  onChange={(event) =>
-                    handleLocationChange(index, "phone", event.target.value)
-                  }
-                  placeholder="+1 (555) 123-4567"
-                  required
-                />
-              </div>
-            </div>
-            <div className="grid gap-3">
-              <Label>Email</Label>
-              <Input
-                type="email"
-                value={location.email}
-                onChange={(event) =>
-                  handleLocationChange(index, "email", event.target.value)
-                }
-                placeholder="location@gym.com"
-                required
-              />
-            </div>
-          </div>
-        ))}
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full"
-          onClick={handleAddLocation}
-        >
-          Add another location
-        </Button>
-      </div>
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <Button type="submit" className="flex-1" disabled={isPending}>
-          {isPending ? "Saving..." : "Save & continue"}
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          className="flex-1"
-          onClick={handleSkip}
-        >
-          Skip for now
-        </Button>
-      </div>
-    </form>
+            Add another location
+          </Button>
+        </div>
+
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <Button type="submit" className="flex-1" disabled={isPending}>
+            {isPending ? "Saving..." : "Save & continue"}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1"
+            onClick={handleSkip}
+          >
+            Skip for now
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }

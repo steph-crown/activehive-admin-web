@@ -1,13 +1,85 @@
 import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { useDocumentsStepMutation } from "@/features/gym-owner-registration/services";
 import { useGymOwnerRegistrationStore } from "@/store";
 import { MissingSessionCard } from "../missing-session-card";
 import { cn } from "@/lib/utils";
+
+const documentsSchema = yup.object({
+  taxIdDocument: yup
+    .mixed<File>()
+    .required("Tax ID document is required")
+    .test("fileSize", "File size must be less than 10MB", (value) => {
+      if (!value) return false;
+      return value.size <= 10 * 1024 * 1024;
+    })
+    .test("fileType", "File must be PNG, JPG, or PDF", (value) => {
+      if (!value) return false;
+      return ["image/png", "image/jpeg", "image/jpg", "application/pdf"].includes(
+        value.type
+      );
+    }),
+  governmentId: yup
+    .mixed<File>()
+    .required("Government ID is required")
+    .test("fileSize", "File size must be less than 10MB", (value) => {
+      if (!value) return false;
+      return value.size <= 10 * 1024 * 1024;
+    })
+    .test("fileType", "File must be PNG, JPG, or PDF", (value) => {
+      if (!value) return false;
+      return ["image/png", "image/jpeg", "image/jpg", "application/pdf"].includes(
+        value.type
+      );
+    }),
+  addressProof: yup
+    .mixed<File>()
+    .required("Address proof is required")
+    .test("fileSize", "File size must be less than 10MB", (value) => {
+      if (!value) return false;
+      return value.size <= 10 * 1024 * 1024;
+    })
+    .test("fileType", "File must be PNG, JPG, or PDF", (value) => {
+      if (!value) return false;
+      return ["image/png", "image/jpeg", "image/jpg", "application/pdf"].includes(
+        value.type
+      );
+    }),
+  addressProofDate: yup.string().required("Address proof date is required"),
+  additionalDocuments: yup
+    .array()
+    .of(
+      yup
+        .mixed<File>()
+        .test("fileSize", "File size must be less than 10MB", (value) => {
+          if (!value) return true;
+          return value.size <= 10 * 1024 * 1024;
+        })
+        .test("fileType", "File must be PNG, JPG, or PDF", (value) => {
+          if (!value) return true;
+          return ["image/png", "image/jpeg", "image/jpg", "application/pdf"].includes(
+            value.type
+          );
+        })
+    )
+    .optional(),
+});
+
+type DocumentsFormValues = yup.InferType<typeof documentsSchema>;
 
 export function DocumentsStepForm({
   className,
@@ -23,44 +95,35 @@ export function DocumentsStepForm({
     useDocumentsStepMutation();
   const fileRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
+  const form = useForm<DocumentsFormValues>({
+    resolver: yupResolver(documentsSchema),
+    defaultValues: {
+      additionalDocuments: [],
+    },
+  });
+
   if (!sessionId) {
     return <MissingSessionCard />;
   }
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-
-    const taxIdDocument = formData.get("taxIdDocument") as File | null;
-    const governmentId = formData.get("governmentId") as File | null;
-    const addressProof = formData.get("addressProof") as File | null;
-    const addressProofDate = formData.get("addressProofDate")?.toString() ?? "";
-    const additionalDocuments = Array.from(
-      (formData.getAll("additionalDocuments") as File[]) ?? []
-    ).filter((file) => file && file.size > 0);
-
-    if (!taxIdDocument || !governmentId || !addressProof || !addressProofDate) {
-      showError("Error", "All required documents must be provided.");
-      return;
-    }
-
+  const onSubmit = async (data: DocumentsFormValues) => {
     try {
       await submitDocuments({
         sessionId,
-        taxIdDocument,
-        governmentId,
-        addressProof,
-        addressProofDate,
-        additionalDocuments,
+        taxIdDocument: data.taxIdDocument,
+        governmentId: data.governmentId,
+        addressProof: data.addressProof,
+        addressProofDate: data.addressProofDate,
+        additionalDocuments: (data.additionalDocuments || []).filter(
+          (file) => file && file.size > 0
+        ),
       });
       setStepStatus(3, "completed");
       showSuccess("Documents uploaded", "Next, let's add your locations.");
       Object.values(fileRefs.current).forEach((input) => {
         if (input) input.value = "";
       });
-      if (event.currentTarget) {
-        event.currentTarget.reset();
-      }
+      form.reset();
       navigate("/gym-locations");
     } catch (error) {
       const message =
@@ -75,96 +138,156 @@ export function DocumentsStepForm({
   };
 
   return (
-    <form
-      className={cn("flex flex-col gap-6", className)}
-      onSubmit={handleSubmit}
-      {...props}
-    >
-      <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-2xl font-bold">Step 3 · Compliance documents</h1>
-        <p className="text-muted-foreground text-sm text-balance">
-          Upload the required docs to verify your business. We accept PNG, JPG,
-          or PDF files up to 10MB.
-        </p>
-      </div>
-      <div className="grid gap-6">
-        <div className="grid gap-3">
-          <Label htmlFor="taxIdDocument">Tax ID / EIN document</Label>
-          <Input
-            id="taxIdDocument"
+    <Form {...form}>
+      <form
+        className={cn("flex flex-col gap-6", className)}
+        onSubmit={form.handleSubmit(onSubmit)}
+        {...props}
+      >
+        <div className="flex flex-col items-center gap-2 text-center">
+          <h1 className="text-2xl font-bold">Step 3 · Compliance documents</h1>
+          <p className="text-muted-foreground text-sm text-balance">
+            Upload the required docs to verify your business. We accept PNG, JPG,
+            or PDF files up to 10MB.
+          </p>
+        </div>
+        <div className="grid gap-6">
+          <FormField
+            control={form.control}
             name="taxIdDocument"
-            type="file"
-            accept=".png,.jpg,.jpeg,.pdf"
-            ref={(ref) => {
-              fileRefs.current.taxIdDocument = ref;
-            }}
-            required
+            render={({ field: { onChange, value, ...field } }) => (
+              <FormItem>
+                <FormLabel>Tax ID / EIN document</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    type="file"
+                    accept=".png,.jpg,.jpeg,.pdf"
+                    ref={(ref) => {
+                      fileRefs.current.taxIdDocument = ref;
+                    }}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        onChange(file);
+                      }
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
-        <div className="grid gap-3">
-          <Label htmlFor="governmentId">Government-issued ID</Label>
-          <Input
-            id="governmentId"
+
+          <FormField
+            control={form.control}
             name="governmentId"
-            type="file"
-            accept=".png,.jpg,.jpeg,.pdf"
-            ref={(ref) => {
-              fileRefs.current.governmentId = ref;
-            }}
-            required
+            render={({ field: { onChange, value, ...field } }) => (
+              <FormItem>
+                <FormLabel>Government-issued ID</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    type="file"
+                    accept=".png,.jpg,.jpeg,.pdf"
+                    ref={(ref) => {
+                      fileRefs.current.governmentId = ref;
+                    }}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        onChange(file);
+                      }
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
-        <div className="grid gap-3">
-          <Label htmlFor="addressProof">Address proof</Label>
-          <Input
-            id="addressProof"
+
+          <FormField
+            control={form.control}
             name="addressProof"
-            type="file"
-            accept=".png,.jpg,.jpeg,.pdf"
-            ref={(ref) => {
-              fileRefs.current.addressProof = ref;
-            }}
-            required
+            render={({ field: { onChange, value, ...field } }) => (
+              <FormItem>
+                <FormLabel>Address proof</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    type="file"
+                    accept=".png,.jpg,.jpeg,.pdf"
+                    ref={(ref) => {
+                      fileRefs.current.addressProof = ref;
+                    }}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        onChange(file);
+                      }
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
-        <div className="grid gap-3">
-          <Label htmlFor="addressProofDate">Date on the address proof</Label>
-          <Input
-            id="addressProofDate"
+
+          <FormField
+            control={form.control}
             name="addressProofDate"
-            type="date"
-            required
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Date on the address proof</FormLabel>
+                <FormControl>
+                  <Input type="date" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
-        <div className="grid gap-3">
-          <Label htmlFor="additionalDocuments">
-            Additional documents (optional)
-          </Label>
-          <Input
-            id="additionalDocuments"
+
+          <FormField
+            control={form.control}
             name="additionalDocuments"
-            type="file"
-            accept=".png,.jpg,.jpeg,.pdf"
-            multiple
-            ref={(ref) => {
-              fileRefs.current.additionalDocuments = ref;
-            }}
+            render={({ field: { onChange, value, ...field } }) => (
+              <FormItem>
+                <FormLabel>Additional documents (optional)</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    type="file"
+                    accept=".png,.jpg,.jpeg,.pdf"
+                    multiple
+                    ref={(ref) => {
+                      fileRefs.current.additionalDocuments = ref;
+                    }}
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files || []);
+                      onChange(files);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
+
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Button type="submit" className="flex-1" disabled={isPending}>
+              {isPending ? "Uploading..." : "Save & continue"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={handleSkip}
+            >
+              Skip for now
+            </Button>
+          </div>
         </div>
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <Button type="submit" className="flex-1" disabled={isPending}>
-            {isPending ? "Uploading..." : "Save & continue"}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            className="flex-1"
-            onClick={handleSkip}
-          >
-            Skip for now
-          </Button>
-        </div>
-      </div>
-    </form>
+      </form>
+    </Form>
   );
 }
