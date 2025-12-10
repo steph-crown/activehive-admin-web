@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DataTable } from "@/components/data-table/data-table";
 import type { User } from "../types";
+import { roleDisplayMap } from "../types/role";
 
 export const usersColumns: ColumnDef<User>[] = [
   {
@@ -65,11 +66,15 @@ export const usersColumns: ColumnDef<User>[] = [
   {
     accessorKey: "role",
     header: "Role",
-    cell: ({ row }) => (
-      <Badge variant="outline" className="text-muted-foreground px-1.5">
-        {row.original.role}
-      </Badge>
-    ),
+    cell: ({ row }) => {
+      const role = row.original.role as keyof typeof roleDisplayMap;
+      const displayName = roleDisplayMap[role] || role;
+      return (
+        <Badge variant="outline" className="text-muted-foreground px-1.5">
+          {displayName}
+        </Badge>
+      );
+    },
   },
   {
     accessorKey: "status",

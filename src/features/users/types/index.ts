@@ -1,3 +1,5 @@
+export * from "./role";
+
 export type UserAddress = {
   city: string;
   state: string;

@@ -1,17 +1,19 @@
 import {
-  IconCamera,
-  IconChartBar,
+  IconBuilding,
+  IconBuildingStore,
+  IconCreditCard,
   IconDashboard,
   IconDatabase,
-  IconFileAi,
-  IconFileDescription,
   IconFileWord,
-  IconFolder,
   IconHelp,
-  IconListDetails,
+  IconId,
+  IconMapPin,
   IconReport,
   IconSearch,
   IconSettings,
+  IconUser,
+  IconUserCheck,
+  IconUserStar,
   IconUsers,
 } from "@tabler/icons-react";
 import * as React from "react";
@@ -44,72 +46,49 @@ const data = {
       icon: IconDashboard,
     },
     {
+      title: "Gym Owners",
+      url: "/dashboard/gym-owners",
+      icon: IconUserCheck,
+    },
+    {
+      title: "Gyms",
+      url: "/dashboard/gyms",
+      icon: IconBuildingStore,
+    },
+    {
+      title: "Locations",
+      url: "/dashboard/locations",
+      icon: IconMapPin,
+    },
+    {
       title: "Users",
       url: "/dashboard/users",
-      icon: IconListDetails,
-    },
-    {
-      title: "Analytics",
-      url: "#",
-      icon: IconChartBar,
-    },
-    {
-      title: "Projects",
-      url: "#",
-      icon: IconFolder,
-    },
-    {
-      title: "Team",
-      url: "#",
       icon: IconUsers,
     },
-  ],
-  navClouds: [
     {
-      title: "Capture",
-      icon: IconCamera,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
+      title: "Staff",
+      url: "/dashboard/staff",
+      icon: IconUser,
     },
     {
-      title: "Proposal",
-      icon: IconFileDescription,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
+      title: "Members",
+      url: "/dashboard/members",
+      icon: IconUser,
     },
     {
-      title: "Prompts",
-      icon: IconFileAi,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
+      title: "Trainers",
+      url: "/dashboard/trainers",
+      icon: IconUserStar,
+    },
+    {
+      title: "Memberships",
+      url: "/dashboard/memberships",
+      icon: IconId,
+    },
+    {
+      title: "Subscriptions",
+      url: "/dashboard/subscriptions",
+      icon: IconCreditCard,
     },
   ],
   navSecondary: [
