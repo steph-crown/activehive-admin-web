@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { type ColumnDef } from "@tanstack/react-table";
 import {
   IconCircleCheckFilled,
@@ -72,7 +73,10 @@ export const subscriptionsColumns: ColumnDef<Subscription>[] = [
     accessorKey: "plan",
     header: "Plan",
     cell: ({ row }) => (
-      <Badge variant="outline" className="text-muted-foreground px-1.5 capitalize">
+      <Badge
+        variant="outline"
+        className="text-muted-foreground px-1.5 capitalize"
+      >
         {row.original.plan}
       </Badge>
     ),
@@ -81,7 +85,10 @@ export const subscriptionsColumns: ColumnDef<Subscription>[] = [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => (
-      <Badge variant="outline" className="text-muted-foreground px-1.5 capitalize">
+      <Badge
+        variant="outline"
+        className="text-muted-foreground px-1.5 capitalize"
+      >
         {row.original.status === "active" ? (
           <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
         ) : (
@@ -98,7 +105,11 @@ export const subscriptionsColumns: ColumnDef<Subscription>[] = [
       const price = row.original.monthlyPrice;
       return (
         <div className="text-sm">
-          {price !== null ? `$${price.toFixed(2)}` : <span className="text-muted-foreground">N/A</span>}
+          {price !== null ? (
+            `$${price.toFixed(2)}`
+          ) : (
+            <span className="text-muted-foreground">N/A</span>
+          )}
         </div>
       );
     },
@@ -134,7 +145,9 @@ export const subscriptionsColumns: ColumnDef<Subscription>[] = [
     accessorKey: "createdAt",
     header: "Created At",
     cell: ({ row }) => {
-      return <div className="text-sm">{formatDate(row.original.createdAt)}</div>;
+      return (
+        <div className="text-sm">{formatDate(row.original.createdAt)}</div>
+      );
     },
   },
   {
@@ -161,8 +174,6 @@ export const subscriptionsColumns: ColumnDef<Subscription>[] = [
     ),
   },
 ];
-
-import type { Subscription } from "../types";
 
 type SubscriptionsTableProps = {
   data: Subscription[];

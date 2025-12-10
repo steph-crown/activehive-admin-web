@@ -1,5 +1,4 @@
 import {
-  IconBuilding,
   IconBuildingStore,
   IconCreditCard,
   IconDashboard,

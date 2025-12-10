@@ -145,8 +145,6 @@ export const membersColumns: ColumnDef<Member>[] = [
   },
 ];
 
-import type { Member } from "../types";
-
 type MembersTableProps = {
   data: Member[];
 };

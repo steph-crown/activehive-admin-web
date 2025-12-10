@@ -43,7 +43,6 @@ import {
 } from "@tanstack/react-table";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -77,7 +76,7 @@ type DataTableProps<TData> = {
 };
 
 // Create a separate component for the drag handle
-function DragHandle<TData extends { id: string | number }>({
+function DragHandle({
   id,
 }: {
   id: string | number;

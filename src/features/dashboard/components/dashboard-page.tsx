@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { IconChevronDown, IconPlus } from "@tabler/icons-react";
+import { IconPlus } from "@tabler/icons-react";
 import { AppSidebar } from "./app-sidebar";
 import { SiteHeader } from "./site-header";
 import { SectionCards } from "./section-cards";
