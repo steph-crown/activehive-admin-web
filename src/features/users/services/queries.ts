@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { usersApi } from "./api";
+import type { User } from "../types";
 
 export const usersQueryKeys = {
   all: ["users"] as const,
@@ -7,8 +8,7 @@ export const usersQueryKeys = {
 };
 
 export const useUsersQuery = () =>
-  useQuery({
+  useQuery<User[]>({
     queryKey: usersQueryKeys.list(),
     queryFn: () => usersApi.getUsers(),
   });
-

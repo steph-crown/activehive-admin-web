@@ -3,6 +3,7 @@ import { BlockLoader } from "@/components/loader/block-loader";
 import { AppSidebar } from "@/features/dashboard/components/app-sidebar";
 import { SiteHeader } from "@/features/dashboard/components/site-header";
 import { useUsersQuery } from "../services";
+import { UsersTable } from "./users-table";
 
 export function UsersPage() {
   const { data, isLoading, error } = useUsersQuery();
@@ -40,16 +41,9 @@ export function UsersPage() {
                   <div className="text-destructive">
                     Error loading users. Check console for details.
                   </div>
-                ) : (
-                  <div className="space-y-4">
-                    <p className="text-muted-foreground">
-                      Check the browser console to see the API response shape.
-                    </p>
-                    <pre className="bg-muted p-4 rounded-md overflow-auto text-sm">
-                      {JSON.stringify(data, null, 2)}
-                    </pre>
-                  </div>
-                )}
+                ) : data ? (
+                  <UsersTable data={data} />
+                ) : null}
               </div>
             </div>
           </div>
@@ -58,4 +52,3 @@ export function UsersPage() {
     </SidebarProvider>
   );
 }
-
