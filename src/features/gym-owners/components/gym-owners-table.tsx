@@ -1,5 +1,9 @@
 import { type ColumnDef } from "@tanstack/react-table";
-import { IconDotsVertical } from "@tabler/icons-react";
+import {
+  IconCircleCheckFilled,
+  IconDotsVertical,
+  IconLoader,
+} from "@tabler/icons-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,12 +16,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DataTable } from "@/components/data-table/data-table";
-
-// Temporary type until we see the API response
-type GymOwner = {
-  id: string;
-  [key: string]: unknown;
-};
+import { formatDate } from "@/lib/utils";
+import type { GymOwner } from "../types";
 
 export const gymOwnersColumns: ColumnDef<GymOwner>[] = [
   {
@@ -45,6 +45,82 @@ export const gymOwnersColumns: ColumnDef<GymOwner>[] = [
     ),
     enableSorting: false,
     enableHiding: false,
+  },
+  {
+    accessorKey: "email",
+    header: "Email",
+    cell: ({ row }) => (
+      <div className="font-medium">{row.original.email}</div>
+    ),
+  },
+  {
+    accessorKey: "firstName",
+    header: "Name",
+    cell: ({ row }) => {
+      const owner = row.original;
+      return (
+        <div>
+          {owner.firstName} {owner.lastName}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => (
+      <Badge variant="outline" className="text-muted-foreground px-1.5">
+        {row.original.status === "active" ? (
+          <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
+        ) : (
+          <IconLoader />
+        )}
+        {row.original.status}
+      </Badge>
+    ),
+  },
+  {
+    accessorKey: "ownedGyms",
+    header: "Gyms",
+    cell: ({ row }) => {
+      const gyms = row.original.ownedGyms;
+      return (
+        <div className="text-sm">
+          {gyms.length > 0 ? (
+            <span>
+              {gyms.length} gym{gyms.length !== 1 ? "s" : ""}
+            </span>
+          ) : (
+            <span className="text-muted-foreground">No gyms</span>
+          )}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "onboardingCompleted",
+    header: "Onboarding",
+    cell: ({ row }) => (
+      <Badge variant={row.original.onboardingCompleted ? "default" : "secondary"}>
+        {row.original.onboardingCompleted ? "Completed" : "Pending"}
+      </Badge>
+    ),
+  },
+  {
+    accessorKey: "isEmailVerified",
+    header: "Email Verified",
+    cell: ({ row }) => (
+      <Badge variant={row.original.isEmailVerified ? "default" : "secondary"}>
+        {row.original.isEmailVerified ? "Verified" : "Not Verified"}
+      </Badge>
+    ),
+  },
+  {
+    accessorKey: "createdAt",
+    header: "Created At",
+    cell: ({ row }) => {
+      return <div className="text-sm">{formatDate(row.original.createdAt)}</div>;
+    },
   },
   {
     id: "actions",

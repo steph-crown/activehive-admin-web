@@ -36,7 +36,7 @@ export function LocationsPage() {
                     Error loading locations. Check console for details.
                   </div>
                 ) : data ? (
-                  <LocationsTable data={Array.isArray(data) ? data : []} />
+                  <LocationsTable data={data} />
                 ) : null}
               </div>
             </div>

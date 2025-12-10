@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { locationsApi } from "./api";
+import type { Location } from "../types";
 
 export const locationsQueryKeys = {
   all: ["locations"] as const,
@@ -7,7 +8,7 @@ export const locationsQueryKeys = {
 };
 
 export const useLocationsQuery = () =>
-  useQuery({
+  useQuery<Location[]>({
     queryKey: locationsQueryKeys.list(),
     queryFn: () => locationsApi.getLocations(),
   });

@@ -36,7 +36,7 @@ export function GymsPage() {
                     Error loading gyms. Check console for details.
                   </div>
                 ) : data ? (
-                  <GymsTable data={Array.isArray(data) ? data : []} />
+                  <GymsTable data={data} />
                 ) : null}
               </div>
             </div>

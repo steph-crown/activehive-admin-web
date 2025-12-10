@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { membersApi } from "./api";
+import type { Member } from "../types";
 
 export const membersQueryKeys = {
   all: ["members"] as const,
@@ -7,7 +8,7 @@ export const membersQueryKeys = {
 };
 
 export const useMembersQuery = () =>
-  useQuery({
+  useQuery<Member[]>({
     queryKey: membersQueryKeys.list(),
     queryFn: () => membersApi.getMembers(),
   });

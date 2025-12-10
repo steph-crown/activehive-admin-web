@@ -36,7 +36,7 @@ export function SubscriptionsPage() {
                     Error loading subscriptions. Check console for details.
                   </div>
                 ) : data ? (
-                  <SubscriptionsTable data={Array.isArray(data) ? data : []} />
+                  <SubscriptionsTable data={data} />
                 ) : null}
               </div>
             </div>

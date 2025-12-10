@@ -36,7 +36,7 @@ export function MembersPage() {
                     Error loading members. Check console for details.
                   </div>
                 ) : data ? (
-                  <MembersTable data={Array.isArray(data) ? data : []} />
+                  <MembersTable data={data} />
                 ) : null}
               </div>
             </div>

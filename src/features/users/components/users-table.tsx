@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DataTable } from "@/components/data-table/data-table";
+import { formatDate } from "@/lib/utils";
 import type { User } from "../types";
 import { roleDisplayMap } from "../types/role";
 
@@ -121,8 +122,9 @@ export const usersColumns: ColumnDef<User>[] = [
     accessorKey: "createdAt",
     header: "Created At",
     cell: ({ row }) => {
-      const date = new Date(row.original.createdAt);
-      return <div className="text-sm">{date.toLocaleDateString()}</div>;
+      return (
+        <div className="text-sm">{formatDate(row.original.createdAt)}</div>
+      );
     },
   },
   {

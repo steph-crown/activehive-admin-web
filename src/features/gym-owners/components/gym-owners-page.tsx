@@ -42,7 +42,7 @@ export function GymOwnersPage() {
                     Error loading gym owners. Check console for details.
                   </div>
                 ) : data ? (
-                  <GymOwnersTable data={Array.isArray(data) ? data : []} />
+                  <GymOwnersTable data={data} />
                 ) : null}
               </div>
             </div>

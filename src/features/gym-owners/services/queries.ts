@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { gymOwnersApi } from "./api";
+import type { GymOwner } from "../types";
 
 export const gymOwnersQueryKeys = {
   all: ["gym-owners"] as const,
@@ -7,7 +8,7 @@ export const gymOwnersQueryKeys = {
 };
 
 export const useGymOwnersQuery = () =>
-  useQuery({
+  useQuery<GymOwner[]>({
     queryKey: gymOwnersQueryKeys.list(),
     queryFn: () => gymOwnersApi.getGymOwners(),
   });

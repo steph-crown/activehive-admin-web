@@ -1,1 +1,5 @@
-// Types will be added after seeing the API response shape
+import type { User } from "@/features/users/types";
+
+export type Member = Omit<User, "ownedGyms" | "trainerGyms"> & {
+  memberships: unknown[];
+};

@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { subscriptionsApi } from "./api";
+import type { Subscription } from "../types";
 
 export const subscriptionsQueryKeys = {
   all: ["subscriptions"] as const,
@@ -7,7 +8,7 @@ export const subscriptionsQueryKeys = {
 };
 
 export const useSubscriptionsQuery = () =>
-  useQuery({
+  useQuery<Subscription[]>({
     queryKey: subscriptionsQueryKeys.list(),
     queryFn: () => subscriptionsApi.getSubscriptions(),
   });

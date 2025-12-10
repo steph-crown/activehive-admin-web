@@ -1,9 +1,10 @@
 import { apiClient } from "@/lib/api-client";
+import type { GymOwner } from "../types";
 
 const basePath = "/api/admin/gym-owners";
 
 export const gymOwnersApi = {
-  getGymOwners: async () => {
-    return await apiClient.get(basePath);
+  getGymOwners: async (): Promise<GymOwner[]> => {
+    return await apiClient.get<GymOwner[]>(basePath);
   },
 };
