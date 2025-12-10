@@ -11,3 +11,4 @@ export const useUsersQuery = () =>
     queryKey: usersQueryKeys.list(),
     queryFn: () => usersApi.getUsers(),
   });
+

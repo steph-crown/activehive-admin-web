@@ -1,6 +1,6 @@
 import { apiClient } from "@/lib/api-client";
 
-const basePath = "/admin/users";
+const basePath = "/api/admin/users";
 
 export const usersApi = {
   getUsers: async () => {
