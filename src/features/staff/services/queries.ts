@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { staffApi } from "./api";
+import type { Staff } from "../types";
 
 export const staffQueryKeys = {
   all: ["staff"] as const,
@@ -7,7 +8,7 @@ export const staffQueryKeys = {
 };
 
 export const useStaffQuery = () =>
-  useQuery({
+  useQuery<Staff[]>({
     queryKey: staffQueryKeys.list(),
     queryFn: () => staffApi.getStaff(),
   });

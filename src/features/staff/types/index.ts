@@ -1,1 +1,3 @@
-// Types will be added after seeing the API response shape
+import type { User } from "@/features/users/types";
+
+export type Staff = User;

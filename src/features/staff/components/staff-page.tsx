@@ -36,7 +36,7 @@ export function StaffPage() {
                     Error loading staff. Check console for details.
                   </div>
                 ) : data ? (
-                  <StaffTable data={Array.isArray(data) ? data : []} />
+                  <StaffTable data={data} />
                 ) : null}
               </div>
             </div>

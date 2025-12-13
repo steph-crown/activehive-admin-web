@@ -14,14 +14,10 @@ import {
   IconUser,
   IconUserCheck,
   IconUserStar,
-  IconUsers,
 } from "@tabler/icons-react";
 import * as React from "react";
 
-import { NavDocuments } from "./nav-documents";
-import { NavMain } from "./nav-main";
-import { NavSecondary } from "./nav-secondary";
-import { NavUser } from "./nav-user";
+import { Logo } from "@/components/icons/logo";
 import {
   Sidebar,
   SidebarContent,
@@ -31,7 +27,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Logo } from "@/components/icons/logo";
+import { NavDocuments } from "./nav-documents";
+import { NavMain } from "./nav-main";
+import { NavSecondary } from "./nav-secondary";
+import { NavUser } from "./nav-user";
 
 const data = {
   user: {
@@ -65,11 +64,11 @@ const data = {
       url: "/dashboard/locations",
       icon: IconMapPin,
     },
-    {
-      title: "Users",
-      url: "/dashboard/users",
-      icon: IconUsers,
-    },
+    // {
+    //   title: "Users",
+    //   url: "/dashboard/users",
+    //   icon: IconUsers,
+    // },
     {
       title: "Staff",
       url: "/dashboard/staff",

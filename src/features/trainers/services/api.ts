@@ -1,9 +1,10 @@
 import { apiClient } from "@/lib/api-client";
-
-const basePath = "/api/admin/trainers";
+import type { Trainer } from "../types";
 
 export const trainersApi = {
-  getTrainers: async () => {
-    return await apiClient.get(basePath);
+  getTrainers: async (): Promise<Trainer[]> => {
+    return await apiClient.get<Trainer[]>("/api/admin/users", {
+      params: { role: "trainer" },
+    });
   },
 };

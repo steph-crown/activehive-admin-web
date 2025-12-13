@@ -36,7 +36,7 @@ export function TrainersPage() {
                     Error loading trainers. Check console for details.
                   </div>
                 ) : data ? (
-                  <TrainersTable data={Array.isArray(data) ? data : []} />
+                  <TrainersTable data={data} />
                 ) : null}
               </div>
             </div>
