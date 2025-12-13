@@ -10,6 +10,7 @@ import {
   IconReport,
   IconSearch,
   IconSettings,
+  IconShield,
   IconUser,
   IconUserCheck,
   IconUserStar,
@@ -43,6 +44,11 @@ const data = {
       title: "Dashboard",
       url: "/dashboard",
       icon: IconDashboard,
+    },
+    {
+      title: "Admins",
+      url: "/dashboard/admins",
+      icon: IconShield,
     },
     {
       title: "Gym Owners",

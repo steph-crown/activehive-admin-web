@@ -20,6 +20,7 @@ const Members = lazy(() => import("@/app/dashboard/members/page"));
 const Memberships = lazy(() => import("@/app/dashboard/memberships/page"));
 const Trainers = lazy(() => import("@/app/dashboard/trainers/page"));
 const Subscriptions = lazy(() => import("@/app/dashboard/subscriptions/page"));
+const Admins = lazy(() => import("@/app/dashboard/admins/page"));
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
 
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard/admins" element={<Admins />} />
           <Route path="/dashboard/users" element={<Users />} />
           <Route path="/dashboard/gym-owners" element={<GymOwners />} />
           <Route path="/dashboard/gyms" element={<Gyms />} />
