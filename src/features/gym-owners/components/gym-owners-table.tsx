@@ -17,7 +17,63 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DataTable } from "@/components/data-table/data-table";
 import { formatDate } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
+import { useApproveStepMutation } from "../services";
 import type { GymOwner } from "../types";
+
+function GymOwnerActions({ owner }: { owner: GymOwner }) {
+  const { showSuccess, showError } = useToast();
+  const { mutateAsync: approveStep, isPending } = useApproveStepMutation();
+
+  const handleApprove = async () => {
+    try {
+      await approveStep({
+        userId: owner.id,
+        payload: {
+          step: "documents",
+          status: "approved",
+          comments: "Approved by admin",
+        },
+      });
+      showSuccess("Success", "Gym owner approved successfully");
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Failed to approve gym owner. Please try again.";
+      showError("Error", message);
+    }
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
+          size="icon"
+        >
+          <IconDotsVertical />
+          <span className="sr-only">Open menu</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-32">
+        <DropdownMenuItem>View Details</DropdownMenuItem>
+        <DropdownMenuItem>Edit</DropdownMenuItem>
+        {owner.status === "pending" && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleApprove} disabled={isPending}>
+              {isPending ? "Approving..." : "Approve"}
+            </DropdownMenuItem>
+          </>
+        )}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
 
 export const gymOwnersColumns: ColumnDef<GymOwner>[] = [
   {
@@ -124,26 +180,7 @@ export const gymOwnersColumns: ColumnDef<GymOwner>[] = [
   },
   {
     id: "actions",
-    cell: () => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
-            size="icon"
-          >
-            <IconDotsVertical />
-            <span className="sr-only">Open menu</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-32">
-          <DropdownMenuItem>View Details</DropdownMenuItem>
-          <DropdownMenuItem>Edit</DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
+    cell: ({ row }) => <GymOwnerActions owner={row.original} />,
   },
 ];
 
