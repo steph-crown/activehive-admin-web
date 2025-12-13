@@ -24,7 +24,6 @@ import {
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateAdminMutation } from "../services";
-import type { CreateAdminPayload } from "../types";
 
 const createAdminSchema = yup.object({
   email: yup
@@ -37,8 +36,7 @@ const createAdminSchema = yup.object({
     .required("Password is required"),
   firstName: yup.string().required("First name is required"),
   lastName: yup.string().required("Last name is required"),
-  phoneNumber: yup.string().optional(),
-  secretKey: yup.string().required("Secret key is required"),
+  phoneNumber: yup.string().required("Phone number is required"),
 });
 
 type CreateAdminFormValues = yup.InferType<typeof createAdminSchema>;
@@ -70,7 +68,6 @@ export function CreateAdminDialog({
       firstName: "",
       lastName: "",
       phoneNumber: "",
-      secretKey: "",
     },
   });
 
@@ -101,7 +98,7 @@ export function CreateAdminDialog({
         <DialogHeader>
           <DialogTitle>Create Admin</DialogTitle>
           <DialogDescription>
-            Create a new system admin account. You'll need the admin secret key.
+            Create a new system admin account.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -176,23 +173,6 @@ export function CreateAdminDialog({
                       placeholder="+1234567890"
                       {...field}
                       value={field.value || ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="secretKey"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Secret Key</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="Enter admin secret key"
-                      {...field}
                     />
                   </FormControl>
                   <FormMessage />

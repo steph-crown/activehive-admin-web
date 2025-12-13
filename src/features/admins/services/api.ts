@@ -1,5 +1,13 @@
 import { apiClient } from "@/lib/api-client";
-import type { Admin, CreateAdminPayload } from "../types";
+import type { Admin } from "../types";
+
+export type CreateAdminFormData = {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber?: string;
+};
 
 export const adminsApi = {
   getAdmins: async (): Promise<Admin[]> => {
@@ -7,7 +15,11 @@ export const adminsApi = {
       params: { role: "admin" },
     });
   },
-  createAdmin: async (payload: CreateAdminPayload): Promise<Admin> => {
-    return await apiClient.post<Admin>("/api/admin/create", payload);
+  createAdmin: async (payload: CreateAdminFormData): Promise<Admin> => {
+    const secretKey = import.meta.env.VITE_ADMIN_SECRET_KEY ?? "admin_activehive_api_secret";
+    return await apiClient.post<Admin>("/api/admin/create", {
+      ...payload,
+      secretKey,
+    });
   },
 };
