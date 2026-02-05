@@ -31,3 +31,42 @@ export type Gym = {
   owner: GymOwner | null;
   trainers: unknown[];
 };
+
+export type GymLocationAddress = UserAddress;
+
+export type GymLocation = {
+  id: string;
+  gymId: string;
+  locationName: string;
+  address: GymLocationAddress | null;
+  phone: string | null;
+  email: string | null;
+  isHeadquarters: boolean;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  [key: string]: unknown;
+};
+
+export type GymSubscription = {
+  id: string;
+  gymId: string;
+  status: string;
+  monthlyPrice: string | null;
+  trialStartDate: string | null;
+  trialEndDate: string | null;
+  subscriptionStartDate: string | null;
+  subscriptionEndDate: string | null;
+  nextPaymentDate: string | null;
+  isTrial: boolean;
+  autoRenew: boolean;
+  [key: string]: unknown;
+};
+
+export type GymDetailResponse = {
+  gym: Gym;
+  locations: GymLocation[];
+  staffMembers: unknown[];
+  memberships: unknown[];
+  subscription: GymSubscription | null;
+};

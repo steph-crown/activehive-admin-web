@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { type ColumnDef } from "@tanstack/react-table";
 import {
   IconCircleCheckFilled,
@@ -7,7 +8,6 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,32 +20,6 @@ import { formatDate } from "@/lib/utils";
 import type { Gym } from "../types";
 
 export const gymsColumns: ColumnDef<Gym>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      </div>
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
   {
     accessorKey: "name",
     header: "Gym Name",
@@ -134,7 +108,7 @@ export const gymsColumns: ColumnDef<Gym>[] = [
   },
   {
     id: "actions",
-    cell: () => (
+    cell: ({ row }) => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
@@ -147,7 +121,9 @@ export const gymsColumns: ColumnDef<Gym>[] = [
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-32">
-          <DropdownMenuItem>View Details</DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link to={`/dashboard/gyms/${row.original.id}`}>View Details</Link>
+          </DropdownMenuItem>
           <DropdownMenuItem>Edit</DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
@@ -167,7 +143,7 @@ export function GymsTable({ data }: GymsTableProps) {
       data={data}
       columns={gymsColumns}
       enableDrag={false}
-      enableSelection={true}
+      enableSelection={false}
       getRowId={(row) => row.id}
     />
   );

@@ -14,6 +14,7 @@ const Dashboard = lazy(() => import("@/app/dashboard/page"));
 const Users = lazy(() => import("@/app/dashboard/users/page"));
 const GymOwners = lazy(() => import("@/app/dashboard/gym-owners/page"));
 const Gyms = lazy(() => import("@/app/dashboard/gyms/page"));
+const GymDetail = lazy(() => import("@/app/dashboard/gyms/detail/page"));
 const Locations = lazy(() => import("@/app/dashboard/locations/page"));
 const Staff = lazy(() => import("@/app/dashboard/staff/page"));
 const Members = lazy(() => import("@/app/dashboard/members/page"));
@@ -37,6 +38,7 @@ function App() {
           <Route path="/dashboard/users" element={<Users />} />
           <Route path="/dashboard/gym-owners" element={<GymOwners />} />
           <Route path="/dashboard/gyms" element={<Gyms />} />
+          <Route path="/dashboard/gyms/:id" element={<GymDetail />} />
           <Route path="/dashboard/locations" element={<Locations />} />
           <Route path="/dashboard/staff" element={<Staff />} />
           <Route path="/dashboard/members" element={<Members />} />
