@@ -1,11 +1,15 @@
+import { useState } from "react";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { BlockLoader } from "@/components/loader/block-loader";
 import { AppSidebar } from "@/features/dashboard/components/app-sidebar";
 import { SiteHeader } from "@/features/dashboard/components/site-header";
 import { useGymOwnersQuery } from "../services";
+import type { GymOwner } from "../types";
 import { GymOwnersTable } from "./gym-owners-table";
+import { ViewGymOwnerDialog } from "./view-gym-owner-dialog";
 
 export function GymOwnersPage() {
+  const [viewOwner, setViewOwner] = useState<GymOwner | null>(null);
   const { data, isLoading, error } = useGymOwnersQuery();
 
   // Log the response to see the shape
@@ -33,6 +37,12 @@ export function GymOwnersPage() {
               <div className="px-4 lg:px-6">
                 <h1 className="text-2xl font-bold mb-4">Gym Owners</h1>
 
+                <ViewGymOwnerDialog
+                  owner={viewOwner}
+                  open={viewOwner != null}
+                  onOpenChange={(open) => !open && setViewOwner(null)}
+                />
+
                 {isLoading ? (
                   <div className="flex items-center justify-center py-10">
                     <BlockLoader />
@@ -42,7 +52,10 @@ export function GymOwnersPage() {
                     Error loading gym owners. Check console for details.
                   </div>
                 ) : data ? (
-                  <GymOwnersTable data={data} />
+                  <GymOwnersTable
+                    data={data}
+                    onViewOwner={(owner) => setViewOwner(owner)}
+                  />
                 ) : null}
               </div>
             </div>

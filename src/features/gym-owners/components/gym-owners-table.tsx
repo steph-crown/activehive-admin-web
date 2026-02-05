@@ -7,7 +7,6 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,7 +20,13 @@ import { useToast } from "@/hooks/use-toast";
 import { useApproveStepMutation } from "../services";
 import type { GymOwner } from "../types";
 
-function GymOwnerActions({ owner }: { owner: GymOwner }) {
+function GymOwnerActions({
+  owner,
+  onViewOwner,
+}: {
+  owner: GymOwner;
+  onViewOwner?: (owner: GymOwner) => void;
+}) {
   const { showSuccess, showError } = useToast();
   const { mutateAsync: approveStep, isPending } = useApproveStepMutation();
 
@@ -58,7 +63,9 @@ function GymOwnerActions({ owner }: { owner: GymOwner }) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-32">
-        <DropdownMenuItem>View Details</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onViewOwner?.(owner)}>
+          View Details
+        </DropdownMenuItem>
         <DropdownMenuItem>Edit</DropdownMenuItem>
         {owner.status === "pending" && (
           <>
@@ -75,33 +82,8 @@ function GymOwnerActions({ owner }: { owner: GymOwner }) {
   );
 }
 
-export const gymOwnersColumns: ColumnDef<GymOwner>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      </div>
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
+function makeGymOwnersColumns(onViewOwner: (owner: GymOwner) => void): ColumnDef<GymOwner>[] {
+  return [
   {
     accessorKey: "email",
     header: "Email",
@@ -180,21 +162,25 @@ export const gymOwnersColumns: ColumnDef<GymOwner>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => <GymOwnerActions owner={row.original} />,
+    cell: ({ row }) => (
+      <GymOwnerActions owner={row.original} onViewOwner={onViewOwner} />
+    ),
   },
 ];
+}
 
 type GymOwnersTableProps = {
   data: GymOwner[];
+  onViewOwner?: (owner: GymOwner) => void;
 };
 
-export function GymOwnersTable({ data }: GymOwnersTableProps) {
+export function GymOwnersTable({ data, onViewOwner }: GymOwnersTableProps) {
   return (
     <DataTable
       data={data}
-      columns={gymOwnersColumns}
+      columns={makeGymOwnersColumns(onViewOwner ?? (() => {}))}
       enableDrag={false}
-      enableSelection={true}
+      enableSelection={false}
       getRowId={(row) => row.id}
     />
   );
