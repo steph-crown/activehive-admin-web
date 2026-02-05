@@ -8,7 +8,6 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,33 +19,8 @@ import { DataTable } from "@/components/data-table/data-table";
 import { formatDate } from "@/lib/utils";
 import type { Staff } from "../types";
 
-export const staffColumns: ColumnDef<Staff>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      </div>
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
+function makeStaffColumns(onViewStaff: (staff: Staff) => void): ColumnDef<Staff>[] {
+  return [
   {
     accessorKey: "email",
     header: "Email",
@@ -113,7 +87,7 @@ export const staffColumns: ColumnDef<Staff>[] = [
   },
   {
     id: "actions",
-    cell: () => (
+    cell: ({ row }) => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
@@ -126,7 +100,9 @@ export const staffColumns: ColumnDef<Staff>[] = [
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-32">
-          <DropdownMenuItem>View Details</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onViewStaff(row.original)}>
+            View Details
+          </DropdownMenuItem>
           <DropdownMenuItem>Edit</DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
@@ -135,18 +111,20 @@ export const staffColumns: ColumnDef<Staff>[] = [
     ),
   },
 ];
+}
 
 type StaffTableProps = {
   data: Staff[];
+  onViewStaff?: (staff: Staff) => void;
 };
 
-export function StaffTable({ data }: StaffTableProps) {
+export function StaffTable({ data, onViewStaff }: StaffTableProps) {
   return (
     <DataTable
       data={data}
-      columns={staffColumns}
+      columns={makeStaffColumns(onViewStaff ?? (() => {}))}
       enableDrag={false}
-      enableSelection={true}
+      enableSelection={false}
       getRowId={(row) => row.id}
     />
   );

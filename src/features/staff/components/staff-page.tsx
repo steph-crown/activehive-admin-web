@@ -1,11 +1,15 @@
+import { useState } from "react";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { BlockLoader } from "@/components/loader/block-loader";
 import { AppSidebar } from "@/features/dashboard/components/app-sidebar";
 import { SiteHeader } from "@/features/dashboard/components/site-header";
 import { useStaffQuery } from "../services";
+import type { Staff } from "../types";
 import { StaffTable } from "./staff-table";
+import { ViewStaffDialog } from "./view-staff-dialog";
 
 export function StaffPage() {
+  const [viewStaff, setViewStaff] = useState<Staff | null>(null);
   const { data, isLoading, error } = useStaffQuery();
 
   if (data) {
@@ -27,6 +31,12 @@ export function StaffPage() {
               <div className="px-4 lg:px-6">
                 <h1 className="text-2xl font-bold mb-4">Staff</h1>
 
+                <ViewStaffDialog
+                  staff={viewStaff}
+                  open={viewStaff != null}
+                  onOpenChange={(open) => !open && setViewStaff(null)}
+                />
+
                 {isLoading ? (
                   <div className="flex items-center justify-center py-10">
                     <BlockLoader />
@@ -36,7 +46,10 @@ export function StaffPage() {
                     Error loading staff. Check console for details.
                   </div>
                 ) : data ? (
-                  <StaffTable data={data} />
+                  <StaffTable
+                    data={data}
+                    onViewStaff={(staff) => setViewStaff(staff)}
+                  />
                 ) : null}
               </div>
             </div>
