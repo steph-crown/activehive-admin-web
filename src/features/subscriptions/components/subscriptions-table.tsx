@@ -8,7 +8,6 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,32 +20,6 @@ import { formatDate } from "@/lib/utils";
 import type { Subscription } from "../types";
 
 export const subscriptionsColumns: ColumnDef<Subscription>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      </div>
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
   {
     accessorKey: "gym",
     header: "Gym",
@@ -72,44 +45,53 @@ export const subscriptionsColumns: ColumnDef<Subscription>[] = [
   {
     accessorKey: "plan",
     header: "Plan",
-    cell: ({ row }) => (
-      <Badge
-        variant="outline"
-        className="text-muted-foreground px-1.5 capitalize"
-      >
-        {row.original.plan}
-      </Badge>
-    ),
+    cell: ({ row }) => {
+      const plan = row.original.plan;
+      if (plan == null || plan === "") {
+        return <span className="text-muted-foreground">—</span>;
+      }
+      return (
+        <Badge
+          variant="outline"
+          className="text-muted-foreground px-1.5 capitalize"
+        >
+          {plan}
+        </Badge>
+      );
+    },
   },
   {
     accessorKey: "status",
     header: "Status",
-    cell: ({ row }) => (
-      <Badge
-        variant="outline"
-        className="text-muted-foreground px-1.5 capitalize"
-      >
-        {row.original.status === "active" ? (
-          <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
-        ) : (
-          <IconLoader />
-        )}
-        {row.original.status}
-      </Badge>
-    ),
+    cell: ({ row }) => {
+      const status = row.original.status;
+      return (
+        <Badge
+          variant="outline"
+          className="text-muted-foreground px-1.5 capitalize"
+        >
+          {status === "active" ? (
+            <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
+          ) : (
+            <IconLoader />
+          )}
+          {status}
+        </Badge>
+      );
+    },
   },
   {
     accessorKey: "monthlyPrice",
     header: "Monthly Price",
     cell: ({ row }) => {
       const price = row.original.monthlyPrice;
+      if (price == null || price === "") {
+        return <span className="text-muted-foreground">—</span>;
+      }
+      const num = Number(price);
       return (
         <div className="text-sm">
-          {price !== null ? (
-            `$${price.toFixed(2)}`
-          ) : (
-            <span className="text-muted-foreground">N/A</span>
-          )}
+          {Number.isFinite(num) ? `$${num.toFixed(2)}` : price}
         </div>
       );
     },
@@ -185,7 +167,7 @@ export function SubscriptionsTable({ data }: SubscriptionsTableProps) {
       data={data}
       columns={subscriptionsColumns}
       enableDrag={false}
-      enableSelection={true}
+      enableSelection={false}
       getRowId={(row) => row.id}
     />
   );

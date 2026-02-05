@@ -8,45 +8,18 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DataTable } from "@/components/data-table/data-table";
 import { formatDate } from "@/lib/utils";
 import type { Trainer } from "../types";
 
-export const trainersColumns: ColumnDef<Trainer>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      </div>
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
+function makeTrainersColumns(onViewTrainer: (trainer: Trainer) => void): ColumnDef<Trainer>[] {
+  return [
   {
     accessorKey: "email",
     header: "Email",
@@ -113,7 +86,7 @@ export const trainersColumns: ColumnDef<Trainer>[] = [
   },
   {
     id: "actions",
-    cell: () => (
+    cell: ({ row }) => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
@@ -126,27 +99,28 @@ export const trainersColumns: ColumnDef<Trainer>[] = [
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-32">
-          <DropdownMenuItem>View Details</DropdownMenuItem>
-          <DropdownMenuItem>Edit</DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onViewTrainer(row.original)}>
+            View Details
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     ),
   },
 ];
+}
 
 type TrainersTableProps = {
   data: Trainer[];
+  onViewTrainer?: (trainer: Trainer) => void;
 };
 
-export function TrainersTable({ data }: TrainersTableProps) {
+export function TrainersTable({ data, onViewTrainer }: TrainersTableProps) {
   return (
     <DataTable
       data={data}
-      columns={trainersColumns}
+      columns={makeTrainersColumns(onViewTrainer ?? (() => {}))}
       enableDrag={false}
-      enableSelection={true}
+      enableSelection={false}
       getRowId={(row) => row.id}
     />
   );

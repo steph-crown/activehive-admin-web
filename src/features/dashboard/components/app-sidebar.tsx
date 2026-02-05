@@ -5,7 +5,6 @@ import {
   IconDatabase,
   IconFileWord,
   IconHelp,
-  IconId,
   IconMapPin,
   IconReport,
   IconSearch,
@@ -83,11 +82,6 @@ const data = {
       title: "Trainers",
       url: "/dashboard/trainers",
       icon: IconUserStar,
-    },
-    {
-      title: "Memberships",
-      url: "/dashboard/memberships",
-      icon: IconId,
     },
     {
       title: "Subscriptions",

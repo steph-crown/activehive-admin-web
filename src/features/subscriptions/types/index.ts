@@ -19,10 +19,12 @@ export type SubscriptionGym = {
 export type Subscription = {
   id: string;
   gymOwnerId: string;
+  trainerId: string | null;
   gymId: string;
-  plan: string;
+  platformPlanId?: string | null;
+  plan: string | null;
   status: string;
-  monthlyPrice: number | null;
+  monthlyPrice: string | null;
   trialStartDate: string | null;
   trialEndDate: string | null;
   subscriptionStartDate: string | null;
@@ -32,6 +34,8 @@ export type Subscription = {
   autoRenew: boolean;
   cancellationDate: string | null;
   cancellationReason: string | null;
+  subscribedBy?: string | null;
+  isTrial?: boolean;
   createdAt: string;
   updatedAt: string;
   gymOwner: SubscriptionGymOwner | null;
