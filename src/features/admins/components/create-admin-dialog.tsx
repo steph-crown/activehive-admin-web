@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateAdminMutation } from "../services";
+import type { Admin } from "../types";
 
 const createAdminSchema = yup.object({
   email: yup
@@ -44,21 +45,32 @@ type CreateAdminFormValues = yup.InferType<typeof createAdminSchema>;
 type CreateAdminDialogProps = {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  viewAdmin?: Admin | null;
+  onViewClose?: () => void;
 };
 
 export function CreateAdminDialog({
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
+  viewAdmin,
+  onViewClose,
 }: CreateAdminDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const { showSuccess, showError } = useToast();
   const { mutateAsync: createAdmin, isPending } = useCreateAdminMutation();
 
-  const isControlled = controlledOpen !== undefined;
-  const open = isControlled ? controlledOpen : internalOpen;
-  const setOpen = isControlled
-    ? controlledOnOpenChange || (() => {})
-    : setInternalOpen;
+  const isViewMode = viewAdmin != null;
+  const open = isViewMode || (controlledOpen ?? internalOpen);
+  const setOpen = (value: boolean) => {
+    if (!value) {
+      onViewClose?.();
+      if (controlledOpen === undefined) setInternalOpen(false);
+      controlledOnOpenChange?.(false);
+    } else {
+      if (controlledOpen === undefined) setInternalOpen(true);
+      controlledOnOpenChange?.(true);
+    }
+  };
 
   const form = useForm<CreateAdminFormValues>({
     resolver: yupResolver(createAdminSchema),
@@ -70,6 +82,18 @@ export function CreateAdminDialog({
       phoneNumber: "",
     },
   });
+
+  useEffect(() => {
+    if (open && viewAdmin) {
+      form.reset({
+        email: viewAdmin.email,
+        firstName: viewAdmin.firstName,
+        lastName: viewAdmin.lastName,
+        phoneNumber: viewAdmin.phoneNumber ?? "",
+        password: "",
+      });
+    }
+  }, [open, viewAdmin, form]);
 
   const onSubmit = async (data: CreateAdminFormValues) => {
     try {
@@ -96,9 +120,11 @@ export function CreateAdminDialog({
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Create Admin</DialogTitle>
+          <DialogTitle>{isViewMode ? "View Admin" : "Create Admin"}</DialogTitle>
           <DialogDescription>
-            Create a new system admin account.
+            {isViewMode
+              ? "Admin account details."
+              : "Create a new system admin account."}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -111,7 +137,12 @@ export function CreateAdminDialog({
                   <FormItem>
                     <FormLabel>First Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="John" {...field} />
+                      <Input
+                        placeholder="John"
+                        {...field}
+                        readOnly={isViewMode}
+                        className={isViewMode ? "bg-muted" : undefined}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -124,7 +155,12 @@ export function CreateAdminDialog({
                   <FormItem>
                     <FormLabel>Last Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Doe" {...field} />
+                      <Input
+                        placeholder="Doe"
+                        {...field}
+                        readOnly={isViewMode}
+                        className={isViewMode ? "bg-muted" : undefined}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -142,25 +178,29 @@ export function CreateAdminDialog({
                       type="email"
                       placeholder="admin@activehive.com"
                       {...field}
+                      readOnly={isViewMode}
+                      className={isViewMode ? "bg-muted" : undefined}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {!isViewMode && (
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="••••••••" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             <FormField
               control={form.control}
               name="phoneNumber"
@@ -173,6 +213,8 @@ export function CreateAdminDialog({
                       placeholder="+1234567890"
                       {...field}
                       value={field.value || ""}
+                      readOnly={isViewMode}
+                      className={isViewMode ? "bg-muted" : undefined}
                     />
                   </FormControl>
                   <FormMessage />
@@ -180,17 +222,25 @@ export function CreateAdminDialog({
               )}
             />
             <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setOpen(false)}
-                disabled={isPending}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending ? "Creating..." : "Create Admin"}
-              </Button>
+              {isViewMode ? (
+                <Button type="button" onClick={() => setOpen(false)}>
+                  Close
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setOpen(false)}
+                    disabled={isPending}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isPending}>
+                    {isPending ? "Creating..." : "Create Admin"}
+                  </Button>
+                </>
+              )}
             </DialogFooter>
           </form>
         </Form>

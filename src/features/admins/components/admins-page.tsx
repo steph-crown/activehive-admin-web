@@ -1,12 +1,15 @@
+import { useState } from "react";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { BlockLoader } from "@/components/loader/block-loader";
 import { AppSidebar } from "@/features/dashboard/components/app-sidebar";
 import { SiteHeader } from "@/features/dashboard/components/site-header";
 import { useAdminsQuery } from "../services";
+import type { Admin } from "../types";
 import { AdminsTable } from "./admins-table";
 import { CreateAdminDialog } from "./create-admin-dialog";
 
 export function AdminsPage() {
+  const [viewAdmin, setViewAdmin] = useState<Admin | null>(null);
   const { data, isLoading, error } = useAdminsQuery();
 
   if (data) {
@@ -28,7 +31,10 @@ export function AdminsPage() {
               <div className="px-4 lg:px-6">
                 <div className="flex items-center justify-between mb-4">
                   <h1 className="text-2xl font-bold">Admins</h1>
-                  <CreateAdminDialog />
+                  <CreateAdminDialog
+                    viewAdmin={viewAdmin}
+                    onViewClose={() => setViewAdmin(null)}
+                  />
                 </div>
 
                 {isLoading ? (
@@ -40,7 +46,10 @@ export function AdminsPage() {
                     Error loading admins. Check console for details.
                   </div>
                 ) : data ? (
-                  <AdminsTable data={data} />
+                  <AdminsTable
+                    data={data}
+                    onViewAdmin={(admin) => setViewAdmin(admin)}
+                  />
                 ) : null}
               </div>
             </div>

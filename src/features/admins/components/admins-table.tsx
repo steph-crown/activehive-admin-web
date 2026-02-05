@@ -8,7 +8,6 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,33 +19,8 @@ import { DataTable } from "@/components/data-table/data-table";
 import { formatDate } from "@/lib/utils";
 import type { Admin } from "../types";
 
-export const adminsColumns: ColumnDef<Admin>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      </div>
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
+function makeAdminsColumns(onViewAdmin: (admin: Admin) => void): ColumnDef<Admin>[] {
+  return [
   {
     accessorKey: "email",
     header: "Email",
@@ -113,7 +87,7 @@ export const adminsColumns: ColumnDef<Admin>[] = [
   },
   {
     id: "actions",
-    cell: () => (
+    cell: ({ row }) => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
@@ -126,7 +100,9 @@ export const adminsColumns: ColumnDef<Admin>[] = [
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-32">
-          <DropdownMenuItem>View Details</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onViewAdmin(row.original)}>
+            View Details
+          </DropdownMenuItem>
           <DropdownMenuItem>Edit</DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
@@ -135,18 +111,20 @@ export const adminsColumns: ColumnDef<Admin>[] = [
     ),
   },
 ];
+}
 
 type AdminsTableProps = {
   data: Admin[];
+  onViewAdmin?: (admin: Admin) => void;
 };
 
-export function AdminsTable({ data }: AdminsTableProps) {
+export function AdminsTable({ data, onViewAdmin }: AdminsTableProps) {
   return (
     <DataTable
       data={data}
-      columns={adminsColumns}
+      columns={makeAdminsColumns(onViewAdmin ?? (() => {}))}
       enableDrag={false}
-      enableSelection={true}
+      enableSelection={false}
       getRowId={(row) => row.id}
     />
   );
