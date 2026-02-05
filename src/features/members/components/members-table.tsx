@@ -7,45 +7,18 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DataTable } from "@/components/data-table/data-table";
 import { formatDate } from "@/lib/utils";
 import type { Member } from "../types";
 
-export const membersColumns: ColumnDef<Member>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      </div>
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
+function makeMembersColumns(onViewMember: (member: Member) => void): ColumnDef<Member>[] {
+  return [
   {
     accessorKey: "email",
     header: "Email",
@@ -122,7 +95,7 @@ export const membersColumns: ColumnDef<Member>[] = [
   },
   {
     id: "actions",
-    cell: () => (
+    cell: ({ row }) => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
@@ -135,27 +108,28 @@ export const membersColumns: ColumnDef<Member>[] = [
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-32">
-          <DropdownMenuItem>View Details</DropdownMenuItem>
-          <DropdownMenuItem>Edit</DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onViewMember(row.original)}>
+            View Details
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     ),
   },
 ];
+}
 
 type MembersTableProps = {
   data: Member[];
+  onViewMember?: (member: Member) => void;
 };
 
-export function MembersTable({ data }: MembersTableProps) {
+export function MembersTable({ data, onViewMember }: MembersTableProps) {
   return (
     <DataTable
       data={data}
-      columns={membersColumns}
+      columns={makeMembersColumns(onViewMember ?? (() => {}))}
       enableDrag={false}
-      enableSelection={true}
+      enableSelection={false}
       getRowId={(row) => row.id}
     />
   );
