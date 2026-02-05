@@ -1,4 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
+import { Link } from "react-router-dom";
 import { type ColumnDef } from "@tanstack/react-table";
 import {
   IconCircleCheckFilled,
@@ -12,7 +13,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DataTable } from "@/components/data-table/data-table";
@@ -134,7 +134,7 @@ export const subscriptionsColumns: ColumnDef<Subscription>[] = [
   },
   {
     id: "actions",
-    cell: () => (
+    cell: ({ row }) => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
@@ -147,10 +147,11 @@ export const subscriptionsColumns: ColumnDef<Subscription>[] = [
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-32">
-          <DropdownMenuItem>View Details</DropdownMenuItem>
-          <DropdownMenuItem>Edit</DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link to={`/dashboard/subscriptions/${row.original.id}`}>
+              View Details
+            </Link>
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     ),
