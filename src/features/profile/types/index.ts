@@ -36,5 +36,32 @@ export type Profile = {
   trainerGyms: unknown[];
   memberships: unknown[];
   fitnessGoals: unknown[];
+  bio?: string | null;
+  specialization?: string | null;
+  address?: ProfileAddress | null;
   [key: string]: unknown;
+};
+
+export type ProfileAddress = {
+  street?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  country?: string;
+};
+
+export type UpdateProfilePayload = {
+  firstName?: string;
+  lastName?: string;
+  phoneNumber?: string;
+  dateOfBirth?: string;
+  bio?: string;
+  specialization?: string;
+  address?: ProfileAddress;
+  profileImage?: string;
+};
+
+export type ChangePasswordPayload = {
+  currentPassword: string;
+  newPassword: string;
 };

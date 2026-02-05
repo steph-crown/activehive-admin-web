@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Card,
@@ -7,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { BlockLoader } from "@/components/loader/block-loader";
 import { AppSidebar } from "@/features/dashboard/components/app-sidebar";
@@ -14,6 +16,8 @@ import { SiteHeader } from "@/features/dashboard/components/site-header";
 import { formatDate } from "@/lib/utils";
 import { useProfileQuery } from "../services";
 import type { ProfileOwnedGym } from "../types";
+import { ChangePasswordDialog } from "./change-password-dialog";
+import { UpdateProfileDialog } from "./update-profile-dialog";
 
 function formatAddress(address: ProfileOwnedGym["address"]): string {
   if (!address) return "—";
@@ -28,6 +32,8 @@ function formatAddress(address: ProfileOwnedGym["address"]): string {
 }
 
 export function ProfilePage() {
+  const [updateProfileOpen, setUpdateProfileOpen] = useState(false);
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   const { data: profile, isLoading, error } = useProfileQuery();
 
   if (isLoading) {
@@ -71,7 +77,35 @@ export function ProfilePage() {
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
               <div className="px-4 lg:px-6 space-y-6">
-                <h1 className="text-2xl font-bold">Profile</h1>
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h1 className="text-2xl font-bold">Profile</h1>
+                    <p className="text-muted-foreground text-sm mt-0.5">
+                      Manage your account information and settings
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 mt-2 sm:mt-0">
+                    <Button
+                      variant="outline"
+                      onClick={() => setChangePasswordOpen(true)}
+                    >
+                      Change Password
+                    </Button>
+                    <Button onClick={() => setUpdateProfileOpen(true)}>
+                      Update Profile
+                    </Button>
+                  </div>
+                </div>
+
+                <UpdateProfileDialog
+                  open={updateProfileOpen}
+                  onOpenChange={setUpdateProfileOpen}
+                  profile={profile}
+                />
+                <ChangePasswordDialog
+                  open={changePasswordOpen}
+                  onOpenChange={setChangePasswordOpen}
+                />
 
                 <Card>
                   <CardHeader>
