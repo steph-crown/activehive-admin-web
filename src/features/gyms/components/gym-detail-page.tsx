@@ -200,16 +200,23 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
                             key={loc.id}
                             className="rounded-lg border border-border p-4 space-y-2 text-sm"
                           >
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium">{loc.locationName}</span>
-                              {loc.isHeadquarters && (
-                                <Badge variant="secondary" className="text-xs">
-                                  Headquarters
+                            <div className="flex items-center justify-between gap-2 flex-wrap">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium">{loc.locationName}</span>
+                                {loc.isHeadquarters && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    Headquarters
+                                  </Badge>
+                                )}
+                                <Badge variant={loc.isActive ? "default" : "secondary"} className="text-xs">
+                                  {loc.isActive ? "Active" : "Inactive"}
                                 </Badge>
-                              )}
-                              <Badge variant={loc.isActive ? "default" : "secondary"} className="text-xs">
-                                {loc.isActive ? "Active" : "Inactive"}
-                              </Badge>
+                              </div>
+                              <Button variant="outline" size="sm" asChild>
+                                <Link to={`/dashboard/locations/${loc.id}`}>
+                                  View location
+                                </Link>
+                              </Button>
                             </div>
                             {loc.address && (
                               <p className="text-muted-foreground">
