@@ -24,3 +24,32 @@ export type Location = {
   gym: LocationGym | null;
   staff: unknown[];
 };
+
+export type LocationDetailGymOwner = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  status: string;
+};
+
+export type LocationDetailGym = {
+  id: string;
+  name: string;
+  isActive: boolean;
+  owner: LocationDetailGymOwner;
+};
+
+export type LocationDetail = {
+  id: string;
+  locationName: string;
+  address: LocationAddress | null;
+  phone: string | null;
+  email: string | null;
+  images: unknown | null;
+  isHeadquarters: boolean;
+  isActive: boolean;
+  gym: LocationDetailGym | null;
+  createdAt: string;
+  updatedAt: string;
+};

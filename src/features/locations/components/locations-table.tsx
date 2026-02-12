@@ -12,14 +12,22 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DataTable } from "@/components/data-table/data-table";
 import { formatDate } from "@/lib/utils";
 import type { Location } from "../types";
 
-export const locationsColumns: ColumnDef<Location>[] = [
+type LocationsTableCallbacks = {
+  onActivateLocation?: (location: Location) => void;
+  onDeactivateLocation?: (location: Location) => void;
+};
+
+function makeLocationsColumns({
+  onActivateLocation,
+  onDeactivateLocation,
+}: LocationsTableCallbacks): ColumnDef<Location>[] {
+  return [
   {
     accessorKey: "locationName",
     header: "Location Name",
@@ -113,40 +121,59 @@ export const locationsColumns: ColumnDef<Location>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
-            size="icon"
-          >
-            <IconDotsVertical />
-            <span className="sr-only">Open menu</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-32">
-          <DropdownMenuItem asChild>
-            <Link to={`/dashboard/locations/${row.original.id}`}>View Details</Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem>Edit</DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
+    cell: ({ row }) => {
+      const location = row.original;
+      const isActive = location.isActive;
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
+              size="icon"
+            >
+              <IconDotsVertical />
+              <span className="sr-only">Open menu</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuItem asChild>
+              <Link to={`/dashboard/locations/${location.id}`}>View Details</Link>
+            </DropdownMenuItem>
+            {isActive && onDeactivateLocation && (
+              <DropdownMenuItem onClick={() => onDeactivateLocation(location)}>
+                Deactivate
+              </DropdownMenuItem>
+            )}
+            {!isActive && onActivateLocation && (
+              <DropdownMenuItem onClick={() => onActivateLocation(location)}>
+                Activate
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
   },
 ];
+}
 
 type LocationsTableProps = {
   data: Location[];
+  onActivateLocation?: (location: Location) => void;
+  onDeactivateLocation?: (location: Location) => void;
 };
 
-export function LocationsTable({ data }: LocationsTableProps) {
+export function LocationsTable({
+  data,
+  onActivateLocation,
+  onDeactivateLocation,
+}: LocationsTableProps) {
   return (
     <DataTable
       data={data}
-      columns={locationsColumns}
+      columns={makeLocationsColumns({ onActivateLocation, onDeactivateLocation })}
       enableDrag={false}
       enableSelection={false}
       getRowId={(row) => row.id}
