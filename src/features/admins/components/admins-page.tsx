@@ -7,9 +7,18 @@ import { useAdminsQuery } from "../services";
 import type { Admin } from "../types";
 import { AdminsTable } from "./admins-table";
 import { CreateAdminDialog } from "./create-admin-dialog";
+import { EditAdminDialog } from "./edit-admin-dialog";
+import { ConfirmAdminActionDialog } from "./confirm-admin-action-dialog";
+
+type AdminActionType = "delete" | "activate" | "deactivate";
 
 export function AdminsPage() {
   const [viewAdmin, setViewAdmin] = useState<Admin | null>(null);
+  const [editAdmin, setEditAdmin] = useState<Admin | null>(null);
+  const [actionAdmin, setActionAdmin] = useState<{
+    admin: Admin;
+    type: AdminActionType;
+  } | null>(null);
   const { data, isLoading, error } = useAdminsQuery();
 
   if (data) {
@@ -37,6 +46,22 @@ export function AdminsPage() {
                   />
                 </div>
 
+                <EditAdminDialog
+                  admin={editAdmin}
+                  open={editAdmin != null}
+                  onOpenChange={(open) => {
+                    if (!open) setEditAdmin(null);
+                  }}
+                />
+                <ConfirmAdminActionDialog
+                  admin={actionAdmin?.admin ?? null}
+                  action={actionAdmin?.type ?? "delete"}
+                  open={actionAdmin != null}
+                  onOpenChange={(open) => {
+                    if (!open) setActionAdmin(null);
+                  }}
+                />
+
                 {isLoading ? (
                   <div className="flex items-center justify-center py-10">
                     <BlockLoader />
@@ -49,6 +74,16 @@ export function AdminsPage() {
                   <AdminsTable
                     data={data}
                     onViewAdmin={(admin) => setViewAdmin(admin)}
+                    onEditAdmin={(admin) => setEditAdmin(admin)}
+                    onDeleteAdmin={(admin) =>
+                      setActionAdmin({ admin, type: "delete" })
+                    }
+                    onActivateAdmin={(admin) =>
+                      setActionAdmin({ admin, type: "activate" })
+                    }
+                    onDeactivateAdmin={(admin) =>
+                      setActionAdmin({ admin, type: "deactivate" })
+                    }
                   />
                 ) : null}
               </div>

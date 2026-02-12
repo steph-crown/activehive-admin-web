@@ -19,7 +19,23 @@ import { DataTable } from "@/components/data-table/data-table";
 import { formatDate } from "@/lib/utils";
 import type { Admin } from "../types";
 
-function makeAdminsColumns(onViewAdmin: (admin: Admin) => void): ColumnDef<Admin>[] {
+type AdminsColumnCallbacks = {
+  onViewAdmin?: (admin: Admin) => void;
+  onEditAdmin?: (admin: Admin) => void;
+  onDeleteAdmin?: (admin: Admin) => void;
+  onActivateAdmin?: (admin: Admin) => void;
+  onDeactivateAdmin?: (admin: Admin) => void;
+};
+
+function makeAdminsColumns(callbacks: AdminsColumnCallbacks): ColumnDef<Admin>[] {
+  const {
+    onViewAdmin,
+    onEditAdmin,
+    onDeleteAdmin,
+    onActivateAdmin,
+    onDeactivateAdmin,
+  } = callbacks;
+
   return [
   {
     accessorKey: "email",
@@ -87,28 +103,59 @@ function makeAdminsColumns(onViewAdmin: (admin: Admin) => void): ColumnDef<Admin
   },
   {
     id: "actions",
-    cell: ({ row }) => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
-            size="icon"
-          >
-            <IconDotsVertical />
-            <span className="sr-only">Open menu</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-32">
-          <DropdownMenuItem onClick={() => onViewAdmin(row.original)}>
-            View Details
-          </DropdownMenuItem>
-          <DropdownMenuItem>Edit</DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
+    cell: ({ row }) => {
+      const admin = row.original;
+      const isActive = admin.status === "active";
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
+              size="icon"
+            >
+              <IconDotsVertical />
+              <span className="sr-only">Open menu</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40">
+            {onViewAdmin && (
+              <DropdownMenuItem onClick={() => onViewAdmin(admin)}>
+                View Details
+              </DropdownMenuItem>
+            )}
+            {onEditAdmin && (
+              <DropdownMenuItem onClick={() => onEditAdmin(admin)}>
+                Edit
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuSeparator />
+            {isActive && onDeactivateAdmin && (
+              <DropdownMenuItem onClick={() => onDeactivateAdmin(admin)}>
+                Deactivate
+              </DropdownMenuItem>
+            )}
+            {!isActive && onActivateAdmin && (
+              <DropdownMenuItem onClick={() => onActivateAdmin(admin)}>
+                Activate
+              </DropdownMenuItem>
+            )}
+            {onDeleteAdmin && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={() => onDeleteAdmin(admin)}
+                >
+                  Delete
+                </DropdownMenuItem>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
   },
 ];
 }
@@ -116,13 +163,30 @@ function makeAdminsColumns(onViewAdmin: (admin: Admin) => void): ColumnDef<Admin
 type AdminsTableProps = {
   data: Admin[];
   onViewAdmin?: (admin: Admin) => void;
+  onEditAdmin?: (admin: Admin) => void;
+  onDeleteAdmin?: (admin: Admin) => void;
+  onActivateAdmin?: (admin: Admin) => void;
+  onDeactivateAdmin?: (admin: Admin) => void;
 };
 
-export function AdminsTable({ data, onViewAdmin }: AdminsTableProps) {
+export function AdminsTable({
+  data,
+  onViewAdmin,
+  onEditAdmin,
+  onDeleteAdmin,
+  onActivateAdmin,
+  onDeactivateAdmin,
+}: AdminsTableProps) {
   return (
     <DataTable
       data={data}
-      columns={makeAdminsColumns(onViewAdmin ?? (() => {}))}
+      columns={makeAdminsColumns({
+        onViewAdmin,
+        onEditAdmin,
+        onDeleteAdmin,
+        onActivateAdmin,
+        onDeactivateAdmin,
+      })}
       enableDrag={false}
       enableSelection={false}
       getRowId={(row) => row.id}
