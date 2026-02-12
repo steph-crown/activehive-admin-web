@@ -41,3 +41,17 @@ export type Subscription = {
   gymOwner: SubscriptionGymOwner | null;
   gym: SubscriptionGym | null;
 };
+
+export type SubscriptionPlan = {
+  id: string;
+  name: string;
+  description: string | null;
+  planType: "gym_owner" | "trainer";
+  price: string;
+  billingPeriod: string;
+  features: string[] | null;
+  trialDays: number | null;
+  isActive: boolean;
+  isDefault: boolean;
+  isPopular: boolean;
+};
