@@ -54,4 +54,5 @@ export type SubscriptionPlan = {
   isActive: boolean;
   isDefault: boolean;
   isPopular: boolean;
+  sortOrder: number | null;
 };

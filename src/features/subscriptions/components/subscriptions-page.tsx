@@ -1,14 +1,19 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { BlockLoader } from "@/components/loader/block-loader";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AppSidebar } from "@/features/dashboard/components/app-sidebar";
 import { SiteHeader } from "@/features/dashboard/components/site-header";
 import { useSubscriptionPlansQuery, useSubscriptionsQuery } from "../services";
+import type { SubscriptionPlan } from "../types";
 import { SubscriptionsTable } from "./subscriptions-table";
 import { SubscriptionPlansTable } from "./subscription-plans-table";
+import { CreateSubscriptionPlanDialog } from "./create-subscription-plan-dialog";
+import { EditSubscriptionPlanDialog } from "./edit-subscription-plan-dialog";
+import { ConfirmDeleteSubscriptionPlanDialog } from "./confirm-delete-subscription-plan-dialog";
 
 type Audience = "gym_owner" | "trainer";
 type View = "subscriptions" | "plans";
@@ -16,6 +21,9 @@ type View = "subscriptions" | "plans";
 export function SubscriptionsPage() {
   const { data, isLoading, error } = useSubscriptionsQuery();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [createOpen, setCreateOpen] = useState(false);
+  const [editPlan, setEditPlan] = useState<SubscriptionPlan | null>(null);
+  const [deletePlan, setDeletePlan] = useState<SubscriptionPlan | null>(null);
 
   const audience: Audience = useMemo(() => {
     const value = searchParams.get("audience");
@@ -66,7 +74,28 @@ export function SubscriptionsPage() {
               <div className="px-4 lg:px-6 space-y-4">
                 <div className="flex items-center justify-between gap-4">
                   <h1 className="text-2xl font-bold">Subscriptions</h1>
+                  {view === "plans" && (
+                    <Button size="sm" onClick={() => setCreateOpen(true)}>
+                      New Subscription Plan
+                    </Button>
+                  )}
                 </div>
+
+                <CreateSubscriptionPlanDialog
+                  open={createOpen}
+                  onOpenChange={setCreateOpen}
+                  initialPlanType={audience}
+                />
+                <EditSubscriptionPlanDialog
+                  plan={editPlan}
+                  open={editPlan != null}
+                  onOpenChange={(open) => !open && setEditPlan(null)}
+                />
+                <ConfirmDeleteSubscriptionPlanDialog
+                  plan={deletePlan}
+                  open={deletePlan != null}
+                  onOpenChange={(open) => !open && setDeletePlan(null)}
+                />
 
                 {/* Audience selector: Gym Owners vs Trainers */}
                 <Tabs
@@ -120,7 +149,11 @@ export function SubscriptionsPage() {
                         details.
                       </div>
                     ) : (
-                      <SubscriptionPlansTable data={plans ?? []} />
+                      <SubscriptionPlansTable
+                        data={plans ?? []}
+                        onEditPlan={(plan) => setEditPlan(plan)}
+                        onDeletePlan={(plan) => setDeletePlan(plan)}
+                      />
                     )}
                   </TabsContent>
                 </Tabs>

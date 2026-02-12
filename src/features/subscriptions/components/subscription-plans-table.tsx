@@ -1,10 +1,30 @@
+import { Link } from "react-router-dom";
 import { type ColumnDef } from "@tanstack/react-table";
+import { IconDotsVertical } from "@tabler/icons-react";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { DataTable } from "@/components/data-table/data-table";
 import type { SubscriptionPlan } from "../types";
 
-const subscriptionPlansColumns: ColumnDef<SubscriptionPlan>[] = [
+type SubscriptionPlansColumnCallbacks = {
+  onEditPlan?: (plan: SubscriptionPlan) => void;
+  onDeletePlan?: (plan: SubscriptionPlan) => void;
+};
+
+const makeSubscriptionPlansColumns = (
+  callbacks: SubscriptionPlansColumnCallbacks,
+): ColumnDef<SubscriptionPlan>[] => {
+  const { onEditPlan, onDeletePlan } = callbacks;
+
+  return [
   {
     accessorKey: "name",
     header: "Name",
@@ -76,17 +96,71 @@ const subscriptionPlansColumns: ColumnDef<SubscriptionPlan>[] = [
       </Badge>
     ),
   },
-];
+  {
+    id: "actions",
+    cell: ({ row }) => {
+      const plan = row.original;
 
-type SubscriptionPlansTableProps = {
-  data: SubscriptionPlan[];
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
+              size="icon"
+            >
+              <IconDotsVertical />
+              <span className="sr-only">Open menu</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuItem asChild>
+              <Link to={`/dashboard/subscriptions/plans/${plan.id}`}>
+                View
+              </Link>
+            </DropdownMenuItem>
+            {onEditPlan && (
+              <DropdownMenuItem onClick={() => onEditPlan(plan)}>
+                Edit
+              </DropdownMenuItem>
+            )}
+            {onDeletePlan && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={() => onDeletePlan(plan)}
+                >
+                  Delete
+                </DropdownMenuItem>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
+  },
+];
 };
 
-export function SubscriptionPlansTable({ data }: SubscriptionPlansTableProps) {
+type SubscriptionPlansTableProps = {
+  readonly data: SubscriptionPlan[];
+  readonly onEditPlan?: (plan: SubscriptionPlan) => void;
+  readonly onDeletePlan?: (plan: SubscriptionPlan) => void;
+};
+
+export function SubscriptionPlansTable({
+  data,
+  onEditPlan,
+  onDeletePlan,
+}: SubscriptionPlansTableProps) {
   return (
     <DataTable
       data={data}
-      columns={subscriptionPlansColumns}
+      columns={makeSubscriptionPlansColumns({
+        onEditPlan,
+        onDeletePlan,
+      })}
       enableDrag={false}
       enableSelection={false}
       getRowId={(row) => row.id}

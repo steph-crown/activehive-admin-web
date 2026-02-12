@@ -11,6 +11,8 @@ export const subscriptionPlansQueryKeys = {
   all: ["subscription-plans"] as const,
   list: (planType: "gym_owner" | "trainer") =>
     [...subscriptionPlansQueryKeys.all, "list", planType] as const,
+  detail: (id: string) =>
+    [...subscriptionPlansQueryKeys.all, "detail", id] as const,
 };
 
 export const useSubscriptionsQuery = () =>
@@ -23,4 +25,11 @@ export const useSubscriptionPlansQuery = (planType: "gym_owner" | "trainer") =>
   useQuery<SubscriptionPlan[]>({
     queryKey: subscriptionPlansQueryKeys.list(planType),
     queryFn: () => subscriptionsApi.getActivePlans(planType),
+  });
+
+export const useSubscriptionPlanDetailQuery = (id: string | undefined) =>
+  useQuery<SubscriptionPlan>({
+    queryKey: subscriptionPlansQueryKeys.detail(id ?? ""),
+    queryFn: () => subscriptionsApi.getSubscriptionPlanById(id!),
+    enabled: Boolean(id),
   });
