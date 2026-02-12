@@ -9,6 +9,13 @@ export type ApproveStepPayload = {
   comments?: string;
 };
 
+export type UpdateGymOwnerPayload = {
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  phoneNumber?: string;
+};
+
 export const gymOwnersApi = {
   getGymOwners: async (): Promise<GymOwner[]> => {
     return await apiClient.get<GymOwner[]>(basePath);
@@ -21,5 +28,17 @@ export const gymOwnersApi = {
       `/api/admin/approvals/user/${userId}/approve-step`,
       payload
     );
+  },
+  updateGymOwner: async (
+    id: string,
+    payload: UpdateGymOwnerPayload
+  ): Promise<GymOwner> => {
+    return await apiClient.patch<GymOwner>(`${basePath}/${id}`, payload);
+  },
+  deactivateGymOwner: async (id: string): Promise<void> => {
+    await apiClient.post(`${basePath}/${id}/deactivate`);
+  },
+  activateGymOwner: async (id: string): Promise<void> => {
+    await apiClient.post(`${basePath}/${id}/activate`);
   },
 };

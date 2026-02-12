@@ -7,20 +7,19 @@ import { useGymOwnersQuery } from "../services";
 import type { GymOwner } from "../types";
 import { GymOwnersTable } from "./gym-owners-table";
 import { ViewGymOwnerDialog } from "./view-gym-owner-dialog";
+import { EditGymOwnerDialog } from "./edit-gym-owner-dialog";
+import { ConfirmGymOwnerStatusDialog } from "./confirm-gym-owner-status-dialog";
+
+type GymOwnerActionType = "activate" | "deactivate";
 
 export function GymOwnersPage() {
   const [viewOwner, setViewOwner] = useState<GymOwner | null>(null);
+  const [editOwner, setEditOwner] = useState<GymOwner | null>(null);
+  const [statusAction, setStatusAction] = useState<{
+    owner: GymOwner;
+    type: GymOwnerActionType;
+  } | null>(null);
   const { data, isLoading, error } = useGymOwnersQuery();
-
-  // Log the response to see the shape
-  if (data) {
-    console.log("Gym Owners API Response:", data);
-    console.log("Response Type:", typeof data);
-    console.log("Is Array:", Array.isArray(data));
-    if (data && typeof data === "object") {
-      console.log("Response Keys:", Object.keys(data));
-    }
-  }
 
   if (error) {
     console.error("Gym Owners API Error:", error);
@@ -42,6 +41,21 @@ export function GymOwnersPage() {
                   open={viewOwner != null}
                   onOpenChange={(open) => !open && setViewOwner(null)}
                 />
+                <EditGymOwnerDialog
+                  owner={editOwner}
+                  open={editOwner != null}
+                  onOpenChange={(open) => {
+                    if (!open) setEditOwner(null);
+                  }}
+                />
+                <ConfirmGymOwnerStatusDialog
+                  owner={statusAction?.owner ?? null}
+                  action={statusAction?.type ?? "deactivate"}
+                  open={statusAction != null}
+                  onOpenChange={(open) => {
+                    if (!open) setStatusAction(null);
+                  }}
+                />
 
                 {isLoading ? (
                   <div className="flex items-center justify-center py-10">
@@ -55,6 +69,13 @@ export function GymOwnersPage() {
                   <GymOwnersTable
                     data={data}
                     onViewOwner={(owner) => setViewOwner(owner)}
+                    onEditOwner={(owner) => setEditOwner(owner)}
+                    onActivateOwner={(owner) =>
+                      setStatusAction({ owner, type: "activate" })
+                    }
+                    onDeactivateOwner={(owner) =>
+                      setStatusAction({ owner, type: "deactivate" })
+                    }
                   />
                 ) : null}
               </div>

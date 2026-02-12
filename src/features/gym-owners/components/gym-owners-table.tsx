@@ -20,13 +20,21 @@ import { useToast } from "@/hooks/use-toast";
 import { useApproveStepMutation } from "../services";
 import type { GymOwner } from "../types";
 
+type GymOwnerActionsProps = {
+  owner: GymOwner;
+  onViewOwner?: (owner: GymOwner) => void;
+  onEditOwner?: (owner: GymOwner) => void;
+  onActivateOwner?: (owner: GymOwner) => void;
+  onDeactivateOwner?: (owner: GymOwner) => void;
+};
+
 function GymOwnerActions({
   owner,
   onViewOwner,
-}: {
-  owner: GymOwner;
-  onViewOwner?: (owner: GymOwner) => void;
-}) {
+  onEditOwner,
+  onActivateOwner,
+  onDeactivateOwner,
+}: GymOwnerActionsProps) {
   const { showSuccess, showError } = useToast();
   const { mutateAsync: approveStep, isPending } = useApproveStepMutation();
 
@@ -50,6 +58,8 @@ function GymOwnerActions({
     }
   };
 
+  const isActive = owner.status === "active";
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -62,11 +72,17 @@ function GymOwnerActions({
           <span className="sr-only">Open menu</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-32">
-        <DropdownMenuItem onClick={() => onViewOwner?.(owner)}>
-          View Details
-        </DropdownMenuItem>
-        <DropdownMenuItem>Edit</DropdownMenuItem>
+      <DropdownMenuContent align="end" className="w-40">
+        {onViewOwner && (
+          <DropdownMenuItem onClick={() => onViewOwner(owner)}>
+            View Details
+          </DropdownMenuItem>
+        )}
+        {onEditOwner && (
+          <DropdownMenuItem onClick={() => onEditOwner(owner)}>
+            Edit
+          </DropdownMenuItem>
+        )}
         {owner.status === "pending" && (
           <>
             <DropdownMenuSeparator />
@@ -76,13 +92,32 @@ function GymOwnerActions({
           </>
         )}
         <DropdownMenuSeparator />
-        <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
+        {isActive && onDeactivateOwner && (
+          <DropdownMenuItem onClick={() => onDeactivateOwner(owner)}>
+            Deactivate
+          </DropdownMenuItem>
+        )}
+        {!isActive && onActivateOwner && (
+          <DropdownMenuItem onClick={() => onActivateOwner(owner)}>
+            Activate
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
 }
 
-function makeGymOwnersColumns(onViewOwner: (owner: GymOwner) => void): ColumnDef<GymOwner>[] {
+function makeGymOwnersColumns({
+  onViewOwner,
+  onEditOwner,
+  onActivateOwner,
+  onDeactivateOwner,
+}: {
+  onViewOwner?: (owner: GymOwner) => void;
+  onEditOwner?: (owner: GymOwner) => void;
+  onActivateOwner?: (owner: GymOwner) => void;
+  onDeactivateOwner?: (owner: GymOwner) => void;
+}): ColumnDef<GymOwner>[] {
   return [
   {
     accessorKey: "email",
@@ -163,7 +198,13 @@ function makeGymOwnersColumns(onViewOwner: (owner: GymOwner) => void): ColumnDef
   {
     id: "actions",
     cell: ({ row }) => (
-      <GymOwnerActions owner={row.original} onViewOwner={onViewOwner} />
+      <GymOwnerActions
+        owner={row.original}
+        onViewOwner={onViewOwner}
+        onEditOwner={onEditOwner}
+        onActivateOwner={onActivateOwner}
+        onDeactivateOwner={onDeactivateOwner}
+      />
     ),
   },
 ];
@@ -172,13 +213,27 @@ function makeGymOwnersColumns(onViewOwner: (owner: GymOwner) => void): ColumnDef
 type GymOwnersTableProps = {
   data: GymOwner[];
   onViewOwner?: (owner: GymOwner) => void;
+  onEditOwner?: (owner: GymOwner) => void;
+  onActivateOwner?: (owner: GymOwner) => void;
+  onDeactivateOwner?: (owner: GymOwner) => void;
 };
 
-export function GymOwnersTable({ data, onViewOwner }: GymOwnersTableProps) {
+export function GymOwnersTable({
+  data,
+  onViewOwner,
+  onEditOwner,
+  onActivateOwner,
+  onDeactivateOwner,
+}: GymOwnersTableProps) {
   return (
     <DataTable
       data={data}
-      columns={makeGymOwnersColumns(onViewOwner ?? (() => {}))}
+      columns={makeGymOwnersColumns({
+        onViewOwner,
+        onEditOwner,
+        onActivateOwner,
+        onDeactivateOwner,
+      })}
       enableDrag={false}
       enableSelection={false}
       getRowId={(row) => row.id}
