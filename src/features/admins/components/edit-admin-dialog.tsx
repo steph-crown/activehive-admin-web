@@ -33,7 +33,6 @@ const editAdminSchema = yup.object({
   firstName: yup.string().required("First name is required"),
   lastName: yup.string().required("Last name is required"),
   phoneNumber: yup.string().required("Phone number is required"),
-  password: yup.string().min(8, "Password must be at least 8 characters").optional(),
 });
 
 type EditAdminFormValues = yup.InferType<typeof editAdminSchema>;
@@ -56,7 +55,6 @@ export function EditAdminDialog({ admin, open, onOpenChange }: EditAdminDialogPr
       firstName: "",
       lastName: "",
       phoneNumber: "",
-      password: "",
     },
   });
 
@@ -67,7 +65,6 @@ export function EditAdminDialog({ admin, open, onOpenChange }: EditAdminDialogPr
         firstName: admin.firstName,
         lastName: admin.lastName,
         phoneNumber: admin.phoneNumber ?? "",
-        password: "",
       });
     }
   }, [open, admin, form]);
@@ -76,13 +73,9 @@ export function EditAdminDialog({ admin, open, onOpenChange }: EditAdminDialogPr
     if (!admin) return;
 
     try {
-      const { password, ...rest } = values;
       await updateAdmin({
         id: admin.id,
-        payload: {
-          ...rest,
-          password: password ? password : undefined,
-        },
+        payload: values,
       });
       showSuccess("Success", "Admin updated successfully");
       onOpenChange(false);
@@ -144,19 +137,6 @@ export function EditAdminDialog({ admin, open, onOpenChange }: EditAdminDialogPr
                       placeholder="admin@activehive.com"
                       {...field}
                     />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>New Password (optional)</FormLabel>
-                  <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -8,7 +8,7 @@ import { adminsQueryKeys } from "./queries";
 
 const invalidateAdmins = (queryClient: ReturnType<typeof useQueryClient>) => {
   queryClient.invalidateQueries({
-    queryKey: adminsQueryKeys.all,
+    queryKey: adminsQueryKeys.list(),
   });
 };
 

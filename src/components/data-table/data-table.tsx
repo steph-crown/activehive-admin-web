@@ -172,6 +172,11 @@ export function DataTable<TData extends { id: string | number }>({
     useSensor(KeyboardSensor, {})
   );
 
+  // Keep internal data in sync with incoming props (e.g. after refetch)
+  React.useEffect(() => {
+    setData(initialData);
+  }, [initialData]);
+
   const dataIds = React.useMemo<UniqueIdentifier[]>(
     () => data?.map((item) => (getRowId ? getRowId(item) : String(item.id))) || [],
     [data, getRowId]
