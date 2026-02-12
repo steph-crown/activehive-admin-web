@@ -59,6 +59,7 @@ function GymOwnerActions({
   };
 
   const isActive = owner.status === "active";
+  const isPendingStatus = owner.status === "pending";
 
   return (
     <DropdownMenu>
@@ -92,12 +93,12 @@ function GymOwnerActions({
           </>
         )}
         <DropdownMenuSeparator />
-        {isActive && onDeactivateOwner && (
+        {!isPendingStatus && isActive && onDeactivateOwner && (
           <DropdownMenuItem onClick={() => onDeactivateOwner(owner)}>
             Deactivate
           </DropdownMenuItem>
         )}
-        {!isActive && onActivateOwner && (
+        {!isPendingStatus && !isActive && onActivateOwner && (
           <DropdownMenuItem onClick={() => onActivateOwner(owner)}>
             Activate
           </DropdownMenuItem>
@@ -119,95 +120,99 @@ function makeGymOwnersColumns({
   onDeactivateOwner?: (owner: GymOwner) => void;
 }): ColumnDef<GymOwner>[] {
   return [
-  {
-    accessorKey: "email",
-    header: "Email",
-    cell: ({ row }) => (
-      <div className="font-medium">{row.original.email}</div>
-    ),
-  },
-  {
-    accessorKey: "firstName",
-    header: "Name",
-    cell: ({ row }) => {
-      const owner = row.original;
-      return (
-        <div>
-          {owner.firstName} {owner.lastName}
-        </div>
-      );
+    {
+      accessorKey: "email",
+      header: "Email",
+      cell: ({ row }) => (
+        <div className="font-medium">{row.original.email}</div>
+      ),
     },
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => (
-      <Badge variant="outline" className="text-muted-foreground px-1.5">
-        {row.original.status === "active" ? (
-          <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
-        ) : (
-          <IconLoader />
-        )}
-        {row.original.status}
-      </Badge>
-    ),
-  },
-  {
-    accessorKey: "ownedGyms",
-    header: "Gyms",
-    cell: ({ row }) => {
-      const gyms = row.original.ownedGyms;
-      return (
-        <div className="text-sm">
-          {gyms.length > 0 ? (
-            <span>
-              {gyms.length} gym{gyms.length !== 1 ? "s" : ""}
-            </span>
+    {
+      accessorKey: "firstName",
+      header: "Name",
+      cell: ({ row }) => {
+        const owner = row.original;
+        return (
+          <div>
+            {owner.firstName} {owner.lastName}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => (
+        <Badge variant="outline" className="text-muted-foreground px-1.5">
+          {row.original.status === "active" ? (
+            <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
           ) : (
-            <span className="text-muted-foreground">No gyms</span>
+            <IconLoader />
           )}
-        </div>
-      );
+          {row.original.status}
+        </Badge>
+      ),
     },
-  },
-  {
-    accessorKey: "onboardingCompleted",
-    header: "Onboarding",
-    cell: ({ row }) => (
-      <Badge variant={row.original.onboardingCompleted ? "default" : "secondary"}>
-        {row.original.onboardingCompleted ? "Completed" : "Pending"}
-      </Badge>
-    ),
-  },
-  {
-    accessorKey: "isEmailVerified",
-    header: "Email Verified",
-    cell: ({ row }) => (
-      <Badge variant={row.original.isEmailVerified ? "default" : "secondary"}>
-        {row.original.isEmailVerified ? "Verified" : "Not Verified"}
-      </Badge>
-    ),
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Created At",
-    cell: ({ row }) => {
-      return <div className="text-sm">{formatDate(row.original.createdAt)}</div>;
+    // {
+    //   accessorKey: "ownedGyms",
+    //   header: "Gyms",
+    //   cell: ({ row }) => {
+    //     const gyms = row.original.ownedGyms;
+    //     return (
+    //       <div className="text-sm">
+    //         {gyms.length > 0 ? (
+    //           <span>
+    //             {gyms.length} gym{gyms.length !== 1 ? "s" : ""}
+    //           </span>
+    //         ) : (
+    //           <span className="text-muted-foreground">No gyms</span>
+    //         )}
+    //       </div>
+    //     );
+    //   },
+    // },
+    {
+      accessorKey: "onboardingCompleted",
+      header: "Onboarding",
+      cell: ({ row }) => (
+        <Badge
+          variant={row.original.onboardingCompleted ? "default" : "secondary"}
+        >
+          {row.original.onboardingCompleted ? "Completed" : "Pending"}
+        </Badge>
+      ),
     },
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => (
-      <GymOwnerActions
-        owner={row.original}
-        onViewOwner={onViewOwner}
-        onEditOwner={onEditOwner}
-        onActivateOwner={onActivateOwner}
-        onDeactivateOwner={onDeactivateOwner}
-      />
-    ),
-  },
-];
+    {
+      accessorKey: "isEmailVerified",
+      header: "Email Verified",
+      cell: ({ row }) => (
+        <Badge variant={row.original.isEmailVerified ? "default" : "secondary"}>
+          {row.original.isEmailVerified ? "Verified" : "Not Verified"}
+        </Badge>
+      ),
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Created At",
+      cell: ({ row }) => {
+        return (
+          <div className="text-sm">{formatDate(row.original.createdAt)}</div>
+        );
+      },
+    },
+    {
+      id: "actions",
+      cell: ({ row }) => (
+        <GymOwnerActions
+          owner={row.original}
+          onViewOwner={onViewOwner}
+          onEditOwner={onEditOwner}
+          onActivateOwner={onActivateOwner}
+          onDeactivateOwner={onDeactivateOwner}
+        />
+      ),
+    },
+  ];
 }
 
 type GymOwnersTableProps = {

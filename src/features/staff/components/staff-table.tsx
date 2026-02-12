@@ -104,6 +104,11 @@ function makeStaffColumns(callbacks: StaffColumnCallbacks): ColumnDef<Staff>[] {
       cell: ({ row }) => {
         const staff = row.original;
         const isActive = staff.status === "active";
+        const isPending = staff.status === "pending";
+        const hasStatusActions =
+          !isPending &&
+          ((isActive && onDeactivateStaff) || (!isActive && onActivateStaff));
+        const hasDelete = Boolean(onDeleteStaff);
 
         return (
           <DropdownMenu>
@@ -128,20 +133,19 @@ function makeStaffColumns(callbacks: StaffColumnCallbacks): ColumnDef<Staff>[] {
                   Edit
                 </DropdownMenuItem>
               )}
-              <DropdownMenuSeparator />
-              {isActive && onDeactivateStaff && (
+              {(hasStatusActions || hasDelete) && <DropdownMenuSeparator />}
+              {hasStatusActions && isActive && onDeactivateStaff && (
                 <DropdownMenuItem onClick={() => onDeactivateStaff(staff)}>
                   Deactivate
                 </DropdownMenuItem>
               )}
-              {!isActive && onActivateStaff && (
+              {hasStatusActions && !isActive && onActivateStaff && (
                 <DropdownMenuItem onClick={() => onActivateStaff(staff)}>
                   Activate
                 </DropdownMenuItem>
               )}
               {onDeleteStaff && (
                 <>
-                  <DropdownMenuSeparator />
                   <DropdownMenuItem
                     variant="destructive"
                     onClick={() => onDeleteStaff(staff)}

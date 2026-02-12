@@ -21,7 +21,7 @@ export function ConfirmStaffActionDialog({
   action,
   open,
   onOpenChange,
-}: ConfirmStaffActionDialogProps) {
+}: Readonly<ConfirmStaffActionDialogProps>) {
   const { showSuccess, showError } = useToast();
   const { mutateAsync: deleteStaff, isPending: deleting } =
     useDeleteStaffMutation();

@@ -38,3 +38,5 @@ src/
 - **Data fetching**: TanStack Query (`@tanstack/react-query`) + Axios (`src/lib/api-client.ts`).
 - **State management**: Zustand stores in `src/store` and feature-level stores where needed.
 - **Shared UI** lives in `src/components`, organized into `atoms`, `icons`, `layouts`, `loader`, `toast`, and `ui`.
+
+in subscriptions page, i am at a dilemma as to the architecture to use. currently i have a tab of subscription and subscription plans. but thing is, there's two types of subscription plans - for gym owner and for trainer (three actually - and for members of a gym). but in the subscriptions page, i want to put everything about trainer and gym owner sub. in gym owner details page, that's where i want to put the subscription plans for gym owner. same goes for trainer details page. So in subscriptions page, we have for gym owner alone

@@ -7,9 +7,16 @@ import { useTrainersQuery } from "../services";
 import type { Trainer } from "../types";
 import { TrainersTable } from "./trainers-table";
 import { ViewTrainerDialog } from "./view-trainer-dialog";
+import { EditTrainerDialog } from "./edit-trainer-dialog";
+import { ConfirmTrainerActionDialog } from "./confirm-trainer-action-dialog";
 
 export function TrainersPage() {
   const [viewTrainer, setViewTrainer] = useState<Trainer | null>(null);
+  const [editTrainer, setEditTrainer] = useState<Trainer | null>(null);
+  const [action, setAction] = useState<{
+    trainer: Trainer;
+    action: "delete" | "activate" | "deactivate";
+  } | null>(null);
   const { data, isLoading, error } = useTrainersQuery();
 
   if (data) {
@@ -36,6 +43,21 @@ export function TrainersPage() {
                   open={viewTrainer != null}
                   onOpenChange={(open) => !open && setViewTrainer(null)}
                 />
+                <EditTrainerDialog
+                  trainer={editTrainer}
+                  open={editTrainer != null}
+                  onOpenChange={(open) => !open && setEditTrainer(null)}
+                />
+                <ConfirmTrainerActionDialog
+                  trainer={action?.trainer ?? null}
+                  action={action?.action ?? "deactivate"}
+                  open={action != null}
+                  onOpenChange={(open) => {
+                    if (!open) {
+                      setAction(null);
+                    }
+                  }}
+                />
 
                 {isLoading ? (
                   <div className="flex items-center justify-center py-10">
@@ -49,6 +71,16 @@ export function TrainersPage() {
                   <TrainersTable
                     data={data}
                     onViewTrainer={(trainer) => setViewTrainer(trainer)}
+                    onEditTrainer={(trainer) => setEditTrainer(trainer)}
+                    onDeleteTrainer={(trainer) =>
+                      setAction({ trainer, action: "delete" })
+                    }
+                    onActivateTrainer={(trainer) =>
+                      setAction({ trainer, action: "activate" })
+                    }
+                    onDeactivateTrainer={(trainer) =>
+                      setAction({ trainer, action: "deactivate" })
+                    }
                   />
                 ) : null}
               </div>
