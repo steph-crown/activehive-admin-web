@@ -76,11 +76,7 @@ type DataTableProps<TData> = {
 };
 
 // Create a separate component for the drag handle
-function DragHandle({
-  id,
-}: {
-  id: string | number;
-}) {
+function DragHandle({ id }: { id: string | number }) {
   const { attributes, listeners } = useSortable({
     id: id.toString(),
   });
@@ -108,7 +104,9 @@ function DraggableRow<TData>({
   enableDrag: boolean;
   getRowId?: (row: TData) => string;
 }) {
-  const rowId = getRowId ? getRowId(row.original) : String((row.original as { id: string | number }).id);
+  const rowId = getRowId
+    ? getRowId(row.original)
+    : String((row.original as { id: string | number }).id);
   const { transform, transition, setNodeRef, isDragging } = useSortable({
     id: rowId,
   });
@@ -158,7 +156,7 @@ export function DataTable<TData extends { id: string | number }>({
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
+    [],
   );
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [pagination, setPagination] = React.useState({
@@ -169,7 +167,7 @@ export function DataTable<TData extends { id: string | number }>({
   const sensors = useSensors(
     useSensor(MouseSensor, {}),
     useSensor(TouchSensor, {}),
-    useSensor(KeyboardSensor, {})
+    useSensor(KeyboardSensor, {}),
   );
 
   // Keep internal data in sync with incoming props (e.g. after refetch)
@@ -178,8 +176,9 @@ export function DataTable<TData extends { id: string | number }>({
   }, [initialData]);
 
   const dataIds = React.useMemo<UniqueIdentifier[]>(
-    () => data?.map((item) => (getRowId ? getRowId(item) : String(item.id))) || [],
-    [data, getRowId]
+    () =>
+      data?.map((item) => (getRowId ? getRowId(item) : String(item.id))) || [],
+    [data, getRowId],
   );
 
   const table = useReactTable({
@@ -226,7 +225,9 @@ export function DataTable<TData extends { id: string | number }>({
           id: "drag",
           header: () => null,
           cell: ({ row }: { row: Row<TData> }) => (
-            <DragHandle id={getRowId ? getRowId(row.original) : row.original.id} />
+            <DragHandle
+              id={getRowId ? getRowId(row.original) : row.original.id}
+            />
           ),
         },
         ...columns,
@@ -255,7 +256,7 @@ export function DataTable<TData extends { id: string | number }>({
                   .filter(
                     (column) =>
                       typeof column.accessorFn !== "undefined" &&
-                      column.getCanHide()
+                      column.getCanHide(),
                   )
                   .map((column) => {
                     return (
@@ -296,7 +297,7 @@ export function DataTable<TData extends { id: string | number }>({
                             ? null
                             : flexRender(
                                 header.column.columnDef.header,
-                                header.getContext()
+                                header.getContext(),
                               )}
                         </TableHead>
                       );
@@ -344,7 +345,7 @@ export function DataTable<TData extends { id: string | number }>({
                           ? null
                           : flexRender(
                               header.column.columnDef.header,
-                              header.getContext()
+                              header.getContext(),
                             )}
                       </TableHead>
                     );
@@ -354,14 +355,16 @@ export function DataTable<TData extends { id: string | number }>({
             </TableHeader>
             <TableBody>
               {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <DraggableRow
-                    key={row.id}
-                    row={row}
-                    enableDrag={false}
-                    getRowId={getRowId}
-                  />
-                ))
+                table
+                  .getRowModel()
+                  .rows.map((row) => (
+                    <DraggableRow
+                      key={row.id}
+                      row={row}
+                      enableDrag={false}
+                      getRowId={getRowId}
+                    />
+                  ))
               ) : (
                 <TableRow>
                   <TableCell
@@ -377,10 +380,6 @@ export function DataTable<TData extends { id: string | number }>({
         )}
       </div>
       <div className="flex items-center justify-between px-4">
-        <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
         <div className="flex w-full items-center gap-8 lg:w-fit">
           <div className="hidden items-center gap-2 lg:flex">
             <Label htmlFor="rows-per-page" className="text-sm font-medium">

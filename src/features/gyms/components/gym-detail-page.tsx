@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Card,
@@ -14,6 +15,7 @@ import { AppSidebar } from "@/features/dashboard/components/app-sidebar";
 import { SiteHeader } from "@/features/dashboard/components/site-header";
 import { formatDate } from "@/lib/utils";
 import { useGymByIdQuery } from "../services";
+import { ConfirmGymStatusDialog } from "./confirm-gym-status-dialog";
 import type { GymAddress, GymLocation } from "../types";
 
 function formatAddress(address: GymAddress | null): string {
@@ -33,6 +35,9 @@ type GymDetailPageProps = {
 };
 
 export function GymDetailPage({ gymId }: GymDetailPageProps) {
+  const [statusAction, setStatusAction] = useState<
+    "activate" | "deactivate" | null
+  >(null);
   const { data, isLoading, error } = useGymByIdQuery(gymId);
 
   if (isLoading) {
@@ -57,7 +62,8 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
           <SiteHeader />
           <div className="px-4 lg:px-6 py-6">
             <p className="text-destructive">
-              Error loading gym. {error instanceof Error ? error.message : "Please try again."}
+              Error loading gym.{" "}
+              {error instanceof Error ? error.message : "Please try again."}
             </p>
             <Button variant="outline" asChild className="mt-4">
               <Link to="/dashboard/gyms">Back to Gyms</Link>
@@ -79,11 +85,40 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
               <div className="px-4 lg:px-6 space-y-6">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center justify-between gap-4">
                   <Button variant="ghost" size="sm" asChild>
                     <Link to="/dashboard/gyms">← Back to Gyms</Link>
                   </Button>
+                  <div className="flex items-center gap-2">
+                    {gym.isActive ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setStatusAction("deactivate")}
+                      >
+                        Deactivate
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        onClick={() => setStatusAction("activate")}
+                      >
+                        Activate
+                      </Button>
+                    )}
+                  </div>
                 </div>
+
+                <ConfirmGymStatusDialog
+                  gym={statusAction ? gym : null}
+                  action={statusAction ?? "deactivate"}
+                  open={statusAction !== null}
+                  onOpenChange={(open) => {
+                    if (!open) {
+                      setStatusAction(null);
+                    }
+                  }}
+                />
 
                 {/* Gym info */}
                 <Card>
@@ -101,7 +136,10 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
                         <CardDescription>
                           Gym details and contact information
                         </CardDescription>
-                        <Badge variant={gym.isActive ? "default" : "secondary"} className="w-fit">
+                        <Badge
+                          variant={gym.isActive ? "default" : "secondary"}
+                          className="w-fit"
+                        >
                           {gym.isActive ? "Active" : "Inactive"}
                         </Badge>
                       </div>
@@ -110,13 +148,17 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
                   <CardContent className="grid gap-4 text-sm">
                     {gym.description && (
                       <div className="grid gap-1">
-                        <span className="text-muted-foreground">Description</span>
+                        <span className="text-muted-foreground">
+                          Description
+                        </span>
                         <p>{gym.description}</p>
                       </div>
                     )}
                     <div className="grid gap-1">
                       <span className="text-muted-foreground">Address</span>
-                      <p className="font-medium">{formatAddress(gym.address)}</p>
+                      <p className="font-medium">
+                        {formatAddress(gym.address)}
+                      </p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="grid gap-1">
@@ -144,11 +186,15 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t">
                       <div className="grid gap-1">
                         <span className="text-muted-foreground">Created</span>
-                        <p className="font-medium">{formatDate(gym.createdAt)}</p>
+                        <p className="font-medium">
+                          {formatDate(gym.createdAt)}
+                        </p>
                       </div>
                       <div className="grid gap-1">
                         <span className="text-muted-foreground">Updated</span>
-                        <p className="font-medium">{formatDate(gym.updatedAt)}</p>
+                        <p className="font-medium">
+                          {formatDate(gym.updatedAt)}
+                        </p>
                       </div>
                     </div>
                   </CardContent>
@@ -202,13 +248,23 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
                           >
                             <div className="flex items-center justify-between gap-2 flex-wrap">
                               <div className="flex items-center gap-2">
-                                <span className="font-medium">{loc.locationName}</span>
+                                <span className="font-medium">
+                                  {loc.locationName}
+                                </span>
                                 {loc.isHeadquarters && (
-                                  <Badge variant="secondary" className="text-xs">
+                                  <Badge
+                                    variant="secondary"
+                                    className="text-xs"
+                                  >
                                     Headquarters
                                   </Badge>
                                 )}
-                                <Badge variant={loc.isActive ? "default" : "secondary"} className="text-xs">
+                                <Badge
+                                  variant={
+                                    loc.isActive ? "default" : "secondary"
+                                  }
+                                  className="text-xs"
+                                >
                                   {loc.isActive ? "Active" : "Inactive"}
                                 </Badge>
                               </div>
@@ -225,14 +281,18 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
                             )}
                             {(loc.phone || loc.email) && (
                               <p className="text-muted-foreground">
-                                {[loc.phone, loc.email].filter(Boolean).join(" · ")}
+                                {[loc.phone, loc.email]
+                                  .filter(Boolean)
+                                  .join(" · ")}
                               </p>
                             )}
                           </li>
                         ))}
                       </ul>
                     ) : (
-                      <p className="text-muted-foreground text-sm">No locations added yet.</p>
+                      <p className="text-muted-foreground text-sm">
+                        No locations added yet.
+                      </p>
                     )}
                   </CardContent>
                 </Card>
@@ -242,7 +302,9 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
                   <Card>
                     <CardHeader>
                       <CardTitle>Staff</CardTitle>
-                      <CardDescription>Staff members at this gym</CardDescription>
+                      <CardDescription>
+                        Staff members at this gym
+                      </CardDescription>
                     </CardHeader>
                     <CardContent>
                       <p className="text-sm font-medium">
@@ -272,8 +334,13 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
                   <Card>
                     <CardHeader>
                       <CardTitle>Subscription</CardTitle>
-                      <CardDescription>Platform subscription for this gym</CardDescription>
-                      <Badge variant={subscription.isTrial ? "secondary" : "default"} className="w-fit">
+                      <CardDescription>
+                        Platform subscription for this gym
+                      </CardDescription>
+                      <Badge
+                        variant={subscription.isTrial ? "secondary" : "default"}
+                        className="w-fit"
+                      >
                         {subscription.status}
                         {subscription.isTrial ? " (Trial)" : ""}
                       </Badge>
@@ -282,32 +349,52 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {subscription.monthlyPrice && (
                           <div className="grid gap-1">
-                            <span className="text-muted-foreground">Monthly price</span>
-                            <p className="font-medium">{subscription.monthlyPrice}</p>
+                            <span className="text-muted-foreground">
+                              Monthly price
+                            </span>
+                            <p className="font-medium">
+                              {subscription.monthlyPrice}
+                            </p>
                           </div>
                         )}
                         <div className="grid gap-1">
-                          <span className="text-muted-foreground">Auto-renew</span>
-                          <p className="font-medium">{subscription.autoRenew ? "Yes" : "No"}</p>
+                          <span className="text-muted-foreground">
+                            Auto-renew
+                          </span>
+                          <p className="font-medium">
+                            {subscription.autoRenew ? "Yes" : "No"}
+                          </p>
                         </div>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t">
                         {subscription.trialEndDate && (
                           <div className="grid gap-1">
-                            <span className="text-muted-foreground">Trial ends</span>
-                            <p className="font-medium">{formatDate(subscription.trialEndDate)}</p>
+                            <span className="text-muted-foreground">
+                              Trial ends
+                            </span>
+                            <p className="font-medium">
+                              {formatDate(subscription.trialEndDate)}
+                            </p>
                           </div>
                         )}
                         {subscription.nextPaymentDate && (
                           <div className="grid gap-1">
-                            <span className="text-muted-foreground">Next payment</span>
-                            <p className="font-medium">{formatDate(subscription.nextPaymentDate)}</p>
+                            <span className="text-muted-foreground">
+                              Next payment
+                            </span>
+                            <p className="font-medium">
+                              {formatDate(subscription.nextPaymentDate)}
+                            </p>
                           </div>
                         )}
                         {subscription.subscriptionEndDate && (
                           <div className="grid gap-1">
-                            <span className="text-muted-foreground">Subscription ends</span>
-                            <p className="font-medium">{formatDate(subscription.subscriptionEndDate)}</p>
+                            <span className="text-muted-foreground">
+                              Subscription ends
+                            </span>
+                            <p className="font-medium">
+                              {formatDate(subscription.subscriptionEndDate)}
+                            </p>
                           </div>
                         )}
                       </div>

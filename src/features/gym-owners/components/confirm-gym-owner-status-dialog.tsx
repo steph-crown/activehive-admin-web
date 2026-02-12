@@ -1,12 +1,4 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useToast } from "@/hooks/use-toast";
 import {
   useActivateGymOwnerMutation,
@@ -67,36 +59,19 @@ export function ConfirmGymOwnerStatusDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[420px]">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
-        <div className="text-sm">
-          <p className="font-medium">
-            {owner.firstName} {owner.lastName}
-          </p>
-          <p className="text-muted-foreground text-xs">{owner.email}</p>
-        </div>
-        <DialogFooter>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isPending}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="button"
-            onClick={handleConfirm}
-            disabled={isPending}
-          >
-            {isPending ? "Processing..." : confirmLabel}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <ConfirmDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={title}
+      description={description}
+      confirmLabel={confirmLabel}
+      isLoading={isPending}
+      onConfirm={handleConfirm}
+    >
+      <p className="font-medium">
+        {owner.firstName} {owner.lastName}
+      </p>
+      <p className="text-muted-foreground text-xs">{owner.email}</p>
+    </ConfirmDialog>
   );
 }

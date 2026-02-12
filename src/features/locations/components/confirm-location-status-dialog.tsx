@@ -1,23 +1,17 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useToast } from "@/hooks/use-toast";
 import {
   useActivateLocationMutation,
   useDeactivateLocationMutation,
 } from "../services";
-import type { Location } from "../types";
+import type { Location, LocationDetail } from "../types";
 
 type LocationActionType = "activate" | "deactivate";
 
 type ConfirmLocationStatusDialogProps = {
-  location: Location | null;
+  location: Location | LocationDetail | null;
   action: LocationActionType;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -67,32 +61,30 @@ export function ConfirmLocationStatusDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[420px]">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
-        <div className="text-sm">
-          <p className="font-medium">{location.locationName}</p>
-          {location.email && (
-            <p className="text-muted-foreground text-xs">{location.email}</p>
-          )}
-        </div>
-        <DialogFooter>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isPending}
+    <ConfirmDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={title}
+      description={description}
+      confirmLabel={confirmLabel}
+      isLoading={isPending}
+      onConfirm={handleConfirm}
+    >
+      <p className="font-medium">{location.locationName}</p>
+      {location.email && (
+        <p className="text-muted-foreground text-xs">{location.email}</p>
+      )}
+      {location.gym && (
+        <p className="mt-2 text-xs">
+          <span className="text-muted-foreground">Gym: </span>
+          <Link
+            to={`/dashboard/gyms/${location.gym.id}`}
+            className="font-medium text-primary hover:underline"
           >
-            Cancel
-          </Button>
-          <Button type="button" onClick={handleConfirm} disabled={isPending}>
-            {isPending ? "Processing..." : confirmLabel}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+            {location.gym.name}
+          </Link>
+        </p>
+      )}
+    </ConfirmDialog>
   );
 }

@@ -1,4 +1,6 @@
-import { Link } from "react-router-dom";
+import { BlockLoader } from "@/components/loader/block-loader";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -6,15 +8,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { BlockLoader } from "@/components/loader/block-loader";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/features/dashboard/components/app-sidebar";
 import { SiteHeader } from "@/features/dashboard/components/site-header";
 import { formatDate } from "@/lib/utils";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useLocationByIdQuery } from "../services";
-import type { LocationAddress, LocationDetailGym } from "../types";
+import type { LocationAddress, LocationDetail } from "../types";
+import { ConfirmLocationStatusDialog } from "./confirm-location-status-dialog";
 
 type LocationDetailPageProps = {
   locationId: string;
@@ -32,7 +34,12 @@ function formatAddress(address: LocationAddress | null): string {
   return parts.join(", ") || "—";
 }
 
-export function LocationDetailPage({ locationId }: LocationDetailPageProps) {
+export function LocationDetailPage({
+  locationId,
+}: Readonly<LocationDetailPageProps>) {
+  const [statusAction, setStatusAction] = useState<
+    "activate" | "deactivate" | null
+  >(null);
   const { data, isLoading, error } = useLocationByIdQuery(locationId);
 
   if (isLoading) {
@@ -66,8 +73,8 @@ export function LocationDetailPage({ locationId }: LocationDetailPageProps) {
     );
   }
 
-  const location = data;
-  const gym = location.gym as LocationDetailGym | null;
+  const location: LocationDetail = data;
+  const gym = location.gym;
 
   return (
     <SidebarProvider>
@@ -78,11 +85,40 @@ export function LocationDetailPage({ locationId }: LocationDetailPageProps) {
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
               <div className="px-4 lg:px-6 space-y-6">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center justify-between gap-4">
                   <Button variant="ghost" size="sm" asChild>
                     <Link to="/dashboard/locations">← Back to Locations</Link>
                   </Button>
+                  <div className="flex items-center gap-2">
+                    {location.isActive ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setStatusAction("deactivate")}
+                      >
+                        Deactivate
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        onClick={() => setStatusAction("activate")}
+                      >
+                        Activate
+                      </Button>
+                    )}
+                  </div>
                 </div>
+
+                <ConfirmLocationStatusDialog
+                  location={statusAction ? location : null}
+                  action={statusAction ?? "deactivate"}
+                  open={statusAction !== null}
+                  onOpenChange={(open) => {
+                    if (!open) {
+                      setStatusAction(null);
+                    }
+                  }}
+                />
 
                 <Card>
                   <CardHeader>

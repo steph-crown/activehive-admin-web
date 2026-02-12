@@ -1,12 +1,4 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useToast } from "@/hooks/use-toast";
 import {
   useActivateAdminMutation,
@@ -84,37 +76,20 @@ export function ConfirmAdminActionDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[420px]">
-        <DialogHeader>
-          <DialogTitle>{titles[action]}</DialogTitle>
-          <DialogDescription>{descriptions[action]}</DialogDescription>
-        </DialogHeader>
-        <div className="text-sm">
-          <p className="font-medium">
-            {admin.firstName} {admin.lastName}
-          </p>
-          <p className="text-muted-foreground text-xs">{admin.email}</p>
-        </div>
-        <DialogFooter>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isPending}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="button"
-            variant={action === "delete" ? "destructive" : "default"}
-            onClick={handleConfirm}
-            disabled={isPending}
-          >
-            {isPending ? "Processing..." : confirmLabel[action]}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <ConfirmDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={titles[action]}
+      description={descriptions[action]}
+      confirmLabel={confirmLabel[action]}
+      confirmVariant={action === "delete" ? "destructive" : "default"}
+      isLoading={isPending}
+      onConfirm={handleConfirm}
+    >
+      <p className="font-medium">
+        {admin.firstName} {admin.lastName}
+      </p>
+      <p className="text-muted-foreground text-xs">{admin.email}</p>
+    </ConfirmDialog>
   );
 }
