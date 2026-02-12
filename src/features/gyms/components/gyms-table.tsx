@@ -12,14 +12,22 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DataTable } from "@/components/data-table/data-table";
 import { formatDate } from "@/lib/utils";
 import type { Gym } from "../types";
 
-export const gymsColumns: ColumnDef<Gym>[] = [
+type GymsTableCallbacks = {
+  onActivateGym?: (gym: Gym) => void;
+  onDeactivateGym?: (gym: Gym) => void;
+};
+
+function makeGymsColumns({
+  onActivateGym,
+  onDeactivateGym,
+}: GymsTableCallbacks): ColumnDef<Gym>[] {
+  return [
   {
     accessorKey: "name",
     header: "Gym Name",
@@ -108,40 +116,59 @@ export const gymsColumns: ColumnDef<Gym>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
-            size="icon"
-          >
-            <IconDotsVertical />
-            <span className="sr-only">Open menu</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-32">
-          <DropdownMenuItem asChild>
-            <Link to={`/dashboard/gyms/${row.original.id}`}>View Details</Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem>Edit</DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
+    cell: ({ row }) => {
+      const gym = row.original;
+      const isActive = gym.isActive;
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
+              size="icon"
+            >
+              <IconDotsVertical />
+              <span className="sr-only">Open menu</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuItem asChild>
+              <Link to={`/dashboard/gyms/${gym.id}`}>View Details</Link>
+            </DropdownMenuItem>
+            {isActive && onDeactivateGym && (
+              <DropdownMenuItem onClick={() => onDeactivateGym(gym)}>
+                Deactivate
+              </DropdownMenuItem>
+            )}
+            {!isActive && onActivateGym && (
+              <DropdownMenuItem onClick={() => onActivateGym(gym)}>
+                Activate
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
   },
 ];
+}
 
 type GymsTableProps = {
   data: Gym[];
+  onActivateGym?: (gym: Gym) => void;
+  onDeactivateGym?: (gym: Gym) => void;
 };
 
-export function GymsTable({ data }: GymsTableProps) {
+export function GymsTable({
+  data,
+  onActivateGym,
+  onDeactivateGym,
+}: GymsTableProps) {
   return (
     <DataTable
       data={data}
-      columns={gymsColumns}
+      columns={makeGymsColumns({ onActivateGym, onDeactivateGym })}
       enableDrag={false}
       enableSelection={false}
       getRowId={(row) => row.id}

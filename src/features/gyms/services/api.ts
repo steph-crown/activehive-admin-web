@@ -10,4 +10,10 @@ export const gymsApi = {
   getGymById: async (id: string): Promise<GymDetailResponse> => {
     return await apiClient.get<GymDetailResponse>(`${basePath}/${id}`);
   },
+  deactivateGym: async (id: string): Promise<void> => {
+    await apiClient.post(`${basePath}/${id}/deactivate`);
+  },
+  activateGym: async (id: string): Promise<void> => {
+    await apiClient.post(`${basePath}/${id}/activate`);
+  },
 };

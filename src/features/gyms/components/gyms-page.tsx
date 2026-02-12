@@ -1,16 +1,21 @@
+import { useState } from "react";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { BlockLoader } from "@/components/loader/block-loader";
 import { AppSidebar } from "@/features/dashboard/components/app-sidebar";
 import { SiteHeader } from "@/features/dashboard/components/site-header";
 import { useGymsQuery } from "../services";
+import type { Gym } from "../types";
 import { GymsTable } from "./gyms-table";
+import { ConfirmGymStatusDialog } from "./confirm-gym-status-dialog";
+
+type GymActionType = "activate" | "deactivate";
 
 export function GymsPage() {
+  const [statusAction, setStatusAction] = useState<{
+    gym: Gym;
+    type: GymActionType;
+  } | null>(null);
   const { data, isLoading, error } = useGymsQuery();
-
-  if (data) {
-    console.log("Gyms API Response:", data);
-  }
 
   if (error) {
     console.error("Gyms API Error:", error);
@@ -27,6 +32,15 @@ export function GymsPage() {
               <div className="px-4 lg:px-6">
                 <h1 className="text-2xl font-bold mb-4">Gyms</h1>
 
+                <ConfirmGymStatusDialog
+                  gym={statusAction?.gym ?? null}
+                  action={statusAction?.type ?? "deactivate"}
+                  open={statusAction != null}
+                  onOpenChange={(open) => {
+                    if (!open) setStatusAction(null);
+                  }}
+                />
+
                 {isLoading ? (
                   <div className="flex items-center justify-center py-10">
                     <BlockLoader />
@@ -36,7 +50,15 @@ export function GymsPage() {
                     Error loading gyms. Check console for details.
                   </div>
                 ) : data ? (
-                  <GymsTable data={data} />
+                  <GymsTable
+                    data={data}
+                    onActivateGym={(gym) =>
+                      setStatusAction({ gym, type: "activate" })
+                    }
+                    onDeactivateGym={(gym) =>
+                      setStatusAction({ gym, type: "deactivate" })
+                    }
+                  />
                 ) : null}
               </div>
             </div>
