@@ -65,15 +65,35 @@ function makeGymsColumns({
     accessorKey: "email",
     header: "Email",
     cell: ({ row }) => (
-      <div className="text-sm">{row.original.email || <span className="text-muted-foreground">N/A</span>}</div>
+      <div className="text-sm">
+        {row.original.email || (
+          <span className="text-muted-foreground">N/A</span>
+        )}
+      </div>
     ),
   },
   {
-    accessorKey: "phoneNumber",
-    header: "Phone",
-    cell: ({ row }) => (
-      <div className="text-sm">{row.original.phoneNumber || <span className="text-muted-foreground">N/A</span>}</div>
-    ),
+    accessorKey: "approvalStatus",
+    header: "Approval Status",
+    cell: ({ row }) => {
+      const status = row.original.approvalStatus;
+      if (!status) {
+        return <span className="text-muted-foreground text-sm">N/A</span>;
+      }
+
+      let variant: "outline" | "secondary" | "destructive" = "outline";
+      if (status === "approved") {
+        variant = "secondary";
+      } else if (status === "rejected") {
+        variant = "destructive";
+      }
+
+      return (
+        <Badge variant={variant} className="capitalize text-xs px-2 py-0.5">
+          {status}
+        </Badge>
+      );
+    },
   },
   {
     accessorKey: "isActive",
