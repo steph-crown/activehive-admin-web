@@ -30,6 +30,7 @@ export type Gym = {
   updatedAt: string;
   owner: GymOwner | null;
   trainers: unknown[];
+  approvalStatus?: "pending" | "approved" | "rejected" | null;
 };
 
 export type GymLocationAddress = UserAddress;
@@ -88,7 +89,18 @@ export type GymRegistrationStatusRegistration = {
   status: string;
   submittedAt: string | null;
   completedAt: string | null;
-  documents: unknown | null;
+  documents: {
+    rcNumber?: string | null;
+    companyRegNo?: string | null;
+    addressProof?: string | null;
+    governmentId?: string | null;
+    rcValidation?: {
+      verified?: boolean;
+    } | null;
+    addressProofDate?: string | null;
+    additionalDocuments?: string[] | null;
+    [key: string]: unknown;
+  } | null;
   currentStep: string | null;
   stepData: GymRegistrationStepData;
   isApproved: boolean;

@@ -96,7 +96,9 @@ export function GymApplicationPage() {
   }
 
   const { gym, owner, registration, stats } = data;
-  const canFinalize = registration.status === "pending_approval";
+  const canFinalize =
+    registration.status === "pending_approval" &&
+    (gym.approvalStatus === "pending" || gym.approvalStatus == null);
 
   const brandingStep = registration.stepData?.["2"] as
     | {
@@ -124,6 +126,7 @@ export function GymApplicationPage() {
     | undefined;
 
   const locations = locationsStep?.locations ?? [];
+  const documents = registration.documents;
 
   return (
     <SidebarProvider>
@@ -342,12 +345,33 @@ export function GymApplicationPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="grid gap-4 text-sm">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                       <div className="grid gap-1">
                         <span className="text-muted-foreground">Status</span>
                         <Badge variant="outline" className="capitalize w-fit">
                           {registration.status}
                         </Badge>
+                      </div>
+                      <div className="grid gap-1">
+                        <span className="text-muted-foreground">
+                          Approval status
+                        </span>
+                        {gym.approvalStatus ? (
+                          <Badge
+                            variant={
+                              gym.approvalStatus === "approved"
+                                ? "secondary"
+                                : gym.approvalStatus === "rejected"
+                                  ? "destructive"
+                                  : "outline"
+                            }
+                            className="capitalize w-fit"
+                          >
+                            {gym.approvalStatus}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground">N/A</span>
+                        )}
                       </div>
                       <div className="grid gap-1">
                         <span className="text-muted-foreground">
@@ -412,6 +436,140 @@ export function GymApplicationPage() {
                     )}
                   </CardContent>
                 </Card>
+
+                {documents && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Documents</CardTitle>
+                      <CardDescription>
+                        Registration documents and company details.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid gap-4 text-sm">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid gap-1">
+                          <span className="text-muted-foreground">
+                            RC number
+                          </span>
+                          <p className="font-medium">
+                            {documents.rcNumber ?? documents.companyRegNo ?? "—"}
+                          </p>
+                        </div>
+                        <div className="grid gap-1">
+                          <span className="text-muted-foreground">
+                            Address proof date
+                          </span>
+                          <p className="font-medium">
+                            {documents.addressProofDate
+                              ? documents.addressProofDate
+                              : "—"}
+                          </p>
+                        </div>
+                        <div className="grid gap-1">
+                          <span className="text-muted-foreground">
+                            RC validation
+                          </span>
+                          <Badge
+                            variant={
+                              documents.rcValidation?.verified
+                                ? "secondary"
+                                : "outline"
+                            }
+                            className="w-fit"
+                          >
+                            {documents.rcValidation?.verified
+                              ? "Verified"
+                              : "Not verified"}
+                          </Badge>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4">
+                        <div className="grid gap-2">
+                          <span className="text-muted-foreground">
+                            Address proof
+                          </span>
+                          {documents.addressProof ? (
+                            <Button
+                              asChild
+                              variant="outline"
+                              size="sm"
+                              className="w-fit"
+                            >
+                              <a
+                                href={documents.addressProof}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                Download address proof
+                              </a>
+                            </Button>
+                          ) : (
+                            <span className="text-muted-foreground text-sm">
+                              Not provided
+                            </span>
+                          )}
+                        </div>
+                        <div className="grid gap-2">
+                          <span className="text-muted-foreground">
+                            Government ID
+                          </span>
+                          {documents.governmentId ? (
+                            <Button
+                              asChild
+                              variant="outline"
+                              size="sm"
+                              className="w-fit"
+                            >
+                              <a
+                                href={documents.governmentId}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                Download government ID
+                              </a>
+                            </Button>
+                          ) : (
+                            <span className="text-muted-foreground text-sm">
+                              Not provided
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {documents.additionalDocuments &&
+                        documents.additionalDocuments.length > 0 && (
+                          <div className="grid gap-2 border-t pt-4">
+                            <span className="text-muted-foreground">
+                              Additional documents
+                            </span>
+                            <div className="flex flex-col gap-2">
+                              {documents.additionalDocuments.map(
+                                (docUrl, index) => (
+                                  <Button
+                                    key={docUrl}
+                                    asChild
+                                    variant="outline"
+                                    size="sm"
+                                    className="w-fit"
+                                  >
+                                    <a
+                                      href={docUrl}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                    >
+                                      Download additional document{" "}
+                                      {index + 1}
+                                    </a>
+                                  </Button>
+                                ),
+                              )}
+                            </div>
+                          </div>
+                        )}
+                    </CardContent>
+                  </Card>
+                )}
 
                 {locations.length > 0 && (
                   <Card>

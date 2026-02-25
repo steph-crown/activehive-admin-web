@@ -139,6 +139,7 @@ function makeGymsColumns({
     cell: ({ row }) => {
       const gym = row.original;
       const isActive = gym.isActive;
+      const canToggleStatus = gym.approvalStatus === "approved";
 
       return (
         <DropdownMenu>
@@ -161,12 +162,12 @@ function makeGymsColumns({
                 Review application
               </Link>
             </DropdownMenuItem>
-            {isActive && onDeactivateGym && (
+            {canToggleStatus && isActive && onDeactivateGym && (
               <DropdownMenuItem onClick={() => onDeactivateGym(gym)}>
                 Deactivate
               </DropdownMenuItem>
             )}
-            {!isActive && onActivateGym && (
+            {canToggleStatus && !isActive && onActivateGym && (
               <DropdownMenuItem onClick={() => onActivateGym(gym)}>
                 Activate
               </DropdownMenuItem>
