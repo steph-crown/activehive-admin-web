@@ -136,6 +136,11 @@ function makeGymsColumns({
             <DropdownMenuItem asChild>
               <Link to={`/dashboard/gyms/${gym.id}`}>View Details</Link>
             </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to={`/dashboard/gyms/${gym.id}/application`}>
+                Review application
+              </Link>
+            </DropdownMenuItem>
             {isActive && onDeactivateGym && (
               <DropdownMenuItem onClick={() => onDeactivateGym(gym)}>
                 Deactivate

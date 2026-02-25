@@ -70,3 +70,47 @@ export type GymDetailResponse = {
   memberships: unknown[];
   subscription: GymSubscription | null;
 };
+
+export type GymRegistrationStatusOwner = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string | null;
+  status: string;
+  isEmailVerified: boolean;
+  onboardingCompleted: boolean;
+};
+
+export type GymRegistrationStepData = Record<string, unknown>;
+
+export type GymRegistrationStatusRegistration = {
+  status: string;
+  submittedAt: string | null;
+  completedAt: string | null;
+  documents: unknown | null;
+  currentStep: string | null;
+  stepData: GymRegistrationStepData;
+  isApproved: boolean;
+  subscriptionStatus: {
+    hasSubscription: boolean;
+    isExpired: boolean;
+    status: string;
+    trialEndDate: string | null;
+    subscriptionEndDate: string | null;
+  } | null;
+};
+
+export type GymRegistrationStatusStats = {
+  totalMembers: number;
+  totalTrainers: number;
+  totalLocations: number;
+  activeMemberships: number;
+};
+
+export type GymRegistrationStatusResponse = {
+  gym: Gym;
+  owner: GymRegistrationStatusOwner;
+  registration: GymRegistrationStatusRegistration;
+  stats: GymRegistrationStatusStats;
+};

@@ -22,16 +22,16 @@ export const gymOwnersApi = {
   },
   approveStep: async (
     userId: string,
-    payload: ApproveStepPayload
+    payload: ApproveStepPayload,
   ): Promise<unknown> => {
     return await apiClient.post(
       `/api/admin/approvals/user/${userId}/approve-step`,
-      payload
+      payload,
     );
   },
   updateGymOwner: async (
     id: string,
-    payload: UpdateGymOwnerPayload
+    payload: UpdateGymOwnerPayload,
   ): Promise<GymOwner> => {
     return await apiClient.patch<GymOwner>(`${basePath}/${id}`, payload);
   },

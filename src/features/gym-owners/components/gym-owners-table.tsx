@@ -16,8 +16,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DataTable } from "@/components/data-table/data-table";
 import { formatDate } from "@/lib/utils";
-import { useToast } from "@/hooks/use-toast";
-import { useApproveStepMutation } from "../services";
 import type { GymOwner } from "../types";
 
 type GymOwnerActionsProps = {
@@ -35,28 +33,28 @@ function GymOwnerActions({
   onActivateOwner,
   onDeactivateOwner,
 }: GymOwnerActionsProps) {
-  const { showSuccess, showError } = useToast();
-  const { mutateAsync: approveStep, isPending } = useApproveStepMutation();
+  // const { showSuccess, showError } = useToast();
+  // const { mutateAsync: approveStep, isPending } = useApproveStepMutation();
 
-  const handleApprove = async () => {
-    try {
-      await approveStep({
-        userId: owner.id,
-        payload: {
-          step: "documents",
-          status: "approved",
-          comments: "Approved by admin",
-        },
-      });
-      showSuccess("Success", "Gym owner approved successfully");
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Failed to approve gym owner. Please try again.";
-      showError("Error", message);
-    }
-  };
+  // const handleApprove = async () => {
+  //   try {
+  //     await approveStep({
+  //       userId: owner.id,
+  //       payload: {
+  //         step: "documents",
+  //         status: "approved",
+  //         comments: "Approved by admin",
+  //       },
+  //     });
+  //     showSuccess("Success", "Gym owner approved successfully");
+  //   } catch (error) {
+  //     const message =
+  //       error instanceof Error
+  //         ? error.message
+  //         : "Failed to approve gym owner. Please try again.";
+  //     showError("Error", message);
+  //   }
+  // };
 
   const isActive = owner.status === "active";
   const isPendingStatus = owner.status === "pending";
@@ -84,14 +82,14 @@ function GymOwnerActions({
             Edit
           </DropdownMenuItem>
         )}
-        {owner.status === "pending" && (
+        {/* {owner.status === "pending" && (
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleApprove} disabled={isPending}>
               {isPending ? "Approving..." : "Approve"}
             </DropdownMenuItem>
           </>
-        )}
+        )} */}
         <DropdownMenuSeparator />
         {!isPendingStatus && isActive && onDeactivateOwner && (
           <DropdownMenuItem onClick={() => onDeactivateOwner(owner)}>
