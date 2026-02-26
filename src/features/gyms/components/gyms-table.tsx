@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DataTable } from "@/components/data-table/data-table";
-import { formatDate } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import type { Gym } from "../types";
 
 type GymsTableCallbacks = {
@@ -81,15 +81,17 @@ function makeGymsColumns({
         return <span className="text-muted-foreground text-sm">N/A</span>;
       }
 
-      let variant: "outline" | "secondary" | "destructive" = "outline";
-      if (status === "approved") {
-        variant = "secondary";
-      } else if (status === "rejected") {
-        variant = "destructive";
-      }
-
       return (
-        <Badge variant={variant} className="capitalize text-xs px-2 py-0.5">
+        <Badge
+          variant="outline"
+          className={cn(
+            "capitalize text-xs px-2 py-0.5",
+            status === "approved" &&
+              "border-emerald-200 bg-emerald-50 text-emerald-700",
+            status === "rejected" &&
+              "border-destructive/30 bg-destructive/10 text-destructive",
+          )}
+        >
           {status}
         </Badge>
       );

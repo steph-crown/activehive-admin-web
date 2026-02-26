@@ -14,11 +14,15 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { BlockLoader } from "@/components/loader/block-loader";
 import { AppSidebar } from "@/features/dashboard/components/app-sidebar";
 import { SiteHeader } from "@/features/dashboard/components/site-header";
-import { formatDate } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { gymsApi, useGymRegistrationStatusQuery } from "../services";
+import {
+  gymsApi,
+  useGymByIdQuery,
+  useGymRegistrationStatusQuery,
+} from "../services";
 
 export function GymApplicationPage() {
   const { id } = useParams<{ id: string }>();
@@ -30,6 +34,7 @@ export function GymApplicationPage() {
   const [reason, setReason] = useState("");
   const [isReasonDialogOpen, setIsReasonDialogOpen] = useState(false);
   const { data, isLoading, error, refetch } = useGymRegistrationStatusQuery(id);
+  const { data: gymDetail } = useGymByIdQuery(id, Boolean(id));
 
   const handleFinalize = async (
     status: "approved" | "rejected",
@@ -95,7 +100,8 @@ export function GymApplicationPage() {
     );
   }
 
-  const { gym, owner, registration, stats } = data;
+  const { gym: registrationGym, owner, registration, stats } = data;
+  const gym = gymDetail?.gym ?? registrationGym;
   const canFinalize =
     registration.status === "pending_approval" &&
     (gym.approvalStatus === "pending" || gym.approvalStatus == null);
@@ -358,14 +364,14 @@ export function GymApplicationPage() {
                         </span>
                         {gym.approvalStatus ? (
                           <Badge
-                            variant={
-                              gym.approvalStatus === "approved"
-                                ? "secondary"
-                                : gym.approvalStatus === "rejected"
-                                  ? "destructive"
-                                  : "outline"
-                            }
-                            className="capitalize w-fit"
+                            variant="outline"
+                            className={cn(
+                              "capitalize w-fit",
+                              gym.approvalStatus === "approved" &&
+                                "border-emerald-200 bg-emerald-50 text-emerald-700",
+                              gym.approvalStatus === "rejected" &&
+                                "border-destructive/30 bg-destructive/10 text-destructive",
+                            )}
                           >
                             {gym.approvalStatus}
                           </Badge>
@@ -392,6 +398,19 @@ export function GymApplicationPage() {
                             ? formatDate(registration.completedAt)
                             : "—"}
                         </p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-2">
+                      <div className="grid gap-1">
+                        <span className="text-muted-foreground">
+                          Gym status
+                        </span>
+                        <Badge
+                          variant={gym.isActive ? "default" : "secondary"}
+                          className="w-fit"
+                        >
+                          {gym.isActive ? "Active" : "Inactive"}
+                        </Badge>
                       </div>
                     </div>
                     {registration.subscriptionStatus && (

@@ -13,7 +13,7 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { BlockLoader } from "@/components/loader/block-loader";
 import { AppSidebar } from "@/features/dashboard/components/app-sidebar";
 import { SiteHeader } from "@/features/dashboard/components/site-header";
-import { formatDate } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import { useGymByIdQuery } from "../services";
 import { ConfirmGymStatusDialog } from "./confirm-gym-status-dialog";
 import type { GymAddress, GymLocation } from "../types";
@@ -136,12 +136,28 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
                         <CardDescription>
                           Gym details and contact information
                         </CardDescription>
-                        <Badge
-                          variant={gym.isActive ? "default" : "secondary"}
-                          className="w-fit"
-                        >
-                          {gym.isActive ? "Active" : "Inactive"}
-                        </Badge>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge
+                            variant={gym.isActive ? "default" : "secondary"}
+                            className="w-fit"
+                          >
+                            {gym.isActive ? "Active" : "Inactive"}
+                          </Badge>
+                          {gym.approvalStatus && (
+                            <Badge
+                              variant="outline"
+                              className={cn(
+                                "capitalize w-fit",
+                                gym.approvalStatus === "approved" &&
+                                  "border-emerald-200 bg-emerald-50 text-emerald-700",
+                                gym.approvalStatus === "rejected" &&
+                                  "border-destructive/30 bg-destructive/10 text-destructive",
+                              )}
+                            >
+                              {gym.approvalStatus}
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </CardHeader>
