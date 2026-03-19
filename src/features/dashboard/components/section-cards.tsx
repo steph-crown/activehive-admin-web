@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Card } from "@/components/ui/card";
 
-function TrendUpIcon(props: React.SVGProps<SVGSVGElement>) {
+function TrendUpIcon(props: Readonly<React.SVGProps<SVGSVGElement>>) {
   return (
     <svg
       width="16"
@@ -29,7 +29,7 @@ function TrendUpIcon(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-function TrendDownIcon(props: React.SVGProps<SVGSVGElement>) {
+function TrendDownIcon(props: Readonly<React.SVGProps<SVGSVGElement>>) {
   return (
     <svg
       width="16"
@@ -50,7 +50,7 @@ function TrendDownIcon(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-function CourseManagementBooksIcon(props: React.SVGProps<SVGSVGElement>) {
+function GymsIconPrimary(props: Readonly<React.SVGProps<SVGSVGElement>>) {
   return (
     <svg
       width="48"
@@ -71,31 +71,153 @@ function CourseManagementBooksIcon(props: React.SVGProps<SVGSVGElement>) {
       />
       <g opacity="0.3">
         <path
-          d="M16 22C17.0195 21.175 17.6713 19.9136 17.6713 18.5C17.6713 17.0864 17.0195 15.825 16 15H28.4999C30.4329 15 31.9999 16.567 31.9999 18.5C31.9999 20.433 30.4329 22 28.4999 22H16Z"
-          fill="var(--primary-500)"
-        />
-        <path
-          d="M32 32C30.9805 31.175 30.3287 29.9136 30.3287 28.5C30.3287 27.0864 30.9805 25.825 32 25H19.5001C17.5671 25 16.0001 26.567 16.0001 28.5C16.0001 30.433 17.5671 32 19.5001 32H32Z"
+          d="M16 29V21.5C16 20.6716 16.6716 20 17.5 20H30.5C31.3284 20 32 20.6716 32 21.5V29H16Z"
           fill="var(--primary-500)"
         />
       </g>
       <path
-        d="M16 22C17.0195 21.175 17.6713 19.9136 17.6713 18.5C17.6713 17.0864 17.0195 15.825 16 15H28.4999C30.4329 15 31.9999 16.567 31.9999 18.5C31.9999 20.433 30.4329 22 28.4999 22H16Z"
+        d="M16 29V21.5C16 20.6716 16.6716 20 17.5 20H30.5C31.3284 20 32 20.6716 32 21.5V29H16Z"
         stroke="var(--primary-500)"
         strokeWidth="2"
         strokeLinejoin="round"
       />
       <path
-        d="M32 32C30.9805 31.175 30.3287 29.9136 30.3287 28.5C30.3287 27.0864 30.9805 25.825 32 25H19.5001C17.5671 25 16.0001 26.567 16.0001 28.5C16.0001 30.433 17.5671 32 19.5001 32H32Z"
+        d="M19 29V25.5C19 24.6716 19.6716 24 20.5 24H27.5C28.3284 24 29 24.6716 29 25.5V29"
         stroke="var(--primary-500)"
         strokeWidth="2"
         strokeLinejoin="round"
+      />
+      <path
+        d="M21 20V18C21 17.4477 21.4477 17 22 17H26C26.5523 17 27 17.4477 27 18V20"
+        stroke="var(--primary-500)"
+        strokeWidth="2"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+      <path
+        d="M18.5 22.5H23"
+        stroke="var(--primary-500)"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M25 22.5H29.5"
+        stroke="var(--primary-500)"
+        strokeWidth="2"
+        strokeLinecap="round"
       />
     </svg>
   );
 }
 
-function CourseManagementUsersIcon(props: React.SVGProps<SVGSVGElement>) {
+function TrainersIconBlue(props: Readonly<React.SVGProps<SVGSVGElement>>) {
+  return (
+    <svg
+      width="48"
+      height="48"
+      viewBox="0 0 48 48"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <path
+        d="M0 10C0 4.47715 4.47715 0 10 0H38C43.5229 0 48 4.47715 48 10V38C48 43.5228 43.5228 48 38 48H10C4.47715 48 0 43.5228 0 38V10Z"
+        fill="var(--blue-50)"
+      />
+      <path
+        d="M36 12V36H12V12H36Z"
+        fill="white"
+        fillOpacity="0.01"
+      />
+      <g opacity="0.3">
+        <path
+          d="M24 23C26.2091 23 28 21.2091 28 19C28 16.7909 26.2091 15 24 15C21.7909 15 20 16.7909 20 19C20 21.2091 21.7909 23 24 23Z"
+          fill="var(--blue-500)"
+        />
+      </g>
+      <path
+        d="M24 23C26.2091 23 28 21.2091 28 19C28 16.7909 26.2091 15 24 15C21.7909 15 20 16.7909 20 19C20 21.2091 21.7909 23 24 23Z"
+        stroke="var(--blue-500)"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M18.5 32C18.5 28.4101 21.4101 25.5 25 25.5H23C21.6193 25.5 20.5 26.6193 20.5 28V32"
+        fill="var(--blue-500)"
+        fillOpacity="0.01"
+      />
+      <path
+        d="M17.5 32V28.5C17.5 26.0147 19.5147 24 22 24H26C28.4853 24 30.5 26.0147 30.5 28.5V32"
+        stroke="var(--blue-500)"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M20.5 18.5H27.5"
+        stroke="var(--blue-500)"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function ChallengesIconError(props: Readonly<React.SVGProps<SVGSVGElement>>) {
+  return (
+    <svg
+      width="48"
+      height="48"
+      viewBox="0 0 48 48"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <path
+        d="M0 10C0 4.47715 4.47715 0 10 0H38C43.5229 0 48 4.47715 48 10V38C48 43.5228 43.5228 48 38 48H10C4.47715 48 0 43.5228 0 38V10Z"
+        fill="var(--error-50)"
+      />
+      <path
+        d="M36 12V36H12V12H36Z"
+        fill="white"
+        fillOpacity="0.01"
+      />
+      <g opacity="0.3">
+        <path
+          d="M19 18H29V22C29 26.4183 25.4183 30 21 30H19V18Z"
+          fill="var(--error-500)"
+        />
+      </g>
+      <path
+        d="M19 18H29V22C29 26.4183 25.4183 30 21 30H19V18Z"
+        stroke="var(--error-500)"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M16.5 31H31.5"
+        stroke="var(--error-500)"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M22 14V18"
+        stroke="var(--error-500)"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M26 14V18"
+        stroke="var(--error-500)"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function CourseManagementUsersIcon(
+  props: Readonly<React.SVGProps<SVGSVGElement>>,
+) {
   return (
     <svg
       width="48"
@@ -138,76 +260,6 @@ function CourseManagementUsersIcon(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-function CourseManagementStarIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      width="48"
-      height="48"
-      viewBox="0 0 48 48"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      {...props}
-    >
-      <path
-        d="M0 10C0 4.47715 4.47715 0 10 0H38C43.5229 0 48 4.47715 48 10V38C48 43.5228 43.5228 48 38 48H10C4.47715 48 0 43.5228 0 38V10Z"
-        fill="var(--blue-50)"
-      />
-      <path
-        d="M36 12V36H12V12H36Z"
-        fill="white"
-        fillOpacity="0.01"
-      />
-      <path
-        opacity="0.3"
-        d="M23.784 14.8709C23.8804 14.7053 24.1196 14.7053 24.216 14.8709L27.1774 19.9552C27.2127 20.0159 27.2719 20.0589 27.3405 20.0737L33.0911 21.319C33.2783 21.3595 33.3522 21.587 33.2246 21.7299L29.3042 26.1174C29.2574 26.1698 29.2348 26.2394 29.2419 26.3092L29.8346 32.1631C29.8539 32.3538 29.6604 32.4944 29.4851 32.4171L24.1008 30.0444C24.0366 30.0161 23.9634 30.0161 23.8992 30.0444L18.5149 32.4171C18.3396 32.4944 18.1461 32.3538 18.1654 32.1631L18.7581 26.3092C18.7652 26.2394 18.7426 26.1698 18.6958 26.1174L14.7754 21.7299C14.6478 21.587 14.7217 21.3595 14.9089 21.319L20.6595 20.0737C20.7281 20.0589 20.7873 20.0159 20.8226 19.9552L23.784 14.8709Z"
-        fill="var(--blue-500)"
-      />
-      <path
-        d="M23.784 14.8709C23.8804 14.7053 24.1196 14.7053 24.216 14.8709L27.1774 19.9552C27.2127 20.0159 27.2719 20.0589 27.3405 20.0737L33.0911 21.319C33.2783 21.3595 33.3522 21.587 33.2246 21.7299L29.3042 26.1174C29.2574 26.1698 29.2348 26.2394 29.2419 26.3092L29.8346 32.1631C29.8539 32.3538 29.6604 32.4943 29.4851 32.4171L24.1008 30.0444C24.0366 30.0161 23.9634 30.0161 23.8992 30.0444L18.5149 32.4171C18.3396 32.4943 18.1461 32.3538 18.1654 32.1631L18.7581 26.3092C18.7652 26.2394 18.7426 26.1698 18.6958 26.1174L14.7754 21.7299C14.6478 21.587 14.7217 21.3595 14.9089 21.319L20.6595 20.0737C20.7281 20.0589 20.7873 20.0159 20.8226 19.9552L23.784 14.8709Z"
-        stroke="var(--blue-500)"
-        strokeWidth="2"
-      />
-    </svg>
-  );
-}
-
-function CourseManagementBookmarkIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      width="48"
-      height="48"
-      viewBox="0 0 48 48"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      {...props}
-    >
-      <path
-        d="M0 10C0 4.47715 4.47715 0 10 0H38C43.5229 0 48 4.47715 48 10V38C48 43.5228 43.5228 48 38 48H10C4.47715 48 0 43.5228 0 38V10Z"
-        fill="var(--error-50)"
-      />
-      <path
-        d="M36 12V36H12V12H36Z"
-        fill="white"
-        fillOpacity="0.01"
-      />
-      <path
-        opacity="0.3"
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M17 18C17 16.3431 18.3431 15 20 15H28C29.6569 15 31 16.3431 31 18V32.0657C31 33.2638 29.6648 33.9784 28.6679 33.3138L24 30.2019L19.332 33.3138C18.3352 33.9784 17 33.2638 17 32.0657V18Z"
-        fill="var(--error-500)"
-      />
-      <path
-        d="M30 23V18C30 16.8954 29.1046 16 28 16H20C18.8954 16 18 16.8954 18 18V32.0657C18 32.4651 18.4451 32.7033 18.7773 32.4818L23.7226 29.1849C23.8906 29.0729 24.1094 29.0729 24.2774 29.1849L25 29.6667M27.4948 33.7508L27.8012 31.6059C27.8318 31.3917 27.9311 31.1932 28.0841 31.0402L31.3839 27.7403C31.9697 27.1546 32.9195 27.1546 33.5052 27.7403C34.091 28.3261 34.091 29.2759 33.5052 29.8617L30.2054 33.1615C30.0524 33.3145 29.8539 33.4137 29.6397 33.4443L27.4948 33.7508Z"
-        stroke="var(--error-500)"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 type MetricCardTheme = {
   icon: React.ReactNode;
   title: string;
@@ -216,7 +268,7 @@ type MetricCardTheme = {
   isPositive: boolean;
   comparisonText: string;
   valueColorVar: string;
-  shadowClass: string;
+  hoverShadowClass: string;
   cssVars: React.CSSProperties;
 };
 
@@ -234,15 +286,15 @@ export function SectionCards() {
 
   const cardThemes: MetricCardTheme[] = [
     {
-      title: "My Courses",
-      value: "8,746",
+      title: "Total Gyms",
+      value: "24",
       percentChange: 2.4,
       isPositive: true,
       comparisonText: "vs last month",
-      icon: <CourseManagementBooksIcon />,
+      icon: <GymsIconPrimary />,
       valueColorVar: "var(--primary-500)",
-      shadowClass:
-        "shadow-[0_14px_30px_-20px_rgba(255,91,4,0.28)]",
+      hoverShadowClass:
+        "hover:shadow-[0_14px_30px_-20px_rgba(255,91,4,0.28)]",
       cssVars: mergeCssVars({
         ...baseVars,
         "--primary-50": "#ffefe6",
@@ -250,15 +302,15 @@ export function SectionCards() {
       }),
     },
     {
-      title: "Total Learners",
+      title: "total members",
       value: "8,746",
       percentChange: 2.4,
       isPositive: true,
       comparisonText: "vs last month",
       icon: <CourseManagementUsersIcon />,
       valueColorVar: "var(--purple-500)",
-      shadowClass:
-        "shadow-[0_14px_30px_-20px_rgba(126,82,255,0.26)]",
+      hoverShadowClass:
+        "hover:shadow-[0_14px_30px_-20px_rgba(126,82,255,0.26)]",
       cssVars: mergeCssVars({
         ...baseVars,
         "--purple-50": "#f2eeff",
@@ -266,15 +318,15 @@ export function SectionCards() {
       }),
     },
     {
-      title: "Total Ratings",
-      value: "100",
-      percentChange: 2.4,
+      title: "Total Trainers",
+      value: "56",
+      percentChange: 1.9,
       isPositive: true,
       comparisonText: "vs last month",
-      icon: <CourseManagementStarIcon />,
+      icon: <TrainersIconBlue />,
       valueColorVar: "var(--blue-500)",
-      shadowClass:
-        "shadow-[0_14px_30px_-20px_rgba(67,66,255,0.26)]",
+      hoverShadowClass:
+        "hover:shadow-[0_14px_30px_-20px_rgba(67,66,255,0.26)]",
       cssVars: mergeCssVars({
         ...baseVars,
         "--blue-50": "#ececff",
@@ -282,15 +334,15 @@ export function SectionCards() {
       }),
     },
     {
-      title: "Total Drafts",
-      value: "8,746",
-      percentChange: -2.4,
+      title: "Active challenges",
+      value: "14",
+      percentChange: -1.7,
       isPositive: false,
       comparisonText: "vs last month",
-      icon: <CourseManagementBookmarkIcon />,
+      icon: <ChallengesIconError />,
       valueColorVar: "var(--error-500)",
-      shadowClass:
-        "shadow-[0_14px_30px_-20px_rgba(211,47,47,0.22)]",
+      hoverShadowClass:
+        "hover:shadow-[0_14px_30px_-20px_rgba(211,47,47,0.22)]",
       cssVars: mergeCssVars({
         ...baseVars,
         "--error-50": "#fbeaea",
@@ -308,7 +360,7 @@ export function SectionCards() {
         return (
           <Card
             key={card.title}
-            className={`@container/card p-0 gap-0 bg-white border border-[#f4f4f4] shadow-none ${card.shadowClass}`}
+            className={`@container/card p-0 gap-0 bg-white border border-[#f4f4f4] shadow-none transition-shadow ${card.hoverShadowClass}`}
             style={card.cssVars}
           >
             <div className="flex flex-col gap-2 p-5">
