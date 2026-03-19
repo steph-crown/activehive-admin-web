@@ -19,26 +19,30 @@ import {
 export function SectionCardsSkeleton() {
   const cardKeys = ["card-0", "card-1", "card-2", "card-3"] as const;
   return (
-    <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
       {cardKeys.map((cardKey) => (
-        <Card key={cardKey} className="@container/card">
-          <CardHeader>
-            <CardDescription>
-              <Skeleton className="h-4 w-40" />
-            </CardDescription>
-            <CardTitle className="text-2xl">
-              <Skeleton className="h-8 w-36" />
-            </CardTitle>
-            <CardAction>
-              <Skeleton className="h-6 w-16 rounded-full" />
-            </CardAction>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <Skeleton className="h-4 w-64" />
-            <div className="mt-2">
-              <Skeleton className="h-4 w-52" />
+        <Card
+          key={cardKey}
+          className="@container/card p-0 gap-0 bg-white border border-[#f4f4f4] shadow-none"
+        >
+          <div className="flex flex-col gap-2 p-5">
+            <div className="flex flex-col items-start gap-5">
+              <Skeleton className="h-12 w-12 rounded-[10px]" />
+              <Skeleton className="h-4 w-28" />
             </div>
-          </CardContent>
+
+            <div className="flex items-center justify-between gap-2">
+              <Skeleton className="h-7 w-24" />
+
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
+                  <Skeleton className="h-4 w-4" />
+                  <Skeleton className="h-3 w-14" />
+                </div>
+                <Skeleton className="h-3 w-28" />
+              </div>
+            </div>
+          </div>
         </Card>
       ))}
     </div>
