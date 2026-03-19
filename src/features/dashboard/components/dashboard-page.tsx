@@ -1,17 +1,6 @@
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { DataTable } from "@/components/data-table/data-table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { IconPlus } from "@tabler/icons-react";
+import { Input } from "@/components/ui/input";
 import { AppSidebar } from "./app-sidebar";
 import { SiteHeader } from "./site-header";
 import { SectionCards } from "./section-cards";
@@ -19,14 +8,48 @@ import { RevenueChart } from "./revenue-chart";
 import { MembersChart } from "./members-chart";
 import { dashboardColumns } from "./dashboard-columns";
 import { useDashboardDocumentsQuery } from "../services";
+import type { DashboardDocument } from "../types";
 import {
   ChartsSkeleton,
   DashboardTableSkeleton,
   SectionCardsSkeleton,
 } from "./dashboard-skeleton";
+import { useMemo, useState } from "react";
+
+const dummyDashboardTableData: DashboardDocument[] = [
+  {
+    id: 1,
+    header: "Membership renewals",
+    type: "Compliance",
+    status: "Done",
+    target: "85",
+    limit: "95",
+    reviewer: "Eddie Lake",
+  },
+  {
+    id: 2,
+    header: "Trainer onboarding docs",
+    type: "Audit",
+    status: "In Process",
+    target: "70",
+    limit: "90",
+    reviewer: "Assign reviewer",
+  },
+  {
+    id: 3,
+    header: "Monthly attendance logs",
+    type: "Operations",
+    status: "Done",
+    target: "92",
+    limit: "98",
+    reviewer: "Jamik Tashpulatov",
+  },
+];
 
 export function DashboardPage() {
-  const { data, isLoading } = useDashboardDocumentsQuery();
+  const { isLoading } = useDashboardDocumentsQuery();
+  const [searchQuery, setSearchQuery] = useState("");
+  const tableData = useMemo(() => dummyDashboardTableData, []);
 
   return (
     <SidebarProvider>
@@ -36,7 +59,7 @@ export function DashboardPage() {
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-              {isLoading || !data ? (
+              {isLoading ? (
                 <>
                   <SectionCardsSkeleton />
                   <div className="px-4 lg:px-6">
@@ -55,88 +78,30 @@ export function DashboardPage() {
                       <MembersChart />
                     </div>
                   </div>
-                  <Tabs
-                    defaultValue="outline"
-                    className="w-full flex-col justify-start gap-6"
-                  >
-                    <div className="flex items-center justify-between px-4 lg:px-6">
-                      <Label htmlFor="view-selector" className="sr-only">
-                        View
-                      </Label>
-                      <Select defaultValue="outline">
-                        <SelectTrigger
-                          className="flex w-fit @4xl/main:hidden"
-                          size="sm"
-                          id="view-selector"
-                        >
-                          <SelectValue placeholder="Select a view" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="outline">Outline</SelectItem>
-                          <SelectItem value="past-performance">
-                            Past Performance
-                          </SelectItem>
-                          <SelectItem value="key-personnel">
-                            Key Personnel
-                          </SelectItem>
-                          <SelectItem value="focus-documents">
-                            Focus Documents
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <TabsList className="**:data-[slot=badge]:bg-muted-foreground/30 hidden **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:px-1 @4xl/main:flex">
-                        <TabsTrigger value="outline">Outline</TabsTrigger>
-                        <TabsTrigger value="past-performance">
-                          Past Performance{" "}
-                          <Badge variant="secondary">3</Badge>
-                        </TabsTrigger>
-                        <TabsTrigger value="key-personnel">
-                          Key Personnel <Badge variant="secondary">2</Badge>
-                        </TabsTrigger>
-                        <TabsTrigger value="focus-documents">
-                          Focus Documents
-                        </TabsTrigger>
-                      </TabsList>
-                      <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm">
-                          <IconPlus />
-                          <span className="hidden lg:inline">
-                            Add Section
-                          </span>
-                        </Button>
+                  <div className="px-4 lg:px-6">
+                    <div className="flex flex-col gap-6 rounded-xl border border-[#F4F4F4] bg-white p-8">
+                      <div className="flex items-center justify-between gap-4">
+                        <h2 className="text-grey-900 text-lg font-semibold">
+                          Members
+                        </h2>
+                        <Input
+                          type="text"
+                          placeholder="Search by header, reviewer..."
+                          className="h-10 w-full max-w-[280px]"
+                          value={searchQuery}
+                          onChange={(event) => setSearchQuery(event.target.value)}
+                        />
                       </div>
-                    </div>
-                    <TabsContent
-                      value="outline"
-                      className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
-                    >
                       <DataTable
-                        data={data}
+                        data={tableData}
                         columns={dashboardColumns}
-                        enableDrag={true}
-                        enableSelection={true}
+                        searchQuery={searchQuery}
+                        enableDrag={false}
+                        enableSelection={false}
                         getRowId={(row) => row.id.toString()}
                       />
-                    </TabsContent>
-                    <TabsContent
-                      value="past-performance"
-                      className="flex flex-col px-4 lg:px-6"
-                    >
-                      <div className="aspect-video w-full flex-1 rounded-lg border border-dashed"></div>
-                    </TabsContent>
-                    <TabsContent
-                      value="key-personnel"
-                      className="flex flex-col px-4 lg:px-6"
-                    >
-                      <div className="aspect-video w-full flex-1 rounded-lg border border-dashed"></div>
-                    </TabsContent>
-                    <TabsContent
-                      value="focus-documents"
-                      className="flex flex-col px-4 lg:px-6"
-                    >
-                      <div className="aspect-video w-full flex-1 rounded-lg border border-dashed"></div>
-                    </TabsContent>
-                  </Tabs>
+                    </div>
+                  </div>
                 </>
               )}
             </div>

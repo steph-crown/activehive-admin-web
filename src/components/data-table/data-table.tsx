@@ -75,6 +75,7 @@ type DataTableProps<TData> = {
   getRowId?: (row: TData) => string;
   renderToolbar?: () => React.ReactNode;
   isLoading?: boolean;
+  searchQuery?: string;
 };
 
 // Create a separate component for the drag handle
@@ -153,6 +154,7 @@ export function DataTable<TData extends { id: string | number }>({
   getRowId,
   renderToolbar,
   isLoading = false,
+  searchQuery,
 }: DataTableProps<TData>) {
   const [data, setData] = React.useState(() => initialData);
   const [rowSelection, setRowSelection] = React.useState({});
@@ -184,8 +186,16 @@ export function DataTable<TData extends { id: string | number }>({
     [data, getRowId],
   );
 
+  const normalizedQuery = (searchQuery || "").trim().toLowerCase();
+  const filteredData = React.useMemo(() => {
+    if (!normalizedQuery) return data;
+    return data.filter((row) =>
+      JSON.stringify(row).toLowerCase().includes(normalizedQuery),
+    );
+  }, [data, normalizedQuery]);
+
   const table = useReactTable({
-    data,
+    data: filteredData,
     columns,
     state: {
       sorting,
@@ -292,7 +302,7 @@ export function DataTable<TData extends { id: string | number }>({
           </div>
         </div>
       )}
-      <div className="overflow-hidden rounded-lg border">
+      <div className="overflow-hidden bg-white">
         {enableDrag ? (
           <DndContext
             collisionDetection={closestCenter}
@@ -302,12 +312,16 @@ export function DataTable<TData extends { id: string | number }>({
             id={sortableId}
           >
             <Table>
-              <TableHeader className="bg-muted sticky top-0 z-10">
+              <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
                     {headerGroup.headers.map((header) => {
                       return (
-                        <TableHead key={header.id} colSpan={header.colSpan}>
+                        <TableHead
+                          key={header.id}
+                          colSpan={header.colSpan}
+                          className="h-11 bg-white px-4 text-xs"
+                        >
                           {header.isPlaceholder
                             ? null
                             : flexRender(
@@ -325,7 +339,10 @@ export function DataTable<TData extends { id: string | number }>({
                   skeletonRowKeys.map((rowKey) => (
                     <TableRow key={rowKey}>
                       {skeletonColumns.map((col) => (
-                        <TableCell key={`${rowKey}-${col.id}`}>
+                        <TableCell
+                          key={`${rowKey}-${col.id}`}
+                          className="px-4 py-4"
+                        >
                           <Skeleton className="h-4 w-full" />
                         </TableCell>
                       ))}
@@ -360,12 +377,16 @@ export function DataTable<TData extends { id: string | number }>({
           </DndContext>
         ) : (
           <Table>
-            <TableHeader className="bg-muted sticky top-0 z-10">
+            <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
                     return (
-                      <TableHead key={header.id} colSpan={header.colSpan}>
+                      <TableHead
+                        key={header.id}
+                        colSpan={header.colSpan}
+                        className="h-11 bg-white px-4 text-xs"
+                      >
                         {header.isPlaceholder
                           ? null
                           : flexRender(
@@ -383,7 +404,10 @@ export function DataTable<TData extends { id: string | number }>({
                 skeletonRowKeys.map((rowKey) => (
                   <TableRow key={rowKey}>
                     {skeletonColumns.map((col) => (
-                      <TableCell key={`${rowKey}-${col.id}`}>
+                      <TableCell
+                        key={`${rowKey}-${col.id}`}
+                        className="px-4 py-4"
+                      >
                         <Skeleton className="h-4 w-full" />
                       </TableCell>
                     ))}
@@ -414,7 +438,7 @@ export function DataTable<TData extends { id: string | number }>({
           </Table>
         )}
       </div>
-      <div className="flex items-center justify-end">
+      <div className="flex items-center justify-end px-1 py-2">
         <div className="flex items-center gap-8">
           <div className="hidden items-center gap-2 lg:flex">
             <Label htmlFor="rows-per-page" className="text-sm font-medium">
