@@ -15,11 +15,12 @@ import { IconPlus } from "@tabler/icons-react";
 import { AppSidebar } from "./app-sidebar";
 import { SiteHeader } from "./site-header";
 import { SectionCards } from "./section-cards";
-import { ChartAreaInteractive } from "./chart-area-interactive";
+import { RevenueChart } from "./revenue-chart";
+import { MembersChart } from "./members-chart";
 import { dashboardColumns } from "./dashboard-columns";
 import { useDashboardDocumentsQuery } from "../services";
 import {
-  ChartAreaSkeleton,
+  ChartsSkeleton,
   DashboardTableSkeleton,
   SectionCardsSkeleton,
 } from "./dashboard-skeleton";
@@ -39,7 +40,7 @@ export function DashboardPage() {
                 <>
                   <SectionCardsSkeleton />
                   <div className="px-4 lg:px-6">
-                    <ChartAreaSkeleton />
+                    <ChartsSkeleton />
                   </div>
                   <div className="px-4 lg:px-6">
                     <DashboardTableSkeleton />
@@ -49,7 +50,10 @@ export function DashboardPage() {
                 <>
                   <SectionCards />
                   <div className="px-4 lg:px-6">
-                    <ChartAreaInteractive />
+                    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                      <RevenueChart />
+                      <MembersChart />
+                    </div>
                   </div>
                   <Tabs
                     defaultValue="outline"

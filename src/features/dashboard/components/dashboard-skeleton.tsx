@@ -70,6 +70,36 @@ export function ChartAreaSkeleton() {
   );
 }
 
+export function ChartsSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <Card className="border-grey-50 p-0 shadow-none">
+        <div className="flex flex-col">
+          <div className="border-grey-50 flex items-center justify-between border-b px-6 py-3">
+            <Skeleton className="h-4 w-44" />
+            <Skeleton className="h-9 w-56 rounded-md" />
+          </div>
+          <div className="flex flex-col gap-4 p-6">
+            <Skeleton className="h-[300px] w-full rounded-lg" />
+          </div>
+        </div>
+      </Card>
+
+      <Card className="border-grey-50 p-0 shadow-none">
+        <div className="flex flex-col">
+          <div className="border-grey-50 flex items-center justify-between border-b px-6 py-3">
+            <Skeleton className="h-4 w-56" />
+            <Skeleton className="h-9 w-56 rounded-md" />
+          </div>
+          <div className="flex flex-col gap-4 p-6">
+            <Skeleton className="h-[300px] w-full rounded-lg" />
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
 export function DashboardTableSkeleton() {
   // Admin dashboard columns are fixed in this app.
   const headerKeys = ["col-0", "col-1", "col-2", "col-3", "col-4", "col-5", "col-6", "col-7", "col-8"] as const;
