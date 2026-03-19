@@ -91,7 +91,7 @@ export const subscriptionsColumns: ColumnDef<Subscription>[] = [
       const num = Number(price);
       return (
         <div className="text-sm">
-          {Number.isFinite(num) ? `$${num.toFixed(2)}` : price}
+          {Number.isFinite(num) ? `₦${num.toFixed(2)}` : price}
         </div>
       );
     },

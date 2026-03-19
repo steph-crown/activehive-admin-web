@@ -88,7 +88,7 @@ export function SubscriptionPlanDetailPage() {
                       <div className="grid gap-1">
                         <span className="text-muted-foreground">Price</span>
                         <p className="font-medium">
-                          ${Number(plan.price).toFixed(2)}
+                          ₦{Number(plan.price).toFixed(2)}
                         </p>
                       </div>
                       <div className="grid gap-1">

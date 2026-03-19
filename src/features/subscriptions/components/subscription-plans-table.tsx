@@ -55,7 +55,7 @@ const makeSubscriptionPlansColumns = (
       const num = Number(price);
       return (
         <span className="text-sm">
-          {Number.isFinite(num) ? `$${num.toFixed(2)}` : price}
+          {Number.isFinite(num) ? `₦${num.toFixed(2)}` : price}
         </span>
       );
     },

@@ -314,7 +314,13 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
                 </Card>
 
                 {/* Staff & Memberships row */}
-                <div className="grid gap-4 md:grid-cols-2">
+                <div
+                  className={
+                    subscription?.isTrial
+                      ? "grid gap-4 md:grid-cols-1"
+                      : "grid gap-4 md:grid-cols-2"
+                  }
+                >
                   <Card>
                     <CardHeader>
                       <CardTitle>Staff</CardTitle>
@@ -330,19 +336,23 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
                       </p>
                     </CardContent>
                   </Card>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Memberships</CardTitle>
-                      <CardDescription>Membership plans</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm font-medium">
-                        {memberships.length > 0
-                          ? `${memberships.length} plan${memberships.length !== 1 ? "s" : ""}`
-                          : "No memberships"}
-                      </p>
-                    </CardContent>
-                  </Card>
+                  {!subscription?.isTrial && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Memberships</CardTitle>
+                        <CardDescription>Membership plans</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm font-medium">
+                          {memberships.length > 0
+                            ? `${memberships.length} plan${
+                                memberships.length !== 1 ? "s" : ""
+                              }`
+                            : "No memberships"}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  )}
                 </div>
 
                 {/* Subscription */}

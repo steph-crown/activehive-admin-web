@@ -16,6 +16,7 @@ import { AppSidebar } from "@/features/dashboard/components/app-sidebar";
 import { SiteHeader } from "@/features/dashboard/components/site-header";
 import { cn, formatDate } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { useUpload } from "@/hooks/use-upload";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -23,6 +24,7 @@ import {
   useGymByIdQuery,
   useGymRegistrationStatusQuery,
 } from "../services";
+import { getGovernmentIdTypeLabel } from "../constants/nigeria-government-id-types";
 
 export function GymApplicationPage() {
   const { id } = useParams<{ id: string }>();
@@ -33,6 +35,8 @@ export function GymApplicationPage() {
   const [decision, setDecision] = useState<"approved" | "rejected" | null>(null);
   const [reason, setReason] = useState("");
   const [isReasonDialogOpen, setIsReasonDialogOpen] = useState(false);
+  const { upload, isUploading: isUploadingRcProof } = useUpload();
+  const [rcProofUploadUrl, setRcProofUploadUrl] = useState<string | null>(null);
   const { data, isLoading, error, refetch } = useGymRegistrationStatusQuery(id);
   const { data: gymDetail } = useGymByIdQuery(id, Boolean(id));
 
@@ -181,6 +185,30 @@ export function GymApplicationPage() {
                   )}
                 </div>
 
+                <div className="sticky top-0 z-10 -mx-4 px-4 py-2 bg-background/95 backdrop-blur border-b">
+                  <div className="flex flex-wrap items-center gap-4">
+                    <div className="grid gap-1">
+                      <span className="text-muted-foreground">Status</span>
+                      <Badge
+                        variant="outline"
+                        className="capitalize w-fit"
+                      >
+                        {owner.status}
+                      </Badge>
+                    </div>
+                    <div className="grid gap-1">
+                      <span className="text-muted-foreground">Onboarding</span>
+                      <Badge
+                        variant={
+                          owner.onboardingCompleted ? "default" : "secondary"
+                        }
+                      >
+                        {owner.onboardingCompleted ? "Completed" : "Pending"}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+
                 <Card>
                   <CardHeader>
                     <CardTitle>Gym</CardTitle>
@@ -312,31 +340,13 @@ export function GymApplicationPage() {
                         </p>
                       </div>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="grid gap-1">
-                        <span className="text-muted-foreground">Status</span>
-                        <Badge variant="outline" className="capitalize w-fit">
-                          {owner.status}
-                        </Badge>
-                      </div>
+                    <div className="grid grid-cols-1 gap-4">
                       <div className="grid gap-1">
                         <span className="text-muted-foreground">
                           Email verified
                         </span>
                         <Badge variant={owner.isEmailVerified ? "default" : "secondary"}>
                           {owner.isEmailVerified ? "Yes" : "No"}
-                        </Badge>
-                      </div>
-                      <div className="grid gap-1">
-                        <span className="text-muted-foreground">
-                          Onboarding
-                        </span>
-                        <Badge
-                          variant={
-                            owner.onboardingCompleted ? "default" : "secondary"
-                          }
-                        >
-                          {owner.onboardingCompleted ? "Completed" : "Pending"}
                         </Badge>
                       </div>
                     </div>
@@ -465,7 +475,7 @@ export function GymApplicationPage() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="grid gap-4 text-sm">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div className="grid gap-1">
                           <span className="text-muted-foreground">
                             RC number
@@ -486,6 +496,16 @@ export function GymApplicationPage() {
                         </div>
                         <div className="grid gap-1">
                           <span className="text-muted-foreground">
+                            Type of Government ID
+                          </span>
+                          <p className="font-medium">
+                            {getGovernmentIdTypeLabel(
+                              documents.governmentIdType,
+                            ) ?? "—"}
+                          </p>
+                        </div>
+                        <div className="grid gap-1">
+                          <span className="text-muted-foreground">
                             RC validation
                           </span>
                           <Badge
@@ -500,6 +520,59 @@ export function GymApplicationPage() {
                               ? "Verified"
                               : "Not verified"}
                           </Badge>
+
+                          <div className="mt-2 space-y-2">
+                            <div className="text-xs text-muted-foreground">
+                              Admin upload RC verification proof
+                            </div>
+                            <input
+                              type="file"
+                              accept="image/png,image/jpeg,image/jpg,image/webp"
+                              disabled={isUploadingRcProof}
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+
+                                try {
+                                  const url = await upload(
+                                    file,
+                                    "gym-rc-verification",
+                                  );
+                                  setRcProofUploadUrl(url);
+                                  showSuccess(
+                                    "Success",
+                                    "RC proof uploaded to Cloudinary.",
+                                  );
+                                } catch (err) {
+                                  const message =
+                                    err instanceof Error
+                                      ? err.message
+                                      : "Failed to upload RC proof.";
+                                  showError("Error", message);
+                                }
+                              }}
+                            />
+
+                            {(rcProofUploadUrl ||
+                              documents.rcValidation?.proofUrl) && (
+                              <a
+                                href={
+                                  rcProofUploadUrl ??
+                                  documents.rcValidation?.proofUrl ??
+                                  undefined
+                                }
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-xs text-primary underline block"
+                              >
+                                View uploaded proof
+                              </a>
+                            )}
+
+                            <p className="text-xs text-muted-foreground">
+                              TODO: backend persistence for the proof URL.
+                            </p>
+                          </div>
                         </div>
                       </div>
 

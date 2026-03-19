@@ -79,7 +79,7 @@ export function EditSubscriptionPlanDialog({
     defaultValues: {
       name: "",
       description: "",
-      price: 0,
+      price: "" as unknown as number,
       trialDays: null,
       isActive: true,
       isDefault: false,

@@ -93,9 +93,11 @@ export type GymRegistrationStatusRegistration = {
     rcNumber?: string | null;
     companyRegNo?: string | null;
     addressProof?: string | null;
+    governmentIdType?: string | null;
     governmentId?: string | null;
     rcValidation?: {
       verified?: boolean;
+      proofUrl?: string | null;
     } | null;
     addressProofDate?: string | null;
     additionalDocuments?: string[] | null;
