@@ -1,0 +1,48 @@
+import type { PlatformLeaderboard } from "../types";
+
+export const DEMO_LEADERBOARDS: PlatformLeaderboard[] = [
+  {
+    id: "lb1",
+    name: "Monthly points",
+    description: "Total loyalty points earned this month.",
+    scope: "platform",
+    metric: "points",
+    period: "monthly",
+    status: "live",
+    participantCount: 1284,
+    updatedAt: "2026-03-27T08:00:00.000Z",
+  },
+  {
+    id: "lb2",
+    name: "Weekly check-ins",
+    description: "Most gym check-ins per location.",
+    scope: "gym",
+    metric: "visits",
+    period: "weekly",
+    status: "live",
+    participantCount: 412,
+    updatedAt: "2026-03-28T06:00:00.000Z",
+  },
+  {
+    id: "lb3",
+    name: "Class streak",
+    description: "Consecutive classes attended.",
+    scope: "platform",
+    metric: "classes",
+    period: "all_time",
+    status: "draft",
+    participantCount: 0,
+    updatedAt: "2026-03-20T12:00:00.000Z",
+  },
+  {
+    id: "lb4",
+    name: "Q1 challenge",
+    description: "Archived seasonal board.",
+    scope: "platform",
+    metric: "points",
+    period: "monthly",
+    status: "archived",
+    participantCount: 890,
+    updatedAt: "2026-03-01T00:00:00.000Z",
+  },
+];

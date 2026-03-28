@@ -1,7 +1,9 @@
 import {
+  IconBadges,
   IconBuildingStore,
   IconDashboard,
   IconMapPin,
+  IconPodium,
   IconShield,
   IconTrophy,
   IconUserCheck,
@@ -77,6 +79,18 @@ const data = {
       icon: IconTrophy,
     },
   ],
+  navTrailing: [
+    {
+      title: "Badges",
+      url: "/dashboard/badges",
+      icon: IconBadges,
+    },
+    {
+      title: "Leaderboards",
+      url: "/dashboard/leaderboards",
+      icon: IconPodium,
+    },
+  ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -102,6 +116,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain
           items={data.navMain}
           additionalMenuItems={<NavSubscriptionsGroup />}
+          trailingItems={data.navTrailing}
         />
       </SidebarContent>
       <SidebarFooter>

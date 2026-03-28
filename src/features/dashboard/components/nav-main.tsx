@@ -13,6 +13,7 @@ import {
 export function NavMain({
   items,
   additionalMenuItems,
+  trailingItems,
 }: {
   items: {
     title: string;
@@ -21,6 +22,12 @@ export function NavMain({
   }[];
   /** Sibling items inside the same `SidebarMenu` as flat links (e.g. grouped/collapsible nav). */
   additionalMenuItems?: React.ReactNode;
+  /** Flat links rendered after `additionalMenuItems` (e.g. Badges, Leaderboards). */
+  trailingItems?: {
+    title: string;
+    url: string;
+    icon?: Icon;
+  }[];
 }) {
   const location = useLocation();
 
@@ -70,6 +77,28 @@ export function NavMain({
             );
           })}
           {additionalMenuItems}
+          {trailingItems?.map((item) => {
+            const pathname = location.pathname;
+            const isActive =
+              pathname === item.url ||
+              (item.url !== "/dashboard" &&
+                pathname.startsWith(`${item.url}/`));
+
+            return (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton
+                  asChild
+                  tooltip={item.title}
+                  isActive={isActive}
+                >
+                  <Link to={item.url}>
+                    {item.icon && <item.icon />}
+                    <span>{item.title}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
