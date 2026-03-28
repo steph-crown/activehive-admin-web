@@ -23,7 +23,7 @@ export function SectionCardsSkeleton() {
       {cardKeys.map((cardKey) => (
         <Card
           key={cardKey}
-          className="@container/card p-0 gap-0 bg-white border border-[#f4f4f4] shadow-none"
+          className="@container/card !rounded-md gap-0 border border-[#F4F4F4] bg-white p-0 shadow-none"
         >
           <div className="flex flex-col gap-2 p-5">
             <div className="flex flex-col items-start gap-5">
@@ -51,7 +51,7 @@ export function SectionCardsSkeleton() {
 
 export function ChartAreaSkeleton() {
   return (
-    <Card className="@container/card">
+    <Card className="@container/card !rounded-md">
       <CardHeader>
         <CardTitle>
           <Skeleton className="h-6 w-44" />
@@ -107,7 +107,7 @@ export function DashboardTableSkeleton() {
 
   return (
     <div className="relative flex flex-col gap-4 overflow-auto">
-      <div className="overflow-hidden rounded-lg border">
+      <div className="overflow-hidden !rounded-md border border-[#F4F4F4]">
         <Table>
           <TableHeader className="bg-muted sticky top-0 z-10">
             <TableRow>
