@@ -32,9 +32,15 @@ import {
 } from "@/components/ui/select";
 import {
   dateInputToRangeIso,
+  isoToDateInput,
   slugifyName,
 } from "../lib/challenge-form-utils";
-import type { ChallengeType, CreateChallengePayload } from "../types";
+import type {
+  ChallengeStatus,
+  ChallengeType,
+  PlatformChallenge,
+  UpdateChallengePayload,
+} from "../types";
 
 const CHALLENGE_TYPES: ChallengeType[] = [
   "workout_streak",
@@ -43,7 +49,15 @@ const CHALLENGE_TYPES: ChallengeType[] = [
   "referral",
 ];
 
-const challengeSchema = yup.object({
+const CHALLENGE_STATUSES: ChallengeStatus[] = [
+  "draft",
+  "scheduled",
+  "active",
+  "completed",
+  "cancelled",
+];
+
+const editChallengeSchema = yup.object({
   name: yup.string().required("Name is required"),
   slug: yup
     .string()
@@ -57,6 +71,10 @@ const challengeSchema = yup.object({
     .mixed<ChallengeType>()
     .oneOf(CHALLENGE_TYPES)
     .required("Type is required"),
+  status: yup
+    .mixed<ChallengeStatus>()
+    .oneOf(CHALLENGE_STATUSES)
+    .required("Status is required"),
   startsAt: yup.string().required("Start date is required"),
   endsAt: yup
     .string()
@@ -77,48 +95,75 @@ const challengeSchema = yup.object({
     .min(0, "Reward cannot be negative"),
 });
 
-type FormValues = yup.InferType<typeof challengeSchema>;
+type FormValues = yup.InferType<typeof editChallengeSchema>;
 
-const defaultValues: FormValues = {
+const emptyEditValues: FormValues = {
   name: "",
   slug: "",
   description: "",
   type: "workout_streak",
+  status: "draft",
   startsAt: "",
   endsAt: "",
   rewardPoints: 0,
 };
 
-type CreateChallengeDialogProps = {
+type EditChallengeDialogProps = {
+  readonly challenge: PlatformChallenge | null;
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
-  readonly onCreate: (payload: CreateChallengePayload) => void;
+  readonly onSave: (payload: UpdateChallengePayload) => void;
 };
 
-export function CreateChallengeDialog({
+function toFormValues(c: PlatformChallenge): FormValues {
+  return {
+    name: c.name,
+    slug: c.slug,
+    description: c.description ?? "",
+    type: c.type,
+    status: c.status,
+    startsAt: isoToDateInput(c.startsAt),
+    endsAt: isoToDateInput(c.endsAt),
+    rewardPoints: c.rewardPoints,
+  };
+}
+
+const statusLabel: Record<ChallengeStatus, string> = {
+  draft: "Draft",
+  scheduled: "Scheduled",
+  active: "Active",
+  completed: "Completed",
+  cancelled: "Cancelled",
+};
+
+export function EditChallengeDialog({
+  challenge,
   open,
   onOpenChange,
-  onCreate,
-}: CreateChallengeDialogProps) {
+  onSave,
+}: EditChallengeDialogProps) {
   const form = useForm<FormValues>({
-    resolver: yupResolver(challengeSchema) as any,
-    defaultValues,
+    resolver: yupResolver(editChallengeSchema) as any,
+    defaultValues: emptyEditValues,
   });
 
   useEffect(() => {
-    if (open) {
-      form.reset(defaultValues);
+    if (open && challenge) {
+      form.reset(toFormValues(challenge));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset when dialog opens only
-  }, [open]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset when dialog opens or row changes
+  }, [open, challenge?.id]);
 
   const onSubmit = (values: FormValues) => {
+    if (!challenge) return;
     const range = dateInputToRangeIso(values.startsAt, values.endsAt);
-    onCreate({
+    onSave({
+      id: challenge.id,
       name: values.name,
       slug: values.slug,
       description: values.description?.trim() ? values.description : null,
       type: values.type,
+      status: values.status,
       startsAt: range.startsAt,
       endsAt: range.endsAt,
       rewardPoints: values.rewardPoints,
@@ -131,10 +176,10 @@ export function CreateChallengeDialog({
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="font-heading text-2xl tracking-wide uppercase">
-            Create challenge
+            Edit challenge
           </DialogTitle>
           <DialogDescription>
-            Schedule a timed challenge with a reward for members and gyms.
+            Update schedule, reward, and visibility for this challenge.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -187,7 +232,7 @@ export function CreateChallengeDialog({
                 control={form.control}
                 name="type"
                 render={({ field }) => (
-                  <FormItem className="min-w-0 sm:col-span-2">
+                  <FormItem className="min-w-0">
                     <FormLabel>Type</FormLabel>
                     <FormControl>
                       <Select
@@ -206,6 +251,35 @@ export function CreateChallengeDialog({
                           <SelectItem value="check_in">Check-in</SelectItem>
                           <SelectItem value="steps">Steps</SelectItem>
                           <SelectItem value="referral">Referral</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem className="min-w-0">
+                    <FormLabel>Status</FormLabel>
+                    <FormControl>
+                      <Select
+                        value={field.value}
+                        onValueChange={(v) =>
+                          field.onChange(v as ChallengeStatus)
+                        }
+                      >
+                        <SelectTrigger className="h-10 w-full min-w-0">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CHALLENGE_STATUSES.map((s) => (
+                            <SelectItem key={s} value={s}>
+                              {statusLabel[s]}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </FormControl>
@@ -291,7 +365,7 @@ export function CreateChallengeDialog({
               >
                 Cancel
               </Button>
-              <Button type="submit">Create challenge</Button>
+              <Button type="submit">Save changes</Button>
             </DialogFooter>
           </form>
         </Form>

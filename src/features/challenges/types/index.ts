@@ -34,3 +34,8 @@ export type CreateChallengePayload = {
   endsAt: string;
   rewardPoints: number;
 };
+
+export type UpdateChallengePayload = CreateChallengePayload & {
+  id: string;
+  status: ChallengeStatus;
+};

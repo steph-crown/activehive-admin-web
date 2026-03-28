@@ -12,9 +12,15 @@ import { useToast } from "@/hooks/use-toast";
 import { rowMatchesDateField, rowMatchesSearch } from "@/lib/table-filters";
 import { IconPlus } from "@tabler/icons-react";
 import { DEMO_CHALLENGES } from "../data/demo-challenges";
-import type { CreateChallengePayload, PlatformChallenge } from "../types";
+import type {
+  CreateChallengePayload,
+  PlatformChallenge,
+  UpdateChallengePayload,
+} from "../types";
 import { ChallengesTable } from "./challenges-table";
+import { ConfirmDeleteChallengeDialog } from "./confirm-delete-challenge-dialog";
 import { CreateChallengeDialog } from "./create-challenge-dialog";
+import { EditChallengeDialog } from "./edit-challenge-dialog";
 
 const TYPE_FILTER_OPTIONS = [
   { value: "all", label: "All types" },
@@ -39,6 +45,11 @@ export function ChallengesPage() {
     ...DEMO_CHALLENGES,
   ]);
   const [createOpen, setCreateOpen] = useState(false);
+  const [editChallenge, setEditChallenge] = useState<PlatformChallenge | null>(
+    null,
+  );
+  const [deleteChallenge, setDeleteChallenge] =
+    useState<PlatformChallenge | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
@@ -77,6 +88,35 @@ export function ChallengesPage() {
     );
   };
 
+  const handleEditSave = (payload: UpdateChallengePayload) => {
+    setChallenges((prev) =>
+      prev.map((c) =>
+        c.id === payload.id
+          ? {
+              ...c,
+              name: payload.name,
+              slug: payload.slug,
+              description: payload.description,
+              type: payload.type,
+              status: payload.status,
+              startsAt: payload.startsAt,
+              endsAt: payload.endsAt,
+              rewardPoints: payload.rewardPoints,
+            }
+          : c,
+      ),
+    );
+    showSuccess("Challenge updated", `${payload.name} was saved.`);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (!deleteChallenge) return;
+    const { id, name } = deleteChallenge;
+    setChallenges((prev) => prev.filter((c) => c.id !== id));
+    showSuccess("Challenge deleted", `${name} was removed.`);
+    setDeleteChallenge(null);
+  };
+
   return (
     <SidebarProvider>
       <AppSidebar variant="inset" />
@@ -103,6 +143,22 @@ export function ChallengesPage() {
                   open={createOpen}
                   onOpenChange={setCreateOpen}
                   onCreate={handleCreate}
+                />
+                <EditChallengeDialog
+                  challenge={editChallenge}
+                  open={editChallenge != null}
+                  onOpenChange={(open) => {
+                    if (!open) setEditChallenge(null);
+                  }}
+                  onSave={handleEditSave}
+                />
+                <ConfirmDeleteChallengeDialog
+                  challenge={deleteChallenge}
+                  open={deleteChallenge != null}
+                  onOpenChange={(open) => {
+                    if (!open) setDeleteChallenge(null);
+                  }}
+                  onConfirm={handleDeleteConfirm}
                 />
 
                 <TableFilterBar
@@ -132,7 +188,11 @@ export function ChallengesPage() {
                 />
 
                 <div className="mt-4">
-                  <ChallengesTable data={filtered} />
+                  <ChallengesTable
+                    data={filtered}
+                    onEditChallenge={(c) => setEditChallenge(c)}
+                    onDeleteChallenge={(c) => setDeleteChallenge(c)}
+                  />
                 </div>
               </div>
             </div>
