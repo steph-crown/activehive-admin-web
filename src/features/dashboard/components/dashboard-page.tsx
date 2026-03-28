@@ -6,9 +6,8 @@ import { SiteHeader } from "./site-header";
 import { SectionCards } from "./section-cards";
 import { RevenueChart } from "./revenue-chart";
 import { MembersChart } from "./members-chart";
-import { dashboardColumns } from "./dashboard-columns";
+import { recentActivitiesColumns } from "./recent-activities-columns";
 import { useDashboardDocumentsQuery } from "../services";
-import type { DashboardDocument } from "../types";
 import {
   ChartsSkeleton,
   DashboardTableSkeleton,
@@ -16,40 +15,10 @@ import {
 } from "./dashboard-skeleton";
 import { useMemo, useState } from "react";
 
-const dummyDashboardTableData: DashboardDocument[] = [
-  {
-    id: 1,
-    header: "Membership renewals",
-    type: "Compliance",
-    status: "Done",
-    target: "85",
-    limit: "95",
-    reviewer: "Eddie Lake",
-  },
-  {
-    id: 2,
-    header: "Trainer onboarding docs",
-    type: "Audit",
-    status: "In Process",
-    target: "70",
-    limit: "90",
-    reviewer: "Assign reviewer",
-  },
-  {
-    id: 3,
-    header: "Monthly attendance logs",
-    type: "Operations",
-    status: "Done",
-    target: "92",
-    limit: "98",
-    reviewer: "Jamik Tashpulatov",
-  },
-];
-
 export function DashboardPage() {
-  const { isLoading } = useDashboardDocumentsQuery();
+  const { data, isLoading } = useDashboardDocumentsQuery();
   const [searchQuery, setSearchQuery] = useState("");
-  const tableData = useMemo(() => dummyDashboardTableData, []);
+  const tableData = useMemo(() => data ?? [], [data]);
 
   return (
     <SidebarProvider>
@@ -79,27 +48,32 @@ export function DashboardPage() {
                     </div>
                   </div>
                   <div className="px-4 lg:px-6">
-                    <div className="flex flex-col gap-6 !rounded-md border border-[#F4F4F4] bg-white p-8">
-                      <div className="flex items-center justify-between gap-4">
-                        <h2 className="text-grey-900 text-lg font-semibold">
-                          Members
-                        </h2>
-                        <Input
-                          type="text"
-                          placeholder="Search by header, reviewer..."
-                          className="h-10 w-full max-w-[280px]"
-                          value={searchQuery}
-                          onChange={(event) => setSearchQuery(event.target.value)}
+                    <div className="w-full">
+                      <div className="flex flex-col gap-6 !rounded-md border border-[#F4F4F4] bg-white p-8">
+                        <div className="flex items-center justify-between gap-4">
+                          <h2 className="text-grey-900 text-lg font-semibold">
+                            Recent activities
+                          </h2>
+                          <Input
+                            type="text"
+                            placeholder="Search activities..."
+                            className="h-10 w-full max-w-[280px]"
+                            value={searchQuery}
+                            onChange={(event) =>
+                              setSearchQuery(event.target.value)
+                            }
+                          />
+                        </div>
+                        <DataTable
+                          data={tableData}
+                          columns={recentActivitiesColumns}
+                          searchQuery={searchQuery}
+                          enableDrag={false}
+                          enableSelection={false}
+                          getRowId={(row) => row.id.toString()}
+                          emptyMessage="No recent activities."
                         />
                       </div>
-                      <DataTable
-                        data={tableData}
-                        columns={dashboardColumns}
-                        searchQuery={searchQuery}
-                        enableDrag={false}
-                        enableSelection={false}
-                        getRowId={(row) => row.id.toString()}
-                      />
                     </div>
                   </div>
                 </>

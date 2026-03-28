@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { dashboardApi } from "./api";
-import type { DashboardDocument } from "../types";
+import type { RecentActivity } from "../types";
 
 export const dashboardQueryKeys = {
   all: ["dashboard"] as const,
@@ -8,7 +8,7 @@ export const dashboardQueryKeys = {
 };
 
 export const useDashboardDocumentsQuery = () =>
-  useQuery<DashboardDocument[]>({
+  useQuery<RecentActivity[]>({
     queryKey: dashboardQueryKeys.documents(),
-    queryFn: () => dashboardApi.getDocuments(),
+    queryFn: () => dashboardApi.getRecentActivities(),
   });

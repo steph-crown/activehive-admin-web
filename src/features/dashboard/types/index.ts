@@ -1,9 +1,9 @@
-export type DashboardDocument = {
+export type RecentActivity = {
   id: number;
-  header: string;
-  type: string;
-  status: string;
+  action: string;
   target: string;
-  limit: string;
-  reviewer: string;
+  admin: string;
+  /** ISO 8601 timestamp */
+  when: string;
+  status: string;
 };

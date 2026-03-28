@@ -19,10 +19,12 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
+  IconChevronDown,
   IconChevronLeft,
   IconChevronRight,
   IconChevronsLeft,
   IconChevronsRight,
+  IconChevronUp,
   IconGripVertical,
   IconLayoutColumns,
 } from "@tabler/icons-react";
@@ -76,6 +78,7 @@ type DataTableProps<TData> = {
   renderToolbar?: () => React.ReactNode;
   isLoading?: boolean;
   searchQuery?: string;
+  emptyMessage?: string;
 };
 
 // Create a separate component for the drag handle
@@ -118,7 +121,7 @@ function DraggableRow<TData>({
     return (
       <TableRow data-state={row.getIsSelected() && "selected"}>
         {row.getVisibleCells().map((cell) => (
-          <TableCell key={cell.id}>
+          <TableCell key={cell.id} className="px-4 py-4">
             {flexRender(cell.column.columnDef.cell, cell.getContext())}
           </TableCell>
         ))}
@@ -138,7 +141,7 @@ function DraggableRow<TData>({
       }}
     >
       {row.getVisibleCells().map((cell) => (
-        <TableCell key={cell.id}>
+        <TableCell key={cell.id} className="px-4 py-4">
           {flexRender(cell.column.columnDef.cell, cell.getContext())}
         </TableCell>
       ))}
@@ -155,6 +158,7 @@ export function DataTable<TData extends { id: string | number }>({
   renderToolbar,
   isLoading = false,
   searchQuery,
+  emptyMessage = "No results.",
 }: DataTableProps<TData>) {
   const [data, setData] = React.useState(() => initialData);
   const [rowSelection, setRowSelection] = React.useState({});
@@ -368,7 +372,7 @@ export function DataTable<TData extends { id: string | number }>({
                       colSpan={finalColumns.length}
                       className="h-24 text-center"
                     >
-                      No results.
+                      {emptyMessage}
                     </TableCell>
                   </TableRow>
                 )}
@@ -387,12 +391,31 @@ export function DataTable<TData extends { id: string | number }>({
                         colSpan={header.colSpan}
                         className="h-11 bg-white px-4 text-xs"
                       >
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
+                        {header.isPlaceholder ? null : (
+                          <div
+                            className={
+                              header.column.getCanSort()
+                                ? "flex cursor-pointer select-none items-center gap-2"
+                                : ""
+                            }
+                            onClick={header.column.getToggleSortingHandler()}
+                          >
+                            {flexRender(
                               header.column.columnDef.header,
                               header.getContext(),
                             )}
+                            {header.column.getCanSort() && (
+                              <span className="ml-2">
+                                {{
+                                  asc: <IconChevronUp className="h-4 w-4" />,
+                                  desc: <IconChevronDown className="h-4 w-4" />,
+                                }[header.column.getIsSorted() as string] ?? (
+                                  <IconChevronDown className="h-4 w-4 opacity-50" />
+                                )}
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </TableHead>
                     );
                   })}
@@ -430,7 +453,7 @@ export function DataTable<TData extends { id: string | number }>({
                     colSpan={finalColumns.length}
                     className="h-24 text-center"
                   >
-                    No results.
+                    {emptyMessage}
                   </TableCell>
                 </TableRow>
               )}
@@ -439,7 +462,19 @@ export function DataTable<TData extends { id: string | number }>({
         )}
       </div>
       <div className="flex items-center justify-end px-1 py-2">
-        <div className="flex items-center gap-8">
+        <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
+          {enableSelection ? (
+            <>
+              {table.getFilteredSelectedRowModel().rows.length} of{" "}
+              {table.getFilteredRowModel().rows.length} row(s) selected.
+            </>
+          ) : (
+            <>
+              {table.getFilteredRowModel().rows.length} item(s) total.
+            </>
+          )}
+        </div>
+        <div className="flex w-full items-center gap-8 lg:w-fit">
           <div className="hidden items-center gap-2 lg:flex">
             <Label htmlFor="rows-per-page" className="text-sm font-medium">
               Rows per page

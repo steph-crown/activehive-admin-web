@@ -1,15 +1,15 @@
 import { apiClient } from "@/lib/api-client";
-import type { DashboardDocument } from "../types";
+import type { RecentActivity } from "../types";
 import mockData from "./data.json";
 
-const basePath = "/dashboard/documents";
+const basePath = "/dashboard/recent-activities";
 
 export const dashboardApi = {
-  getDocuments: async (): Promise<DashboardDocument[]> => {
+  getRecentActivities: async (): Promise<RecentActivity[]> => {
     try {
-      return await apiClient.get<DashboardDocument[]>(basePath);
+      return await apiClient.get<RecentActivity[]>(basePath);
     } catch {
-      return mockData;
+      return mockData as RecentActivity[];
     }
   },
 };

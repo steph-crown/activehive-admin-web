@@ -101,8 +101,13 @@ export function ChartsSkeleton() {
 }
 
 export function DashboardTableSkeleton() {
-  // Admin dashboard columns are fixed in this app.
-  const headerKeys = ["col-0", "col-1", "col-2", "col-3", "col-4", "col-5", "col-6", "col-7", "col-8"] as const;
+  const headerKeys = [
+    "col-0",
+    "col-1",
+    "col-2",
+    "col-3",
+    "col-4",
+  ] as const;
   const rowKeys = ["row-0", "row-1", "row-2", "row-3", "row-4", "row-5"] as const;
 
   return (
