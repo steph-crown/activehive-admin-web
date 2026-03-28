@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Link } from "react-router-dom";
 import {
   IconBarbellFilled,
   IconHomeFilled,
@@ -21,6 +22,7 @@ type MetricCardTheme = {
   valueColorVar: string;
   hoverShadowClass: string;
   cssVars: React.CSSProperties;
+  href: string;
 };
 
 function mergeCssVars(vars: Record<string, string>) {
@@ -52,6 +54,7 @@ export function SectionCards() {
         "--primary-50": "#ffefe6",
         "--primary-500": "#ff5b04",
       }),
+      href: "/dashboard/gyms",
     },
     {
       title: "Total Members",
@@ -70,6 +73,7 @@ export function SectionCards() {
         "--purple-50": "#f2eeff",
         "--purple-500": "#7e52ff",
       }),
+      href: "/dashboard/members",
     },
     {
       title: "Total Trainers",
@@ -87,6 +91,7 @@ export function SectionCards() {
         "--blue-50": "#ececff",
         "--blue-500": "#4342ff",
       }),
+      href: "/dashboard/trainers",
     },
     {
       title: "Active Challenges",
@@ -104,6 +109,7 @@ export function SectionCards() {
         "--error-50": "#fbeaea",
         "--error-500": "#d32f2f",
       }),
+      href: "/dashboard/challenges",
     },
   ];
 
@@ -117,11 +123,15 @@ export function SectionCards() {
           : "var(--error-400)";
 
         return (
-          <Card
+          <Link
             key={card.title}
-            className={`@container/card !rounded-md gap-0 border border-[#F4F4F4] bg-white p-0 shadow-none transition-shadow ${card.hoverShadowClass}`}
-            style={card.cssVars}
+            to={card.href}
+            className="block rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
+            <Card
+              className={`@container/card !rounded-md gap-0 border border-[#F4F4F4] bg-white p-0 shadow-none transition-shadow ${card.hoverShadowClass}`}
+              style={card.cssVars}
+            >
             <div className="flex flex-col gap-2 p-5">
               <div className="flex flex-col items-start gap-5">
                 <div
@@ -139,7 +149,10 @@ export function SectionCards() {
               </div>
 
               <div className="flex items-center justify-between gap-2">
-                <div className="text-2xl leading-none font-bold">
+                <div
+                  className="text-2xl leading-none font-bold"
+                  style={{ color: card.valueColorVar }}
+                >
                   {card.value}
                 </div>
 
@@ -159,7 +172,8 @@ export function SectionCards() {
                 </div>
               </div>
             </div>
-          </Card>
+            </Card>
+          </Link>
         );
       })}
     </div>

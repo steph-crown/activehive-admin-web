@@ -513,7 +513,7 @@ export function DataTable<TData extends { id: string | number }>({
               </>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="ml-auto flex items-center gap-2 lg:ml-0">
             {isLoading ? (
               <>
                 <Skeleton className="hidden h-9 w-9 rounded-md lg:flex" />

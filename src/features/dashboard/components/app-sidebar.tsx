@@ -4,6 +4,7 @@ import {
   IconDashboard,
   IconMapPin,
   IconShield,
+  IconTrophy,
   IconUser,
   IconUserCheck,
   IconUserStar,
@@ -74,6 +75,11 @@ const data = {
       title: "Subscriptions",
       url: "/dashboard/subscriptions",
       icon: IconCreditCard,
+    },
+    {
+      title: "Challenges",
+      url: "/dashboard/challenges",
+      icon: IconTrophy,
     },
   ],
 };
