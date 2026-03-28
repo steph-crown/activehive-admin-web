@@ -20,6 +20,9 @@ const Staff = lazy(() => import("@/app/dashboard/staff/page"));
 const Members = lazy(() => import("@/app/dashboard/members/page"));
 const Trainers = lazy(() => import("@/app/dashboard/trainers/page"));
 const Subscriptions = lazy(() => import("@/app/dashboard/subscriptions/page"));
+const SubscriptionPlans = lazy(
+  () => import("@/app/dashboard/subscriptions/plans/page"),
+);
 const Challenges = lazy(() => import("@/app/dashboard/challenges/page"));
 const SubscriptionDetail = lazy(() => import("@/app/dashboard/subscriptions/detail/page"));
 const SubscriptionPlanDetail = lazy(
@@ -49,13 +52,17 @@ function App() {
           <Route path="/dashboard/staff" element={<Staff />} />
           <Route path="/dashboard/members" element={<Members />} />
           <Route path="/dashboard/trainers" element={<Trainers />} />
-          <Route path="/dashboard/subscriptions" element={<Subscriptions />} />
-          <Route path="/dashboard/challenges" element={<Challenges />} />
-          <Route path="/dashboard/subscriptions/:id" element={<SubscriptionDetail />} />
           <Route
             path="/dashboard/subscriptions/plans/:id"
             element={<SubscriptionPlanDetail />}
           />
+          <Route
+            path="/dashboard/subscriptions/plans"
+            element={<SubscriptionPlans />}
+          />
+          <Route path="/dashboard/subscriptions/:id" element={<SubscriptionDetail />} />
+          <Route path="/dashboard/subscriptions" element={<Subscriptions />} />
+          <Route path="/dashboard/challenges" element={<Challenges />} />
         </Routes>
       </Suspense>
     </Router>

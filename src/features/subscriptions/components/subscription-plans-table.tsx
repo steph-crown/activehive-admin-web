@@ -17,14 +17,30 @@ import type { SubscriptionPlan } from "../types";
 type SubscriptionPlansColumnCallbacks = {
   onEditPlan?: (plan: SubscriptionPlan) => void;
   onDeletePlan?: (plan: SubscriptionPlan) => void;
+  /** @default true */
+  showPopularColumn?: boolean;
 };
 
 const makeSubscriptionPlansColumns = (
   callbacks: SubscriptionPlansColumnCallbacks,
 ): ColumnDef<SubscriptionPlan>[] => {
-  const { onEditPlan, onDeletePlan } = callbacks;
+  const {
+    onEditPlan,
+    onDeletePlan,
+    showPopularColumn = true,
+  } = callbacks;
 
-  return [
+  const popularColumn: ColumnDef<SubscriptionPlan> = {
+    accessorKey: "isPopular",
+    header: "Popular",
+    cell: ({ row }) => (
+      <Badge variant={row.original.isPopular ? "default" : "secondary"}>
+        {row.original.isPopular ? "Yes" : "No"}
+      </Badge>
+    ),
+  };
+
+  const columns: ColumnDef<SubscriptionPlan>[] = [
   {
     accessorKey: "name",
     header: "Name",
@@ -88,15 +104,6 @@ const makeSubscriptionPlansColumns = (
     ),
   },
   {
-    accessorKey: "isPopular",
-    header: "Popular",
-    cell: ({ row }) => (
-      <Badge variant={row.original.isPopular ? "default" : "secondary"}>
-        {row.original.isPopular ? "Yes" : "No"}
-      </Badge>
-    ),
-  },
-  {
     id: "actions",
     cell: ({ row }) => {
       const plan = row.original;
@@ -140,19 +147,28 @@ const makeSubscriptionPlansColumns = (
       );
     },
   },
-];
+  ];
+
+  if (showPopularColumn) {
+    const actionsIndex = columns.findIndex((c) => c.id === "actions");
+    columns.splice(actionsIndex, 0, popularColumn);
+  }
+
+  return columns;
 };
 
 type SubscriptionPlansTableProps = {
   readonly data: SubscriptionPlan[];
   readonly onEditPlan?: (plan: SubscriptionPlan) => void;
   readonly onDeletePlan?: (plan: SubscriptionPlan) => void;
+  readonly showPopularColumn?: boolean;
 };
 
 export function SubscriptionPlansTable({
   data,
   onEditPlan,
   onDeletePlan,
+  showPopularColumn = true,
 }: SubscriptionPlansTableProps) {
   return (
     <DataTable
@@ -160,6 +176,7 @@ export function SubscriptionPlansTable({
       columns={makeSubscriptionPlansColumns({
         onEditPlan,
         onDeletePlan,
+        showPopularColumn,
       })}
       enableDrag={false}
       enableSelection={false}

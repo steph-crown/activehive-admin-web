@@ -13,6 +13,7 @@ export function getDefaultSiteHeaderTitle(pathname: string): string {
     "/dashboard/members": "Members",
     "/dashboard/trainers": "Trainers",
     "/dashboard/subscriptions": "Subscriptions",
+    "/dashboard/subscriptions/plans": "Subscription plans",
     "/dashboard/challenges": "Challenges",
     "/profile": "Profile",
   };

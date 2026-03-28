@@ -1,6 +1,5 @@
 import {
   IconBuildingStore,
-  IconCreditCard,
   IconDashboard,
   IconMapPin,
   IconShield,
@@ -21,6 +20,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { NavMain } from "./nav-main";
+import { NavSubscriptionsGroup } from "./nav-subscriptions-group";
 import { NavUser } from "./nav-user";
 
 const data = {
@@ -76,11 +76,6 @@ const data = {
       url: "/dashboard/challenges",
       icon: IconTrophy,
     },
-    {
-      title: "Subscriptions",
-      url: "/dashboard/subscriptions",
-      icon: IconCreditCard,
-    },
   ],
 };
 
@@ -105,6 +100,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
+        <NavSubscriptionsGroup />
       </SidebarContent>
       <SidebarFooter>
         <NavUser />
