@@ -19,14 +19,22 @@ import { DataTable } from "@/components/data-table/data-table";
 import { cn, formatDate } from "@/lib/utils";
 import type { GymListRow } from "../lib/gym-list-display";
 
+function gymShowsApplicationActions(gym: GymListRow): boolean {
+  return gym.approvalStatus === "pending" || gym.approvalStatus == null;
+}
+
 type GymsTableCallbacks = {
   onActivateGym?: (gym: GymListRow) => void;
   onDeactivateGym?: (gym: GymListRow) => void;
+  onApproveApplication?: (gym: GymListRow) => void;
+  onRejectApplication?: (gym: GymListRow) => void;
 };
 
 function makeGymsColumns({
   onActivateGym,
   onDeactivateGym,
+  onApproveApplication,
+  onRejectApplication,
 }: GymsTableCallbacks): ColumnDef<GymListRow>[] {
   return [
     {
@@ -161,6 +169,10 @@ function makeGymsColumns({
         const gym = row.original;
         const isActive = gym.isActive;
         const canToggleStatus = gym.approvalStatus === "approved";
+        const showAppActions =
+          gymShowsApplicationActions(gym) &&
+          onApproveApplication &&
+          onRejectApplication;
 
         return (
           <DropdownMenu>
@@ -174,15 +186,25 @@ function makeGymsColumns({
                 <span className="sr-only">Open menu</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem asChild>
                 <Link to={`/dashboard/gyms/${gym.id}`}>View Details</Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to={`/dashboard/gyms/${gym.id}/application`}>
-                  Review application
-                </Link>
-              </DropdownMenuItem>
+              {showAppActions && (
+                <>
+                  <DropdownMenuItem
+                    onClick={() => onApproveApplication(gym)}
+                  >
+                    Approve application
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="text-destructive focus:text-destructive"
+                    onClick={() => onRejectApplication(gym)}
+                  >
+                    Reject application
+                  </DropdownMenuItem>
+                </>
+              )}
               {canToggleStatus && isActive && onDeactivateGym && (
                 <DropdownMenuItem onClick={() => onDeactivateGym(gym)}>
                   Deactivate
@@ -205,17 +227,26 @@ type GymsTableProps = {
   data: GymListRow[];
   onActivateGym?: (gym: GymListRow) => void;
   onDeactivateGym?: (gym: GymListRow) => void;
+  onApproveApplication?: (gym: GymListRow) => void;
+  onRejectApplication?: (gym: GymListRow) => void;
 };
 
 export function GymsTable({
   data,
   onActivateGym,
   onDeactivateGym,
+  onApproveApplication,
+  onRejectApplication,
 }: GymsTableProps) {
   return (
     <DataTable
       data={data}
-      columns={makeGymsColumns({ onActivateGym, onDeactivateGym })}
+      columns={makeGymsColumns({
+        onActivateGym,
+        onDeactivateGym,
+        onApproveApplication,
+        onRejectApplication,
+      })}
       enableDrag={false}
       enableSelection={false}
       getRowId={(row) => row.id}

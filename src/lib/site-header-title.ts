@@ -19,9 +19,6 @@ export function getDefaultSiteHeaderTitle(pathname: string): string {
 
   if (exact[p]) return exact[p];
 
-  if (/^\/dashboard\/gyms\/[^/]+\/application$/.test(p)) {
-    return "Application review";
-  }
   if (/^\/dashboard\/gyms\/[^/]+$/.test(p)) {
     return "Gym";
   }

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { TableCardSkeleton } from "@/components/loader/page-skeleton";
 import { SectionCardsSkeleton } from "@/features/dashboard/components/dashboard-skeleton";
@@ -12,7 +13,7 @@ import {
   rowMatchesDateField,
   rowMatchesSearch,
 } from "@/lib/table-filters";
-import { useGymsQuery } from "../services";
+import { gymsQueryKeys, useGymsQuery } from "../services";
 import type { Gym } from "../types";
 import {
   GYM_PLAN_FILTER_OPTIONS,
@@ -21,6 +22,7 @@ import {
 } from "../lib/gym-list-display";
 import { GymsTable } from "./gyms-table";
 import { ConfirmGymStatusDialog } from "./confirm-gym-status-dialog";
+import { GymApplicationFinalizeDialog } from "./gym-application-finalize-dialog";
 import { GymsSummaryCards } from "./gyms-summary-cards";
 
 type GymActionType = "activate" | "deactivate";
@@ -40,9 +42,14 @@ const ACTIVE_OPTIONS = [
 ];
 
 export function GymsPage() {
+  const queryClient = useQueryClient();
   const [statusAction, setStatusAction] = useState<{
     gym: Gym;
     type: GymActionType;
+  } | null>(null);
+  const [finalizeApp, setFinalizeApp] = useState<{
+    gym: GymListRow;
+    mode: "approve" | "reject";
   } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [dateFilter, setDateFilter] = useState("");
@@ -125,6 +132,21 @@ export function GymsPage() {
                   }}
                 />
 
+                <GymApplicationFinalizeDialog
+                  gymId={finalizeApp?.gym.id ?? null}
+                  gymName={finalizeApp?.gym.name ?? ""}
+                  mode={finalizeApp?.mode ?? null}
+                  open={finalizeApp != null}
+                  onOpenChange={(open) => {
+                    if (!open) setFinalizeApp(null);
+                  }}
+                  onFinalized={() => {
+                    void queryClient.invalidateQueries({
+                      queryKey: gymsQueryKeys.list(),
+                    });
+                  }}
+                />
+
                 {isLoading ? (
                   <>
                     <SectionCardsSkeleton />
@@ -181,6 +203,12 @@ export function GymsPage() {
                       }
                       onDeactivateGym={(gym: GymListRow) =>
                         setStatusAction({ gym, type: "deactivate" })
+                      }
+                      onApproveApplication={(gym: GymListRow) =>
+                        setFinalizeApp({ gym, mode: "approve" })
+                      }
+                      onRejectApplication={(gym: GymListRow) =>
+                        setFinalizeApp({ gym, mode: "reject" })
                       }
                     />
                   </>
