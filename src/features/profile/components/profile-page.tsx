@@ -10,7 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { BlockLoader } from "@/components/loader/block-loader";
+import { ProfilePageSkeleton } from "@/components/loader/page-skeleton";
 import { AppSidebar } from "@/features/dashboard/components/app-sidebar";
 import { SiteHeader } from "@/features/dashboard/components/site-header";
 import { formatDate } from "@/lib/utils";
@@ -42,8 +42,14 @@ export function ProfilePage() {
         <AppSidebar variant="inset" />
         <SidebarInset>
           <SiteHeader />
-          <div className="flex flex-1 items-center justify-center py-10">
-            <BlockLoader />
+          <div className="flex flex-1 flex-col">
+            <div className="@container/main flex flex-1 flex-col gap-2">
+              <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+                <div className="px-4 lg:px-6 space-y-6">
+                  <ProfilePageSkeleton />
+                </div>
+              </div>
+            </div>
           </div>
         </SidebarInset>
       </SidebarProvider>

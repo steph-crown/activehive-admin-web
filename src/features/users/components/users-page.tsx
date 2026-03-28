@@ -1,5 +1,5 @@
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { BlockLoader } from "@/components/loader/block-loader";
+import { TableCardSkeleton } from "@/components/loader/page-skeleton";
 import { AppSidebar } from "@/features/dashboard/components/app-sidebar";
 import { SiteHeader } from "@/features/dashboard/components/site-header";
 import { useUsersQuery } from "../services";
@@ -34,9 +34,7 @@ export function UsersPage() {
                 <h1 className="text-2xl font-bold mb-4">Users</h1>
 
                 {isLoading ? (
-                  <div className="flex items-center justify-center py-10">
-                    <BlockLoader />
-                  </div>
+                  <TableCardSkeleton rows={8} columns={6} />
                 ) : error ? (
                   <div className="text-destructive">
                     Error loading users. Check console for details.

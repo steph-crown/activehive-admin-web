@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { BlockLoader } from "@/components/loader/block-loader";
+import { TableCardSkeleton } from "@/components/loader/page-skeleton";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AppSidebar } from "@/features/dashboard/components/app-sidebar";
@@ -124,9 +124,7 @@ export function SubscriptionsPage() {
 
                   <TabsContent value="subscriptions" className="mt-4">
                     {isLoading ? (
-                      <div className="flex items-center justify-center py-10">
-                        <BlockLoader />
-                      </div>
+                      <TableCardSkeleton rows={7} columns={5} />
                     ) : error ? (
                       <div className="text-destructive">
                         Error loading subscriptions. Check console for details.
@@ -140,9 +138,7 @@ export function SubscriptionsPage() {
 
                   <TabsContent value="plans" className="mt-4">
                     {plansLoading ? (
-                      <div className="flex items-center justify-center py-10">
-                        <BlockLoader />
-                      </div>
+                      <TableCardSkeleton rows={7} columns={5} />
                     ) : plansError ? (
                       <div className="text-destructive">
                         Error loading subscription plans. Check console for

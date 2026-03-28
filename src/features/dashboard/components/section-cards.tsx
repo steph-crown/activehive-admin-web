@@ -64,11 +64,7 @@ function GymsIconPrimary(props: Readonly<React.SVGProps<SVGSVGElement>>) {
         d="M0 10C0 4.47715 4.47715 0 10 0H38C43.5229 0 48 4.47715 48 10V38C48 43.5228 43.5228 48 38 48H10C4.47715 48 0 43.5228 0 38V10Z"
         fill="var(--primary-50)"
       />
-      <path
-        d="M36 12V36H12V12H36Z"
-        fill="white"
-        fillOpacity="0.01"
-      />
+      <path d="M36 12V36H12V12H36Z" fill="white" fillOpacity="0.01" />
       <g opacity="0.3">
         <path
           d="M16 29V21.5C16 20.6716 16.6716 20 17.5 20H30.5C31.3284 20 32 20.6716 32 21.5V29H16Z"
@@ -124,11 +120,7 @@ function TrainersIconBlue(props: Readonly<React.SVGProps<SVGSVGElement>>) {
         d="M0 10C0 4.47715 4.47715 0 10 0H38C43.5229 0 48 4.47715 48 10V38C48 43.5228 43.5228 48 38 48H10C4.47715 48 0 43.5228 0 38V10Z"
         fill="var(--blue-50)"
       />
-      <path
-        d="M36 12V36H12V12H36Z"
-        fill="white"
-        fillOpacity="0.01"
-      />
+      <path d="M36 12V36H12V12H36Z" fill="white" fillOpacity="0.01" />
       <g opacity="0.3">
         <path
           d="M24 23C26.2091 23 28 21.2091 28 19C28 16.7909 26.2091 15 24 15C21.7909 15 20 16.7909 20 19C20 21.2091 21.7909 23 24 23Z"
@@ -176,11 +168,7 @@ function ChallengesIconError(props: Readonly<React.SVGProps<SVGSVGElement>>) {
         d="M0 10C0 4.47715 4.47715 0 10 0H38C43.5229 0 48 4.47715 48 10V38C48 43.5228 43.5228 48 38 48H10C4.47715 48 0 43.5228 0 38V10Z"
         fill="var(--error-50)"
       />
-      <path
-        d="M36 12V36H12V12H36Z"
-        fill="white"
-        fillOpacity="0.01"
-      />
+      <path d="M36 12V36H12V12H36Z" fill="white" fillOpacity="0.01" />
       <g opacity="0.3">
         <path
           d="M19 18H29V22C29 26.4183 25.4183 30 21 30H19V18Z"
@@ -231,11 +219,7 @@ function CourseManagementUsersIcon(
         d="M0 10C0 4.47715 4.47715 0 10 0H38C43.5229 0 48 4.47715 48 10V38C48 43.5228 43.5228 48 38 48H10C4.47715 48 0 43.5228 0 38V10Z"
         fill="var(--purple-50)"
       />
-      <path
-        d="M36 12V36H12V12H36Z"
-        fill="white"
-        fillOpacity="0.01"
-      />
+      <path d="M36 12V36H12V12H36Z" fill="white" fillOpacity="0.01" />
       <g opacity="0.3">
         <path
           d="M28 19C28 21.2091 26.2091 23 24 23C21.7909 23 20 21.2091 20 19C20 16.7909 21.7909 15 24 15C26.2091 15 28 16.7909 28 19Z"
@@ -293,8 +277,7 @@ export function SectionCards() {
       comparisonText: "vs last month",
       icon: <GymsIconPrimary />,
       valueColorVar: "var(--primary-500)",
-      hoverShadowClass:
-        "hover:shadow-[0_14px_30px_-20px_rgba(255,91,4,0.28)]",
+      hoverShadowClass: "hover:shadow-[0_14px_30px_-20px_rgba(255,91,4,0.28)]",
       cssVars: mergeCssVars({
         ...baseVars,
         "--primary-50": "#ffefe6",
@@ -302,7 +285,7 @@ export function SectionCards() {
       }),
     },
     {
-      title: "total members",
+      title: "Total Members",
       value: "8,746",
       percentChange: 2.4,
       isPositive: true,
@@ -325,8 +308,7 @@ export function SectionCards() {
       comparisonText: "vs last month",
       icon: <TrainersIconBlue />,
       valueColorVar: "var(--blue-500)",
-      hoverShadowClass:
-        "hover:shadow-[0_14px_30px_-20px_rgba(67,66,255,0.26)]",
+      hoverShadowClass: "hover:shadow-[0_14px_30px_-20px_rgba(67,66,255,0.26)]",
       cssVars: mergeCssVars({
         ...baseVars,
         "--blue-50": "#ececff",
@@ -334,15 +316,14 @@ export function SectionCards() {
       }),
     },
     {
-      title: "Active challenges",
+      title: "Active Challenges",
       value: "14",
       percentChange: -1.7,
       isPositive: false,
       comparisonText: "vs last month",
       icon: <ChallengesIconError />,
       valueColorVar: "var(--error-500)",
-      hoverShadowClass:
-        "hover:shadow-[0_14px_30px_-20px_rgba(211,47,47,0.22)]",
+      hoverShadowClass: "hover:shadow-[0_14px_30px_-20px_rgba(211,47,47,0.22)]",
       cssVars: mergeCssVars({
         ...baseVars,
         "--error-50": "#fbeaea",
@@ -391,8 +372,7 @@ export function SectionCards() {
                         : "var(--error-400)",
                     }}
                   >
-                    <TrendIcon className="size-4" />
-                    ~{percent}%
+                    <TrendIcon className="size-4" />~{percent}%
                   </div>
                   <span
                     className="text-xs font-medium"
