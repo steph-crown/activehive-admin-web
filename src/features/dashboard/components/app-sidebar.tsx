@@ -36,16 +36,17 @@ const data = {
       url: "/dashboard/admins",
       icon: IconShield,
     },
+        {
+      title: "Gyms",
+      url: "/dashboard/gyms",
+      icon: IconBuildingStore,
+    },
     {
       title: "Gym Owners",
       url: "/dashboard/gym-owners",
       icon: IconUserCheck,
     },
-    {
-      title: "Gyms",
-      url: "/dashboard/gyms",
-      icon: IconBuildingStore,
-    },
+
     {
       title: "Locations",
       url: "/dashboard/locations",

@@ -132,8 +132,8 @@ export function ChangePasswordDialog({
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending ? "Changing..." : "Change Password"}
+              <Button type="submit" loading={isPending}>
+                Change Password
               </Button>
             </DialogFooter>
           </form>

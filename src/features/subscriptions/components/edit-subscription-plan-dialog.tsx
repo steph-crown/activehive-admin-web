@@ -337,8 +337,8 @@ export function EditSubscriptionPlanDialog({
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending ? "Saving..." : "Save Changes"}
+              <Button type="submit" loading={isPending}>
+                Save Changes
               </Button>
             </DialogFooter>
           </form>

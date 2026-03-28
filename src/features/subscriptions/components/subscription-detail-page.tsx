@@ -20,15 +20,20 @@ export function SubscriptionDetailPage({ subscriptionId }: SubscriptionDetailPag
     <SidebarProvider>
       <AppSidebar variant="inset" />
       <SidebarInset>
-        <SiteHeader />
+        <SiteHeader title="Subscription details" />
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
               <div className="px-4 lg:px-6 space-y-6">
-                <div className="flex items-center gap-4">
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link to="/dashboard/subscriptions">← Back to Subscriptions</Link>
-                  </Button>
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center gap-4">
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link to="/dashboard/subscriptions">
+                        ← Back to Subscriptions
+                      </Link>
+                    </Button>
+                  </div>
+                  <h1 className="text-3xl font-bold">Subscription details</h1>
                 </div>
 
                 <Card>

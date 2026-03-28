@@ -85,7 +85,7 @@ export function ProfilePage() {
               <div className="px-4 lg:px-6 space-y-6">
                 <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <h1 className="text-2xl font-bold">Profile</h1>
+                    <h1 className="text-3xl font-bold">Profile</h1>
                     <p className="text-muted-foreground text-sm mt-0.5">
                       Manage your account information and settings
                     </p>

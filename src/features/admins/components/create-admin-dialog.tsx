@@ -236,8 +236,8 @@ export function CreateAdminDialog({
                   >
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={isPending}>
-                    {isPending ? "Creating..." : "Create Admin"}
+                  <Button type="submit" loading={isPending}>
+                    Create Admin
                   </Button>
                 </>
               )}

@@ -99,7 +99,7 @@ export function LoginForm({
         {...props}
       >
         <div className="flex flex-col items-center gap-2 text-center">
-          <h1 className="text-2xl font-bold">Login to Admin Account</h1>
+          <h1 className="text-3xl font-bold">Login to Admin Account</h1>
           <p className="text-muted-foreground text-sm text-balance">
             Enter your email below to login to your admin account
           </p>
@@ -166,9 +166,9 @@ export function LoginForm({
             type="submit"
             className="w-full hover:scale-105"
             size="lg"
-            disabled={isPending}
+            loading={isPending}
           >
-            {isPending ? "Signing in..." : "Login"}
+            Login
           </Button>
 
           <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">

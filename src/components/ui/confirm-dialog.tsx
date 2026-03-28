@@ -60,9 +60,9 @@ export function ConfirmDialog({
             type="button"
             variant={confirmVariant}
             onClick={handleConfirm}
-            disabled={isLoading}
+            loading={isLoading}
           >
-            {isLoading ? "Processing..." : confirmLabel}
+            {confirmLabel}
           </Button>
         </DialogFooter>
       </DialogContent>

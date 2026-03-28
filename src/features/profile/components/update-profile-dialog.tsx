@@ -298,8 +298,8 @@ export function UpdateProfileDialog({
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending ? "Updating..." : "Update Profile"}
+              <Button type="submit" loading={isPending}>
+                Update Profile
               </Button>
             </DialogFooter>
           </form>

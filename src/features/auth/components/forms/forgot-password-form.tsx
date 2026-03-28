@@ -53,7 +53,7 @@ export function ForgotPasswordForm({
         {...props}
       >
         <div className="flex flex-col items-center gap-2 text-center">
-          <h1 className="text-2xl font-bold">Request password reset</h1>
+          <h1 className="text-3xl font-bold">Request password reset</h1>
           <p className="text-muted-foreground text-sm text-balance">
             Enter your email and we'll send you password reset instructions
           </p>
