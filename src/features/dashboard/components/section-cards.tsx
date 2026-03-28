@@ -1,14 +1,15 @@
 import * as React from "react";
-import { Link } from "react-router-dom";
 import {
   IconBarbellFilled,
   IconHomeFilled,
-  IconTrendingDown,
-  IconTrendingUp,
   IconTrophyFilled,
   IconUserFilled,
 } from "@tabler/icons-react";
-import { Card } from "@/components/ui/card";
+
+import {
+  mergeSectionMetricCssVars,
+  SectionMetricCard,
+} from "./section-metric-card";
 
 type MetricCardTheme = {
   icon: React.ReactNode;
@@ -24,10 +25,6 @@ type MetricCardTheme = {
   cssVars: React.CSSProperties;
   href: string;
 };
-
-function mergeCssVars(vars: Record<string, string>) {
-  return vars as React.CSSProperties;
-}
 
 export function SectionCards() {
   const baseVars = {
@@ -49,7 +46,7 @@ export function SectionCards() {
       iconColorVar: "var(--primary-500)",
       valueColorVar: "var(--primary-500)",
       hoverShadowClass: "hover:shadow-[0_14px_30px_-20px_rgba(255,91,4,0.28)]",
-      cssVars: mergeCssVars({
+      cssVars: mergeSectionMetricCssVars({
         ...baseVars,
         "--primary-50": "#ffefe6",
         "--primary-500": "#ff5b04",
@@ -68,7 +65,7 @@ export function SectionCards() {
       valueColorVar: "var(--purple-500)",
       hoverShadowClass:
         "hover:shadow-[0_14px_30px_-20px_rgba(126,82,255,0.26)]",
-      cssVars: mergeCssVars({
+      cssVars: mergeSectionMetricCssVars({
         ...baseVars,
         "--purple-50": "#f2eeff",
         "--purple-500": "#7e52ff",
@@ -86,7 +83,7 @@ export function SectionCards() {
       iconColorVar: "var(--blue-500)",
       valueColorVar: "var(--blue-500)",
       hoverShadowClass: "hover:shadow-[0_14px_30px_-20px_rgba(67,66,255,0.26)]",
-      cssVars: mergeCssVars({
+      cssVars: mergeSectionMetricCssVars({
         ...baseVars,
         "--blue-50": "#ececff",
         "--blue-500": "#4342ff",
@@ -104,7 +101,7 @@ export function SectionCards() {
       iconColorVar: "var(--error-500)",
       valueColorVar: "var(--error-500)",
       hoverShadowClass: "hover:shadow-[0_14px_30px_-20px_rgba(211,47,47,0.22)]",
-      cssVars: mergeCssVars({
+      cssVars: mergeSectionMetricCssVars({
         ...baseVars,
         "--error-50": "#fbeaea",
         "--error-500": "#d32f2f",
@@ -115,64 +112,22 @@ export function SectionCards() {
 
   return (
     <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
-      {cardThemes.map((card) => {
-        const TrendIcon = card.isPositive ? IconTrendingUp : IconTrendingDown;
-        const percent = Math.abs(card.percentChange);
-        const varianceColor = card.isPositive
-          ? "var(--success-500)"
-          : "var(--error-400)";
-
-        return (
-          <Link
-            key={card.title}
-            to={card.href}
-            className="block rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          >
-            <Card
-              className={`@container/card !rounded-md gap-0 border border-[#F4F4F4] bg-white p-0 shadow-none transition-shadow ${card.hoverShadowClass}`}
-              style={card.cssVars}
-            >
-              <div className="flex flex-col gap-2 p-5">
-                <div className="flex flex-col items-start gap-5">
-                  <div
-                    className="flex size-12 items-center justify-center rounded-md"
-                    style={{
-                      backgroundColor: card.iconBgVar,
-                      color: card.iconColorVar,
-                    }}
-                  >
-                    {card.icon}
-                  </div>
-                  <span className="text-xs font-medium text-gray-400">
-                    {card.title}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between gap-2">
-                  <div className="text-3xl leading-none font-medium text-black font-bebas">
-                    {card.value}
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="flex items-center gap-1 text-xs font-medium"
-                      style={{ color: varianceColor }}
-                    >
-                      <TrendIcon className="size-4" stroke={2} />~{percent}%
-                    </div>
-                    <span
-                      className="text-xs font-medium"
-                      style={{ color: "var(--grey-500)" }}
-                    >
-                      {card.comparisonText}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </Card>
-          </Link>
-        );
-      })}
+      {cardThemes.map((card) => (
+        <SectionMetricCard
+          key={card.title}
+          title={card.title}
+          value={card.value}
+          icon={card.icon}
+          iconBgVar={card.iconBgVar}
+          iconColorVar={card.iconColorVar}
+          percentChange={card.percentChange}
+          isPositive={card.isPositive}
+          comparisonText={card.comparisonText}
+          hoverShadowClass={card.hoverShadowClass}
+          style={card.cssVars}
+          href={card.href}
+        />
+      ))}
     </div>
   );
 }

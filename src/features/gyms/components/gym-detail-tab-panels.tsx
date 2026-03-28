@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useMemo } from "react";
 import {
   IconActivity,
   IconBarbell,
@@ -12,9 +13,16 @@ import {
   IconMapPin,
   IconPhone,
   IconUser,
+  IconUserFilled,
   IconUsers,
 } from "@tabler/icons-react";
+import { type ColumnDef } from "@tanstack/react-table";
 
+import { DataTable } from "@/components/data-table/data-table";
+import {
+  mergeSectionMetricCssVars,
+  SectionMetricCard,
+} from "@/features/dashboard/components/section-metric-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -57,12 +65,41 @@ function formatCityState(gym: Gym): string {
   return [city, state].filter(Boolean).join(", ") || "—";
 }
 
+type DemoMemberRow = {
+  id: string;
+  name: string;
+  email: string;
+  status: "Active" | "Inactive";
+  join: string;
+  lastIn: string;
+};
+
+type DemoActivityRow = {
+  id: string;
+  date: string;
+  action: string;
+  by: string;
+  details: string;
+};
+
+type DemoTrainerRow = {
+  id: string;
+  name: string;
+  status: string;
+  sessions: string;
+};
+
+const METRIC_BASE_VARS = {
+  "--success-500": "#22c55e",
+  "--error-400": "#dc5959",
+  "--grey-500": "#959595",
+} as Record<string, string>;
+
 export type GymDetailTabPanelsProps = {
   gym: Gym;
   locations: GymLocation[];
   subscription: GymSubscription | null;
   planLabel: string;
-  /** Aggregates + placeholders for metrics not on API yet */
   metrics: {
     totalMembers: number;
     activeMembers: number;
@@ -103,12 +140,12 @@ export function GymDetailTabPanels({
       ? formatDate(subscription.nextPaymentDate)
       : "Apr 20, 2026";
 
-  const demoMembers = [
+  const demoMembers: DemoMemberRow[] = [
     {
       id: "1",
       name: "Riley Patel",
       email: "riley@mail.com",
-      status: "Active" as const,
+      status: "Active",
       join: "Apr 2024",
       lastIn: "Mar 16, 2026",
     },
@@ -116,13 +153,13 @@ export function GymDetailTabPanels({
       id: "2",
       name: "Morgan Blake",
       email: "morgan@mail.com",
-      status: "Inactive" as const,
+      status: "Inactive",
       join: "May 2024",
       lastIn: "Jan 05, 2026",
     },
   ];
 
-  const demoActivity = [
+  const demoActivity: DemoActivityRow[] = [
     {
       id: "a1",
       date: "Mar 17, 2026",
@@ -139,14 +176,138 @@ export function GymDetailTabPanels({
     },
   ];
 
-  const demoTrainers = [
+  const demoTrainers: DemoTrainerRow[] = [
     {
       id: "t1",
       name: "Coach Sarah",
-      status: "Active" as const,
+      status: "Active",
       sessions: "180",
     },
   ];
+
+  const memberColumns = useMemo<ColumnDef<DemoMemberRow>[]>(
+    () => [
+      {
+        accessorKey: "name",
+        header: "Name",
+        cell: ({ row }) => (
+          <div className="font-medium">{row.original.name}</div>
+        ),
+      },
+      {
+        accessorKey: "email",
+        header: "Email",
+        cell: ({ row }) => (
+          <div className="text-muted-foreground text-sm">
+            {row.original.email}
+          </div>
+        ),
+      },
+      {
+        accessorKey: "status",
+        header: "Status",
+        cell: ({ row }) => {
+          const active = row.original.status === "Active";
+          return (
+            <Badge
+              variant="outline"
+              className={cn(
+                "gap-1.5 font-normal capitalize",
+                active && "border-emerald-200 bg-emerald-50 text-emerald-800",
+                !active && "text-muted-foreground",
+              )}
+            >
+              <span
+                className={cn(
+                  "size-1.5 rounded-full",
+                  active ? "bg-emerald-600" : "bg-muted-foreground",
+                )}
+              />
+              {row.original.status}
+            </Badge>
+          );
+        },
+      },
+      {
+        accessorKey: "join",
+        header: "Join date",
+        cell: ({ row }) => row.original.join,
+      },
+      {
+        accessorKey: "lastIn",
+        header: "Last check-in",
+        cell: ({ row }) => row.original.lastIn,
+      },
+    ],
+    [],
+  );
+
+  const activityColumns = useMemo<ColumnDef<DemoActivityRow>[]>(
+    () => [
+      {
+        accessorKey: "date",
+        header: "Date",
+        cell: ({ row }) => (
+          <span className="text-muted-foreground">{row.original.date}</span>
+        ),
+      },
+      {
+        accessorKey: "action",
+        header: "Action",
+        cell: ({ row }) => (
+          <span className="font-semibold">{row.original.action}</span>
+        ),
+      },
+      {
+        accessorKey: "by",
+        header: "Performed by",
+        cell: ({ row }) => row.original.by,
+      },
+      {
+        accessorKey: "details",
+        header: "Details",
+        cell: ({ row }) => (
+          <span className="text-muted-foreground">{row.original.details}</span>
+        ),
+      },
+    ],
+    [],
+  );
+
+  const trainerColumns = useMemo<ColumnDef<DemoTrainerRow>[]>(
+    () => [
+      {
+        accessorKey: "name",
+        header: "Trainer",
+        cell: ({ row }) => (
+          <span className="font-semibold">{row.original.name}</span>
+        ),
+      },
+      {
+        accessorKey: "status",
+        header: "Status",
+        cell: ({ row }) => (
+          <Badge
+            variant="outline"
+            className="gap-1.5 border-emerald-200 bg-emerald-50 font-normal text-emerald-800"
+          >
+            <span className="size-1.5 rounded-full bg-emerald-600" />
+            {row.original.status}
+          </Badge>
+        ),
+      },
+      {
+        accessorKey: "sessions",
+        header: () => (
+          <span className="block text-right">Sessions completed</span>
+        ),
+        cell: ({ row }) => (
+          <div className="text-right">{row.original.sessions}</div>
+        ),
+      },
+    ],
+    [],
+  );
 
   return (
     <>
@@ -224,151 +385,62 @@ export function GymDetailTabPanels({
 
       <TabsContent value="members" className="mt-4 space-y-4">
         <div className="grid gap-4 md:grid-cols-2">
-          <Card className="rounded-md border-[#F4F4F4] bg-white p-6 shadow-none">
-            <div className="flex items-start gap-5">
-              <div
-                className="flex size-12 items-center justify-center rounded-md"
-                style={{ backgroundColor: "#fff8e6", color: "#e6ae06" }}
-              >
-                <IconUsers className="size-6" />
-              </div>
-              <div>
-                <p className="text-xs font-medium text-muted-foreground">
-                  Total members
-                </p>
-                <p className="text-3xl font-bold tabular-nums">
-                  {metrics.totalMembers}
-                </p>
-              </div>
-            </div>
-          </Card>
-          <Card className="rounded-md border-[#F4F4F4] bg-white p-6 shadow-none">
-            <div className="flex items-start gap-5">
-              <div
-                className="flex size-12 items-center justify-center rounded-md"
-                style={{ backgroundColor: "#ecfdf3", color: "#22c55e" }}
-              >
-                <IconCircleCheckFilled className="size-6" />
-              </div>
-              <div>
-                <p className="text-xs font-medium text-muted-foreground">
-                  Active members
-                </p>
-                <p className="text-3xl font-bold tabular-nums text-emerald-600">
-                  {metrics.activeMembers}
-                </p>
-              </div>
-            </div>
-          </Card>
+          <SectionMetricCard
+            title="Total members"
+            value={String(metrics.totalMembers)}
+            icon={<IconUserFilled className="size-6" />}
+            iconBgVar="var(--purple-50)"
+            iconColorVar="var(--purple-500)"
+            percentChange={0}
+            isPositive
+            comparisonText="vs last period"
+            hoverShadowClass="hover:shadow-[0_14px_30px_-20px_rgba(126,82,255,0.26)]"
+            style={mergeSectionMetricCssVars({
+              ...METRIC_BASE_VARS,
+              "--purple-50": "#f2eeff",
+              "--purple-500": "#7e52ff",
+            })}
+          />
+          <SectionMetricCard
+            title="Active members"
+            value={String(metrics.activeMembers)}
+            icon={<IconCircleCheckFilled className="size-6" />}
+            iconBgVar="var(--success-50)"
+            iconColorVar="var(--success-500)"
+            percentChange={0}
+            isPositive
+            comparisonText="vs last period"
+            hoverShadowClass="hover:shadow-[0_14px_30px_-20px_rgba(34,197,94,0.22)]"
+            style={mergeSectionMetricCssVars({
+              ...METRIC_BASE_VARS,
+              "--success-50": "#ecfdf3",
+              "--success-500": "#22c55e",
+            })}
+          />
         </div>
-        <Card className="rounded-md border-[#F4F4F4] bg-white p-6 shadow-none">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] text-sm">
-              <thead>
-                <tr className="border-b border-[#F4F4F4] text-left text-muted-foreground">
-                  <th className="pb-3 pr-4 text-xs font-medium uppercase">
-                    Name
-                  </th>
-                  <th className="pb-3 pr-4 text-xs font-medium uppercase">
-                    Email
-                  </th>
-                  <th className="pb-3 pr-4 text-xs font-medium uppercase">
-                    Status
-                  </th>
-                  <th className="pb-3 pr-4 text-xs font-medium uppercase">
-                    Join date
-                  </th>
-                  <th className="pb-3 text-xs font-medium uppercase">
-                    Last check-in
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {demoMembers.map((row) => {
-                  const active = row.status === "Active";
-                  return (
-                    <tr
-                      key={row.id}
-                      className="border-b border-[#F4F4F4] last:border-0"
-                    >
-                      <td className="py-4 pr-4 align-middle font-medium">
-                        {row.name}
-                      </td>
-                      <td className="text-muted-foreground py-4 pr-4 align-middle">
-                        {row.email}
-                      </td>
-                      <td className="py-4 pr-4 align-middle">
-                        <Badge
-                          variant="outline"
-                          className={cn(
-                            "gap-1.5 font-normal capitalize",
-                            active &&
-                              "border-emerald-200 bg-emerald-50 text-emerald-800",
-                            !active && "text-muted-foreground",
-                          )}
-                        >
-                          <span
-                            className={cn(
-                              "size-1.5 rounded-full",
-                              active ? "bg-emerald-600" : "bg-muted-foreground",
-                            )}
-                          />
-                          {row.status}
-                        </Badge>
-                      </td>
-                      <td className="py-4 pr-4 align-middle">{row.join}</td>
-                      <td className="py-4 align-middle">{row.lastIn}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </Card>
+        {/* <Card className="rounded-md border-[#F4F4F4] bg-white p-0 shadow-none"> */}
+        <DataTable
+          data={demoMembers}
+          columns={memberColumns}
+          enableDrag={false}
+          enableSelection={false}
+          getRowId={(row) => row.id}
+          emptyMessage="No members to show."
+        />
+        {/* </Card> */}
       </TabsContent>
 
       <TabsContent value="activity" className="mt-4">
-        <Card className="rounded-md border-[#F4F4F4] bg-white p-6 shadow-none">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[560px] text-sm">
-              <thead>
-                <tr className="border-b border-[#F4F4F4] text-left text-muted-foreground">
-                  <th className="pb-3 pr-4 text-xs font-medium uppercase">
-                    Date
-                  </th>
-                  <th className="pb-3 pr-4 text-xs font-medium uppercase">
-                    Action
-                  </th>
-                  <th className="pb-3 pr-4 text-xs font-medium uppercase">
-                    Performed by
-                  </th>
-                  <th className="pb-3 text-xs font-medium uppercase">
-                    Details
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {demoActivity.map((row) => (
-                  <tr
-                    key={row.id}
-                    className="border-b border-[#F4F4F4] last:border-0"
-                  >
-                    <td className="text-muted-foreground py-4 pr-4 align-middle">
-                      {row.date}
-                    </td>
-                    <td className="py-4 pr-4 align-middle font-semibold">
-                      {row.action}
-                    </td>
-                    <td className="py-4 pr-4 align-middle">{row.by}</td>
-                    <td className="text-muted-foreground py-4 align-middle">
-                      {row.details}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
+        {/* <Card className="rounded-md border-[#F4F4F4] bg-white p-0 shadow-none"> */}
+        <DataTable
+          data={demoActivity}
+          columns={activityColumns}
+          enableDrag={false}
+          enableSelection={false}
+          getRowId={(row) => row.id}
+          emptyMessage="No activity yet."
+        />
+        {/* </Card> */}
       </TabsContent>
 
       <TabsContent value="subscription" className="mt-4">
@@ -416,49 +488,16 @@ export function GymDetailTabPanels({
       </TabsContent>
 
       <TabsContent value="trainers" className="mt-4">
-        <Card className="rounded-md border-[#F4F4F4] bg-white p-6 shadow-none">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[480px] text-sm">
-              <thead>
-                <tr className="border-b border-[#F4F4F4] text-left text-muted-foreground">
-                  <th className="pb-3 pr-4 text-xs font-medium uppercase">
-                    Trainer
-                  </th>
-                  <th className="pb-3 pr-4 text-xs font-medium uppercase">
-                    Status
-                  </th>
-                  <th className="pb-3 text-right text-xs font-medium uppercase">
-                    Sessions completed
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {demoTrainers.map((row) => (
-                  <tr
-                    key={row.id}
-                    className="border-b border-[#F4F4F4] last:border-0"
-                  >
-                    <td className="py-4 pr-4 align-middle font-semibold">
-                      {row.name}
-                    </td>
-                    <td className="py-4 pr-4 align-middle">
-                      <Badge
-                        variant="outline"
-                        className="gap-1.5 border-emerald-200 bg-emerald-50 font-normal text-emerald-800"
-                      >
-                        <span className="size-1.5 rounded-full bg-emerald-600" />
-                        {row.status}
-                      </Badge>
-                    </td>
-                    <td className="py-4 text-right align-middle">
-                      {row.sessions}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
+        {/* <Card className="rounded-md border-[#F4F4F4] bg-white p-0 shadow-none"> */}
+        <DataTable
+          data={demoTrainers}
+          columns={trainerColumns}
+          enableDrag={false}
+          enableSelection={false}
+          getRowId={(row) => row.id}
+          emptyMessage="No trainers to show."
+        />
+        {/* </Card> */}
       </TabsContent>
     </>
   );

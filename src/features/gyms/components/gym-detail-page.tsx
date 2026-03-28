@@ -1,6 +1,13 @@
+import { useMemo } from "react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import {
+  IconBarbellFilled,
+  IconCalendar,
+  IconCircleCheckFilled,
+  IconUserFilled,
+} from "@tabler/icons-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -8,6 +15,10 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StackedDetailSkeleton } from "@/components/loader/page-skeleton";
 import { AppSidebar } from "@/features/dashboard/components/app-sidebar";
+import {
+  mergeSectionMetricCssVars,
+  SectionMetricCard,
+} from "@/features/dashboard/components/section-metric-card";
 import { SiteHeader } from "@/features/dashboard/components/site-header";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
@@ -163,6 +174,84 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
 
   const canToggleActive = gym.approvalStatus === "approved";
 
+  const metricBaseVars = useMemo(
+    () =>
+      ({
+        "--success-500": "#22c55e",
+        "--error-400": "#dc5959",
+        "--grey-500": "#959595",
+      }) as Record<string, string>,
+    [],
+  );
+
+  const gymKpiCards = useMemo(
+    () => [
+      {
+        title: "Total members",
+        value: String(totalMembers),
+        icon: <IconUserFilled className="size-6" />,
+        iconBgVar: "var(--purple-50)",
+        iconColorVar: "var(--purple-500)",
+        hoverShadowClass:
+          "hover:shadow-[0_14px_30px_-20px_rgba(126,82,255,0.26)]",
+        style: mergeSectionMetricCssVars({
+          ...metricBaseVars,
+          "--purple-50": "#f2eeff",
+          "--purple-500": "#7e52ff",
+        }),
+      },
+      {
+        title: "Total trainers",
+        value: String(totalTrainers),
+        icon: <IconBarbellFilled className="size-6" />,
+        iconBgVar: "var(--primary-50)",
+        iconColorVar: "var(--primary-500)",
+        hoverShadowClass:
+          "hover:shadow-[0_14px_30px_-20px_rgba(255,91,4,0.28)]",
+        style: mergeSectionMetricCssVars({
+          ...metricBaseVars,
+          "--primary-50": "#ffefe6",
+          "--primary-500": "#ff5b04",
+        }),
+      },
+      {
+        title: "Total classes",
+        value: String(totalClasses),
+        icon: <IconCalendar className="size-6" />,
+        iconBgVar: "var(--sky-50)",
+        iconColorVar: "var(--sky-500)",
+        hoverShadowClass:
+          "hover:shadow-[0_14px_30px_-20px_rgba(14,165,233,0.22)]",
+        style: mergeSectionMetricCssVars({
+          ...metricBaseVars,
+          "--sky-50": "#e0f2fe",
+          "--sky-500": "#0ea5e9",
+        }),
+      },
+      {
+        title: "Check-ins today",
+        value: String(checkInsToday),
+        icon: <IconCircleCheckFilled className="size-6" />,
+        iconBgVar: "var(--success-50)",
+        iconColorVar: "var(--success-500)",
+        hoverShadowClass:
+          "hover:shadow-[0_14px_30px_-20px_rgba(34,197,94,0.22)]",
+        style: mergeSectionMetricCssVars({
+          ...metricBaseVars,
+          "--success-50": "#ecfdf3",
+          "--success-500": "#22c55e",
+        }),
+      },
+    ],
+    [
+      metricBaseVars,
+      totalMembers,
+      totalTrainers,
+      totalClasses,
+      checkInsToday,
+    ],
+  );
+
   return (
     <SidebarProvider>
       <AppSidebar variant="inset" />
@@ -293,48 +382,20 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
-                  {(
-                    [
-                      {
-                        title: "Total members",
-                        value: totalMembers,
-                        accent: "#7e52ff",
-                        bg: "#f2eeff",
-                      },
-                      {
-                        title: "Total trainers",
-                        value: totalTrainers,
-                        accent: "#ff5b04",
-                        bg: "#ffefe6",
-                      },
-                      {
-                        title: "Total classes",
-                        value: totalClasses,
-                        accent: "#0ea5e9",
-                        bg: "#e0f2fe",
-                      },
-                      {
-                        title: "Check-ins today",
-                        value: checkInsToday,
-                        accent: "#22c55e",
-                        bg: "#ecfdf3",
-                      },
-                    ] as const
-                  ).map((card) => (
-                    <div
+                  {gymKpiCards.map((card) => (
+                    <SectionMetricCard
                       key={card.title}
-                      className="rounded-md border border-[#F4F4F4] bg-white p-5 shadow-none"
-                    >
-                      <p className="text-xs font-medium text-muted-foreground">
-                        {card.title}
-                      </p>
-                      <p
-                        className="mt-2 text-3xl font-bold tabular-nums"
-                        style={{ color: card.accent }}
-                      >
-                        {card.value}
-                      </p>
-                    </div>
+                      title={card.title}
+                      value={card.value}
+                      icon={card.icon}
+                      iconBgVar={card.iconBgVar}
+                      iconColorVar={card.iconColorVar}
+                      percentChange={0}
+                      isPositive
+                      comparisonText="vs last period"
+                      hoverShadowClass={card.hoverShadowClass}
+                      style={card.style}
+                    />
                   ))}
                 </div>
 
