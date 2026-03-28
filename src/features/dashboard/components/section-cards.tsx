@@ -133,19 +133,13 @@ export function SectionCards() {
                 >
                   {card.icon}
                 </div>
-                <span
-                  className="text-xs font-semibold"
-                  style={{ color: "var(--grey-800)" }}
-                >
+                <span className="text-xs font-medium text-gray-400">
                   {card.title}
                 </span>
               </div>
 
               <div className="flex items-center justify-between gap-2">
-                <div
-                  className="text-2xl leading-none font-bold"
-                  style={{ color: card.valueColorVar }}
-                >
+                <div className="text-2xl leading-none font-bold">
                   {card.value}
                 </div>
 

@@ -29,7 +29,7 @@ export function MembersChart() {
     <Card className="!rounded-md border border-[#F4F4F4] p-0 shadow-none">
       <div className="flex flex-col">
         <div className="flex items-center justify-between border-b border-[#F4F4F4] px-6 py-3">
-          <h3 className="text-sm font-semibold text-[#3c3c3c]">
+          <h3 className="text-lg font-semibold text-[#3c3c3c]">
             Participants over time
           </h3>
         </div>
@@ -79,4 +79,3 @@ export function MembersChart() {
     </Card>
   );
 }
-
