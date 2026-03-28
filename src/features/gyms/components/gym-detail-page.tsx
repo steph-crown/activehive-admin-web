@@ -76,6 +76,93 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
     isLoading: registrationLoading,
   } = useGymRegistrationStatusQuery(gymId);
 
+  const metricBaseVars = useMemo(
+    () =>
+      ({
+        "--success-500": "#22c55e",
+        "--error-400": "#dc5959",
+        "--grey-500": "#959595",
+      }) as Record<string, string>,
+    [],
+  );
+
+  const gymKpiCards = useMemo(() => {
+    if (!data) {
+      return [];
+    }
+    const { gym } = data;
+    const stats = registration?.stats;
+    const totalMembers =
+      typeof stats?.totalMembers === "number"
+        ? stats.totalMembers
+        : typeof gym.memberCount === "number"
+          ? gym.memberCount
+          : 198;
+    const totalTrainers =
+      typeof stats?.totalTrainers === "number" ? stats.totalTrainers : 12;
+    const totalClasses = 24;
+    const checkInsToday = 47;
+
+    return [
+      {
+        title: "Total members",
+        value: String(totalMembers),
+        icon: <IconUserFilled className="size-6" />,
+        iconBgVar: "var(--purple-50)",
+        iconColorVar: "var(--purple-500)",
+        hoverShadowClass:
+          "hover:shadow-[0_14px_30px_-20px_rgba(126,82,255,0.26)]",
+        style: mergeSectionMetricCssVars({
+          ...metricBaseVars,
+          "--purple-50": "#f2eeff",
+          "--purple-500": "#7e52ff",
+        }),
+      },
+      {
+        title: "Total trainers",
+        value: String(totalTrainers),
+        icon: <IconBarbellFilled className="size-6" />,
+        iconBgVar: "var(--primary-50)",
+        iconColorVar: "var(--primary-500)",
+        hoverShadowClass:
+          "hover:shadow-[0_14px_30px_-20px_rgba(255,91,4,0.28)]",
+        style: mergeSectionMetricCssVars({
+          ...metricBaseVars,
+          "--primary-50": "#ffefe6",
+          "--primary-500": "#ff5b04",
+        }),
+      },
+      {
+        title: "Total classes",
+        value: String(totalClasses),
+        icon: <IconCalendar className="size-6" />,
+        iconBgVar: "var(--sky-50)",
+        iconColorVar: "var(--sky-500)",
+        hoverShadowClass:
+          "hover:shadow-[0_14px_30px_-20px_rgba(14,165,233,0.22)]",
+        style: mergeSectionMetricCssVars({
+          ...metricBaseVars,
+          "--sky-50": "#e0f2fe",
+          "--sky-500": "#0ea5e9",
+        }),
+      },
+      {
+        title: "Check-ins today",
+        value: String(checkInsToday),
+        icon: <IconCircleCheckFilled className="size-6" />,
+        iconBgVar: "var(--success-50)",
+        iconColorVar: "var(--success-500)",
+        hoverShadowClass:
+          "hover:shadow-[0_14px_30px_-20px_rgba(34,197,94,0.22)]",
+        style: mergeSectionMetricCssVars({
+          ...metricBaseVars,
+          "--success-50": "#ecfdf3",
+          "--success-500": "#22c55e",
+        }),
+      },
+    ];
+  }, [data, registration, metricBaseVars]);
+
   const invalidateGym = () => {
     void queryClient.invalidateQueries({ queryKey: gymsQueryKeys.list() });
     void queryClient.invalidateQueries({
@@ -173,84 +260,6 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
       registration.gym.approvalStatus == null);
 
   const canToggleActive = gym.approvalStatus === "approved";
-
-  const metricBaseVars = useMemo(
-    () =>
-      ({
-        "--success-500": "#22c55e",
-        "--error-400": "#dc5959",
-        "--grey-500": "#959595",
-      }) as Record<string, string>,
-    [],
-  );
-
-  const gymKpiCards = useMemo(
-    () => [
-      {
-        title: "Total members",
-        value: String(totalMembers),
-        icon: <IconUserFilled className="size-6" />,
-        iconBgVar: "var(--purple-50)",
-        iconColorVar: "var(--purple-500)",
-        hoverShadowClass:
-          "hover:shadow-[0_14px_30px_-20px_rgba(126,82,255,0.26)]",
-        style: mergeSectionMetricCssVars({
-          ...metricBaseVars,
-          "--purple-50": "#f2eeff",
-          "--purple-500": "#7e52ff",
-        }),
-      },
-      {
-        title: "Total trainers",
-        value: String(totalTrainers),
-        icon: <IconBarbellFilled className="size-6" />,
-        iconBgVar: "var(--primary-50)",
-        iconColorVar: "var(--primary-500)",
-        hoverShadowClass:
-          "hover:shadow-[0_14px_30px_-20px_rgba(255,91,4,0.28)]",
-        style: mergeSectionMetricCssVars({
-          ...metricBaseVars,
-          "--primary-50": "#ffefe6",
-          "--primary-500": "#ff5b04",
-        }),
-      },
-      {
-        title: "Total classes",
-        value: String(totalClasses),
-        icon: <IconCalendar className="size-6" />,
-        iconBgVar: "var(--sky-50)",
-        iconColorVar: "var(--sky-500)",
-        hoverShadowClass:
-          "hover:shadow-[0_14px_30px_-20px_rgba(14,165,233,0.22)]",
-        style: mergeSectionMetricCssVars({
-          ...metricBaseVars,
-          "--sky-50": "#e0f2fe",
-          "--sky-500": "#0ea5e9",
-        }),
-      },
-      {
-        title: "Check-ins today",
-        value: String(checkInsToday),
-        icon: <IconCircleCheckFilled className="size-6" />,
-        iconBgVar: "var(--success-50)",
-        iconColorVar: "var(--success-500)",
-        hoverShadowClass:
-          "hover:shadow-[0_14px_30px_-20px_rgba(34,197,94,0.22)]",
-        style: mergeSectionMetricCssVars({
-          ...metricBaseVars,
-          "--success-50": "#ecfdf3",
-          "--success-500": "#22c55e",
-        }),
-      },
-    ],
-    [
-      metricBaseVars,
-      totalMembers,
-      totalTrainers,
-      totalClasses,
-      checkInsToday,
-    ],
-  );
 
   return (
     <SidebarProvider>

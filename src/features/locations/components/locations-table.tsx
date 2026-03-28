@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { type ColumnDef } from "@tanstack/react-table";
 import {
   IconCircleCheckFilled,
@@ -19,11 +18,13 @@ import { formatDate } from "@/lib/utils";
 import type { Location } from "../types";
 
 type LocationsTableCallbacks = {
+  onViewDetails?: (location: Location) => void;
   onActivateLocation?: (location: Location) => void;
   onDeactivateLocation?: (location: Location) => void;
 };
 
 function makeLocationsColumns({
+  onViewDetails,
   onActivateLocation,
   onDeactivateLocation,
 }: LocationsTableCallbacks): ColumnDef<Location>[] {
@@ -138,8 +139,10 @@ function makeLocationsColumns({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40">
-            <DropdownMenuItem asChild>
-              <Link to={`/dashboard/locations/${location.id}`}>View Details</Link>
+            <DropdownMenuItem
+              onClick={() => onViewDetails?.(location)}
+            >
+              View Details
             </DropdownMenuItem>
             {isActive && onDeactivateLocation && (
               <DropdownMenuItem onClick={() => onDeactivateLocation(location)}>
@@ -161,19 +164,25 @@ function makeLocationsColumns({
 
 type LocationsTableProps = {
   data: Location[];
+  onViewDetails?: (location: Location) => void;
   onActivateLocation?: (location: Location) => void;
   onDeactivateLocation?: (location: Location) => void;
 };
 
 export function LocationsTable({
   data,
+  onViewDetails,
   onActivateLocation,
   onDeactivateLocation,
 }: LocationsTableProps) {
   return (
     <DataTable
       data={data}
-      columns={makeLocationsColumns({ onActivateLocation, onDeactivateLocation })}
+      columns={makeLocationsColumns({
+        onViewDetails,
+        onActivateLocation,
+        onDeactivateLocation,
+      })}
       enableDrag={false}
       enableSelection={false}
       getRowId={(row) => row.id}

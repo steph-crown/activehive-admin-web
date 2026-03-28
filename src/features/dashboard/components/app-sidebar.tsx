@@ -5,7 +5,6 @@ import {
   IconMapPin,
   IconShield,
   IconTrophy,
-  IconUser,
   IconUserCheck,
   IconUserStar,
 } from "@tabler/icons-react";
@@ -57,30 +56,30 @@ const data = {
     //   url: "/dashboard/users",
     //   icon: IconUsers,
     // },
-    {
-      title: "Staff",
-      url: "/dashboard/staff",
-      icon: IconUser,
-    },
-    {
-      title: "Members",
-      url: "/dashboard/members",
-      icon: IconUser,
-    },
+    // {
+    //   title: "Staff",
+    //   url: "/dashboard/staff",
+    //   icon: IconUser,
+    // },
+    // {
+    //   title: "Members",
+    //   url: "/dashboard/members",
+    //   icon: IconUser,
+    // },
     {
       title: "Freelance Trainers",
       url: "/dashboard/trainers",
       icon: IconUserStar,
     },
     {
-      title: "Subscriptions",
-      url: "/dashboard/subscriptions",
-      icon: IconCreditCard,
-    },
-    {
       title: "Challenges",
       url: "/dashboard/challenges",
       icon: IconTrophy,
+    },
+    {
+      title: "Subscriptions",
+      url: "/dashboard/subscriptions",
+      icon: IconCreditCard,
     },
   ],
 };

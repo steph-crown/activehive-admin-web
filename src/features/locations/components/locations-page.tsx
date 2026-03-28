@@ -13,6 +13,7 @@ import {
 } from "@/lib/table-filters";
 import { useLocationsQuery } from "../services";
 import type { Location } from "../types";
+import { LocationDetailsDialog } from "./location-details-dialog";
 import { LocationsTable } from "./locations-table";
 import { ConfirmLocationStatusDialog } from "./confirm-location-status-dialog";
 
@@ -39,6 +40,9 @@ export function LocationsPage() {
   const [dateFilter, setDateFilter] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
   const [hqFilter, setHqFilter] = useState("all");
+  const [detailsLocationId, setDetailsLocationId] = useState<string | null>(
+    null,
+  );
 
   const { data, isLoading, error } = useLocationsQuery();
 
@@ -70,6 +74,14 @@ export function LocationsPage() {
                     Manage gym locations, branches, and headquarters settings.
                   </p>
                 </div>
+
+                <LocationDetailsDialog
+                  locationId={detailsLocationId}
+                  open={detailsLocationId != null}
+                  onOpenChange={(open) => {
+                    if (!open) setDetailsLocationId(null);
+                  }}
+                />
 
                 <ConfirmLocationStatusDialog
                   location={statusAction?.location ?? null}
@@ -115,6 +127,9 @@ export function LocationsPage() {
                     />
                     <LocationsTable
                       data={filteredData}
+                      onViewDetails={(location) =>
+                        setDetailsLocationId(location.id)
+                      }
                       onActivateLocation={(location) =>
                         setStatusAction({ location, type: "activate" })
                       }
