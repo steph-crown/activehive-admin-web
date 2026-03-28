@@ -132,46 +132,43 @@ export function SectionCards() {
               className={`@container/card !rounded-md gap-0 border border-[#F4F4F4] bg-white p-0 shadow-none transition-shadow ${card.hoverShadowClass}`}
               style={card.cssVars}
             >
-            <div className="flex flex-col gap-2 p-5">
-              <div className="flex flex-col items-start gap-5">
-                <div
-                  className="flex size-12 items-center justify-center rounded-md"
-                  style={{
-                    backgroundColor: card.iconBgVar,
-                    color: card.iconColorVar,
-                  }}
-                >
-                  {card.icon}
-                </div>
-                <span className="text-xs font-medium text-gray-400">
-                  {card.title}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between gap-2">
-                <div
-                  className="text-2xl leading-none font-bold"
-                  style={{ color: card.valueColorVar }}
-                >
-                  {card.value}
-                </div>
-
-                <div className="flex items-center gap-2">
+              <div className="flex flex-col gap-2 p-5">
+                <div className="flex flex-col items-start gap-5">
                   <div
-                    className="flex items-center gap-1 text-xs font-medium"
-                    style={{ color: varianceColor }}
+                    className="flex size-12 items-center justify-center rounded-md"
+                    style={{
+                      backgroundColor: card.iconBgVar,
+                      color: card.iconColorVar,
+                    }}
                   >
-                    <TrendIcon className="size-4" stroke={2} />~{percent}%
+                    {card.icon}
                   </div>
-                  <span
-                    className="text-xs font-medium"
-                    style={{ color: "var(--grey-500)" }}
-                  >
-                    {card.comparisonText}
+                  <span className="text-xs font-medium text-gray-400">
+                    {card.title}
                   </span>
                 </div>
+
+                <div className="flex items-center justify-between gap-2">
+                  <div className="text-3xl leading-none font-medium text-black font-bebas">
+                    {card.value}
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="flex items-center gap-1 text-xs font-medium"
+                      style={{ color: varianceColor }}
+                    >
+                      <TrendIcon className="size-4" stroke={2} />~{percent}%
+                    </div>
+                    <span
+                      className="text-xs font-medium"
+                      style={{ color: "var(--grey-500)" }}
+                    >
+                      {card.comparisonText}
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
             </Card>
           </Link>
         );

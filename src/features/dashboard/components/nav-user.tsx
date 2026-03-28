@@ -69,7 +69,7 @@ export function NavUser() {
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{name}</span>
-                <span className="text-muted-foreground truncate text-xs">
+                <span className="text-[#aaaaaa] truncate text-xs">
                   {email}
                 </span>
               </div>
@@ -90,7 +90,7 @@ export function NavUser() {
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{name}</span>
-                  <span className="text-muted-foreground truncate text-xs">
+                  <span className="text-[#aaaaaa] truncate text-xs">
                     {email}
                   </span>
                 </div>
