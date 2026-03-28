@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { TableCardSkeleton } from "@/components/loader/page-skeleton";
+import { SectionCardsSkeleton } from "@/features/dashboard/components/dashboard-skeleton";
 import {
   TableFilterBar,
   TableFilterSelect,
@@ -13,8 +14,14 @@ import {
 } from "@/lib/table-filters";
 import { useGymsQuery } from "../services";
 import type { Gym } from "../types";
+import {
+  GYM_PLAN_FILTER_OPTIONS,
+  toGymListRow,
+  type GymListRow,
+} from "../lib/gym-list-display";
 import { GymsTable } from "./gyms-table";
 import { ConfirmGymStatusDialog } from "./confirm-gym-status-dialog";
+import { GymsSummaryCards } from "./gyms-summary-cards";
 
 type GymActionType = "activate" | "deactivate";
 
@@ -41,12 +48,31 @@ export function GymsPage() {
   const [dateFilter, setDateFilter] = useState("");
   const [approvalFilter, setApprovalFilter] = useState("all");
   const [activeFilter, setActiveFilter] = useState("all");
+  const [planFilter, setPlanFilter] = useState("all");
 
   const { data, isLoading, error } = useGymsQuery();
 
+  const listRows = useMemo(
+    () => (data ?? []).map(toGymListRow),
+    [data],
+  );
+
+  const summary = useMemo(() => {
+    const rows = listRows;
+    const totalGyms = rows.length;
+    const activeGyms = rows.filter((g) => g.isActive).length;
+    const pendingApproval = rows.filter(
+      (g) => g.approvalStatus === "pending",
+    ).length;
+    const totalMembers = rows.reduce(
+      (sum, g) => sum + g.displayMemberTotal,
+      0,
+    );
+    return { totalGyms, activeGyms, pendingApproval, totalMembers };
+  }, [listRows]);
+
   const filteredData = useMemo(() => {
-    if (!data) return [];
-    return data.filter((row) => {
+    return listRows.filter((row) => {
       if (!rowMatchesSearch(row, searchQuery)) return false;
       if (!rowMatchesDateField(row.createdAt, dateFilter)) return false;
       if (approvalFilter !== "all") {
@@ -59,9 +85,19 @@ export function GymsPage() {
       }
       if (activeFilter === "active" && !row.isActive) return false;
       if (activeFilter === "inactive" && row.isActive) return false;
+      if (planFilter !== "all" && row.displayPlanKey !== planFilter) {
+        return false;
+      }
       return true;
     });
-  }, [data, searchQuery, dateFilter, approvalFilter, activeFilter]);
+  }, [
+    listRows,
+    searchQuery,
+    dateFilter,
+    approvalFilter,
+    activeFilter,
+    planFilter,
+  ]);
 
   return (
     <SidebarProvider>
@@ -72,7 +108,13 @@ export function GymsPage() {
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
               <div className="px-4 lg:px-6">
-                <h1 className="mb-4 text-3xl font-bold">Gyms</h1>
+                <div className="mb-4">
+                  <h1 className="text-3xl font-bold">Gyms</h1>
+                  <p className="text-muted-foreground mt-1 text-sm">
+                    Browse registered gyms, approvals, and roster metrics in one
+                    place.
+                  </p>
+                </div>
 
                 <ConfirmGymStatusDialog
                   gym={statusAction?.gym ?? null}
@@ -84,13 +126,22 @@ export function GymsPage() {
                 />
 
                 {isLoading ? (
-                  <TableCardSkeleton rows={8} columns={6} />
+                  <>
+                    <SectionCardsSkeleton />
+                    <TableCardSkeleton rows={8} columns={8} />
+                  </>
                 ) : error ? (
                   <div className="text-destructive">
                     Error loading gyms. Check console for details.
                   </div>
                 ) : data ? (
                   <>
+                    <GymsSummaryCards
+                      totalGyms={summary.totalGyms}
+                      activeGyms={summary.activeGyms}
+                      pendingApproval={summary.pendingApproval}
+                      totalMembers={summary.totalMembers}
+                    />
                     <TableFilterBar
                       searchValue={searchQuery}
                       onSearchChange={setSearchQuery}
@@ -113,15 +164,22 @@ export function GymsPage() {
                             options={ACTIVE_OPTIONS}
                             aria-label="Filter by active state"
                           />
+                          <TableFilterSelect
+                            value={planFilter}
+                            onValueChange={setPlanFilter}
+                            placeholder="Plans"
+                            options={GYM_PLAN_FILTER_OPTIONS}
+                            aria-label="Filter by subscription plan"
+                          />
                         </>
                       }
                     />
                     <GymsTable
                       data={filteredData}
-                      onActivateGym={(gym) =>
+                      onActivateGym={(gym: GymListRow) =>
                         setStatusAction({ gym, type: "activate" })
                       }
-                      onDeactivateGym={(gym) =>
+                      onDeactivateGym={(gym: GymListRow) =>
                         setStatusAction({ gym, type: "deactivate" })
                       }
                     />

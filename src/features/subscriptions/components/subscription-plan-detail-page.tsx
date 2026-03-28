@@ -73,8 +73,8 @@ export function SubscriptionPlanDetailPage() {
                 <div className="flex items-center justify-between gap-4">
                   <div className="space-y-1">
                     <h1 className="text-3xl font-bold">{plan.name}</h1>
-                    <p className="text-muted-foreground text-sm">
-                      Platform subscription plan details
+                    <p className="text-muted-foreground mt-1 text-sm">
+                      Platform subscription plan details and pricing.
                     </p>
                   </div>
                   <Badge variant="outline" className="capitalize">

@@ -12,10 +12,12 @@ export function ChallengesPage() {
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
               <div className="px-4 lg:px-6">
-                <h1 className="mb-1 text-3xl font-bold">Challenges</h1>
-                <p className="text-muted-foreground mb-6 text-sm">
-                  View and manage platform challenges across gyms.
-                </p>
+                <div className="mb-6">
+                  <h1 className="text-3xl font-bold">Challenges</h1>
+                  <p className="text-muted-foreground mt-1 text-sm">
+                    View and manage platform challenges across gyms.
+                  </p>
+                </div>
                 <p className="text-muted-foreground rounded-md border border-[#F4F4F4] bg-white p-8 text-center text-sm">
                   Challenge listings will appear here when the API is available.
                 </p>

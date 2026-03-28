@@ -86,8 +86,8 @@ export function ProfilePage() {
                 <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <h1 className="text-3xl font-bold">Profile</h1>
-                    <p className="text-muted-foreground text-sm mt-0.5">
-                      Manage your account information and settings
+                    <p className="text-muted-foreground mt-1 text-sm">
+                      Manage your account information and security settings.
                     </p>
                   </div>
                   <div className="flex items-center gap-2 mt-2 sm:mt-0">

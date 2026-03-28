@@ -58,8 +58,13 @@ export function AdminsPage() {
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
               <div className="px-4 lg:px-6">
-                <div className="mb-4 flex items-center justify-between">
-                  <h1 className="text-3xl font-bold">Admin Users</h1>
+                <div className="mb-4 flex items-start justify-between gap-4">
+                  <div>
+                    <h1 className="text-3xl font-bold">Admin Users</h1>
+                    <p className="text-muted-foreground mt-1 text-sm">
+                      Create, review, and manage system administrator accounts.
+                    </p>
+                  </div>
                   <CreateAdminDialog
                     viewAdmin={viewAdmin}
                     onViewClose={() => setViewAdmin(null)}

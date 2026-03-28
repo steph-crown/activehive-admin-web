@@ -158,7 +158,7 @@ export function GymApplicationPage() {
                     <h1 className="text-3xl font-bold">
                       Review application — {gym.name}
                     </h1>
-                    <p className="text-muted-foreground text-sm">
+                    <p className="text-muted-foreground mt-1 text-sm">
                       Registration details for this gym and owner.
                     </p>
                   </div>

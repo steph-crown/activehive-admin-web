@@ -34,6 +34,9 @@ export function SubscriptionDetailPage({ subscriptionId }: SubscriptionDetailPag
                     </Button>
                   </div>
                   <h1 className="text-3xl font-bold">Subscription details</h1>
+                  <p className="text-muted-foreground mt-1 text-sm">
+                    Billing, plan, and lifecycle details for this subscription.
+                  </p>
                 </div>
 
                 <Card>

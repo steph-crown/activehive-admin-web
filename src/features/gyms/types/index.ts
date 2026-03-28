@@ -31,6 +31,11 @@ export type Gym = {
   owner: GymOwner | null;
   trainers: unknown[];
   approvalStatus?: "pending" | "approved" | "rejected" | null;
+  /** When provided by the API; otherwise the list view uses placeholders. */
+  memberCount?: number | null;
+  activeMemberCount?: number | null;
+  subscriptionPlanName?: string | null;
+  revenue?: string | null;
 };
 
 export type GymLocationAddress = UserAddress;
