@@ -57,16 +57,7 @@ const createPlanSchema = yup.object({
     .min(0, "Trial days cannot be negative")
     .optional(),
   hasTrial: yup.boolean().required(),
-  isActive: yup.boolean().required(),
   isDefault: yup.boolean().required(),
-  isPopular: yup.boolean().required(),
-  sortOrder: yup
-    .number()
-    .nullable()
-    .transform((value, originalValue) =>
-      originalValue === "" || Number.isNaN(value) ? null : value,
-    )
-    .optional(),
   features: yup.string().nullable(),
 });
 
@@ -97,10 +88,7 @@ export function CreateSubscriptionPlanDialog({
       billingPeriod: "monthly",
       trialDays: null,
       hasTrial: true,
-      isActive: true,
       isDefault: false,
-      isPopular: false,
-      sortOrder: null,
       features: "",
     },
   });
@@ -111,14 +99,11 @@ export function CreateSubscriptionPlanDialog({
         name: "",
         description: "",
         planType: initialPlanType,
-          price: "" as unknown as number,
+        price: "" as unknown as number,
         billingPeriod: "monthly",
         trialDays: null,
         hasTrial: true,
-        isActive: true,
         isDefault: false,
-        isPopular: false,
-        sortOrder: null,
         features: "",
       });
     }
@@ -141,10 +126,10 @@ export function CreateSubscriptionPlanDialog({
         features,
         trialDays: values.trialDays ?? null,
         hasTrial: values.hasTrial,
-        isActive: values.isActive,
+        isActive: true,
         isDefault: values.isDefault,
-        isPopular: values.isPopular,
-        sortOrder: values.sortOrder ?? null,
+        isPopular: false,
+        sortOrder: null,
       });
       showSuccess("Success", "Subscription plan created successfully");
       onOpenChange(false);
@@ -159,7 +144,7 @@ export function CreateSubscriptionPlanDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Create Subscription Plan</DialogTitle>
           <DialogDescription>
@@ -168,12 +153,12 @@ export function CreateSubscriptionPlanDialog({
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <FormField
                 control={form.control}
                 name="name"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>Name</FormLabel>
                     <FormControl>
                       <Input placeholder="Basic Trainer Plan" {...field} />
@@ -186,7 +171,7 @@ export function CreateSubscriptionPlanDialog({
                 control={form.control}
                 name="planType"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>Plan Type</FormLabel>
                     <FormControl>
                       <Select
@@ -195,7 +180,7 @@ export function CreateSubscriptionPlanDialog({
                           field.onChange(value as "gym_owner" | "trainer")
                         }
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className="h-10 w-full min-w-0">
                           <SelectValue placeholder="Select audience" />
                         </SelectTrigger>
                         <SelectContent>
@@ -208,32 +193,31 @@ export function CreateSubscriptionPlanDialog({
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem className="min-w-0 sm:col-span-2">
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Perfect for freelance trainers starting out."
+                        {...field}
+                        value={field.value ?? ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Perfect for freelance trainers starting out."
-                      {...field}
-                      value={field.value ?? ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <FormField
                 control={form.control}
                 name="price"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>Price</FormLabel>
                     <FormControl>
                       <Input
@@ -260,7 +244,7 @@ export function CreateSubscriptionPlanDialog({
                 control={form.control}
                 name="billingPeriod"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>Billing Period</FormLabel>
                     <FormControl>
                       <Select
@@ -269,7 +253,7 @@ export function CreateSubscriptionPlanDialog({
                           field.onChange(value as BillingPeriod)
                         }
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className="h-10 w-full min-w-0">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -292,7 +276,7 @@ export function CreateSubscriptionPlanDialog({
                 control={form.control}
                 name="trialDays"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0 sm:col-span-2">
                     <FormLabel>Trial Days</FormLabel>
                     <FormControl>
                       <Input
@@ -309,69 +293,12 @@ export function CreateSubscriptionPlanDialog({
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="features"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Features (one per line)</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder={"Profile visibility\nMember messaging\nClass scheduling"}
-                      {...field}
-                      value={field.value ?? ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="isActive"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Active</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="checkbox"
-                        className="size-4"
-                        checked={field.value}
-                        onChange={(event) => field.onChange(event.target.checked)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="isPopular"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Popular</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="checkbox"
-                        className="size-4"
-                        checked={field.value}
-                        onChange={(event) => field.onChange(event.target.checked)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <FormField
                 control={form.control}
                 name="hasTrial"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>Has Trial</FormLabel>
                     <FormControl>
                       <Input
@@ -389,7 +316,7 @@ export function CreateSubscriptionPlanDialog({
                 control={form.control}
                 name="isDefault"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>Default Plan</FormLabel>
                     <FormControl>
                       <Input
@@ -407,15 +334,13 @@ export function CreateSubscriptionPlanDialog({
 
             <FormField
               control={form.control}
-              name="sortOrder"
+              name="features"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Sort Order</FormLabel>
+                  <FormLabel>Features (one per line)</FormLabel>
                   <FormControl>
-                    <Input
-                      type="number"
-                      min="0"
-                      placeholder="1"
+                    <Textarea
+                      placeholder={"Profile visibility\nMember messaging\nClass scheduling"}
                       {...field}
                       value={field.value ?? ""}
                     />
