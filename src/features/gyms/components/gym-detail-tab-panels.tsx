@@ -154,7 +154,7 @@ export function GymDetailTabPanels({
         <div className="grid gap-4 lg:grid-cols-2">
           <Card className="rounded-md border-[#F4F4F4] bg-white p-6 shadow-none">
             <SectionTitle>About</SectionTitle>
-            <p className="text-muted-foreground mt-4 text-sm leading-relaxed">
+            <p className="text-muted-foreground text-sm leading-relaxed">
               {aboutText}
             </p>
             {locations.length > 0 && (
@@ -166,7 +166,7 @@ export function GymDetailTabPanels({
           </Card>
           <Card className="rounded-md border-[#F4F4F4] bg-white p-6 shadow-none">
             <SectionTitle>Owner details</SectionTitle>
-            <div className="mt-6 grid gap-5">
+            <div className="grid gap-5">
               <LabelRow
                 icon={<IconUser className="size-5" />}
                 label="Owner"
@@ -197,7 +197,7 @@ export function GymDetailTabPanels({
         </div>
         <Card className="rounded-md border-[#F4F4F4] bg-white p-6 shadow-none">
           <SectionTitle>Subscription</SectionTitle>
-          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <LabelRow
               icon={<IconCreditCard className="size-5" />}
               label="Plan"
@@ -374,13 +374,13 @@ export function GymDetailTabPanels({
       <TabsContent value="subscription" className="mt-4">
         <Card className="rounded-md border-[#F4F4F4] bg-white p-6 shadow-none">
           <SectionTitle>Current subscription</SectionTitle>
-          <div className="mt-6 grid gap-8 md:grid-cols-2">
+          <div className="grid gap-8 md:grid-cols-2">
             <div className="space-y-6">
               <div>
                 <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
                   Plan
                 </p>
-                <p className="mt-1 text-2xl font-bold">{planLabel}</p>
+                <p className="mt-1 text-sm font-bold">{planLabel}</p>
               </div>
               <div>
                 <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
