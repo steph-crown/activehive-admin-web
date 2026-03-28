@@ -36,7 +36,7 @@ const data = {
       url: "/dashboard/admins",
       icon: IconShield,
     },
-        {
+    {
       title: "Gyms",
       url: "/dashboard/gyms",
       icon: IconBuildingStore,
@@ -68,7 +68,7 @@ const data = {
       icon: IconUser,
     },
     {
-      title: "Trainers",
+      title: "Freelance Trainers",
       url: "/dashboard/trainers",
       icon: IconUserStar,
     },
