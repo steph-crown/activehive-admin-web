@@ -99,8 +99,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavSubscriptionsGroup />
+        <NavMain
+          items={data.navMain}
+          additionalMenuItems={<NavSubscriptionsGroup />}
+        />
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

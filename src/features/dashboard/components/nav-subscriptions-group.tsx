@@ -8,9 +8,6 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import {
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
@@ -32,6 +29,7 @@ function isSubscriptionsListOrDetail(pathname: string): boolean {
   return m[1] !== "plans";
 }
 
+/** Renders as a single `SidebarMenuItem` tree; must live inside the same `SidebarMenu` as other nav links (see gym-web `NavMainGrouped`). */
 export function NavSubscriptionsGroup() {
   const { pathname } = useLocation();
 
@@ -45,48 +43,42 @@ export function NavSubscriptionsGroup() {
   }, [groupActive]);
 
   return (
-    <SidebarGroup>
-      <SidebarGroupContent className="flex flex-col gap-2">
-        <SidebarMenu>
-          <Collapsible
-            asChild
-            open={open}
-            onOpenChange={setOpen}
-            className="group/collapsible"
-          >
-            <SidebarMenuItem>
-              <CollapsibleTrigger asChild>
-                <SidebarMenuButton tooltip="Subscriptions">
-                  <IconCreditCard />
+    <Collapsible
+      asChild
+      open={open}
+      onOpenChange={setOpen}
+      className="group/collapsible"
+    >
+      <SidebarMenuItem>
+        <CollapsibleTrigger asChild>
+          <SidebarMenuButton tooltip="Subscriptions">
+            <IconCreditCard />
+            <span>Subscriptions</span>
+            <IconChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+          </SidebarMenuButton>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <SidebarMenuSub>
+            <SidebarMenuSubItem>
+              <SidebarMenuSubButton
+                asChild
+                isActive={subscriptionsChildActive}
+              >
+                <Link to="/dashboard/subscriptions">
                   <span>Subscriptions</span>
-                  <IconChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                </SidebarMenuButton>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <SidebarMenuSub>
-                  <SidebarMenuSubItem>
-                    <SidebarMenuSubButton
-                      asChild
-                      isActive={subscriptionsChildActive}
-                    >
-                      <Link to="/dashboard/subscriptions">
-                        <span>Subscriptions</span>
-                      </Link>
-                    </SidebarMenuSubButton>
-                  </SidebarMenuSubItem>
-                  <SidebarMenuSubItem>
-                    <SidebarMenuSubButton asChild isActive={plansChildActive}>
-                      <Link to="/dashboard/subscriptions/plans">
-                        <span>Subscription Plans</span>
-                      </Link>
-                    </SidebarMenuSubButton>
-                  </SidebarMenuSubItem>
-                </SidebarMenuSub>
-              </CollapsibleContent>
-            </SidebarMenuItem>
-          </Collapsible>
-        </SidebarMenu>
-      </SidebarGroupContent>
-    </SidebarGroup>
+                </Link>
+              </SidebarMenuSubButton>
+            </SidebarMenuSubItem>
+            <SidebarMenuSubItem>
+              <SidebarMenuSubButton asChild isActive={plansChildActive}>
+                <Link to="/dashboard/subscriptions/plans">
+                  <span>Subscription Plans</span>
+                </Link>
+              </SidebarMenuSubButton>
+            </SidebarMenuSubItem>
+          </SidebarMenuSub>
+        </CollapsibleContent>
+      </SidebarMenuItem>
+    </Collapsible>
   );
 }

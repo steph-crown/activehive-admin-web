@@ -1,3 +1,4 @@
+import * as React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { type Icon } from "@tabler/icons-react";
 
@@ -11,12 +12,15 @@ import {
 
 export function NavMain({
   items,
+  additionalMenuItems,
 }: {
   items: {
     title: string;
     url: string;
     icon?: Icon;
   }[];
+  /** Sibling items inside the same `SidebarMenu` as flat links (e.g. grouped/collapsible nav). */
+  additionalMenuItems?: React.ReactNode;
 }) {
   const location = useLocation();
 
@@ -65,6 +69,7 @@ export function NavMain({
               </SidebarMenuItem>
             );
           })}
+          {additionalMenuItems}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
