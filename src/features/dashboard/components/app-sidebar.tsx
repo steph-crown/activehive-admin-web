@@ -32,7 +32,7 @@ const data = {
       icon: IconDashboard,
     },
     {
-      title: "Admins",
+      title: "Admin Users",
       url: "/dashboard/admins",
       icon: IconShield,
     },

@@ -1,8 +1,13 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { TableCardSkeleton } from "@/components/loader/page-skeleton";
+import {
+  TableFilterBar,
+  TableFilterSelect,
+} from "@/components/molecules/table-filter-bar";
 import { AppSidebar } from "@/features/dashboard/components/app-sidebar";
 import { SiteHeader } from "@/features/dashboard/components/site-header";
+import { rowMatchesDateField, rowMatchesSearch } from "@/lib/table-filters";
 import { useAdminsQuery } from "../services";
 import type { Admin } from "../types";
 import { AdminsTable } from "./admins-table";
@@ -12,6 +17,13 @@ import { ConfirmAdminActionDialog } from "./confirm-admin-action-dialog";
 
 type AdminActionType = "delete" | "activate" | "deactivate";
 
+const STATUS_OPTIONS = [
+  { value: "all", label: "All statuses" },
+  { value: "active", label: "Active" },
+  { value: "inactive", label: "Inactive" },
+  { value: "pending", label: "Pending" },
+];
+
 export function AdminsPage() {
   const [viewAdmin, setViewAdmin] = useState<Admin | null>(null);
   const [editAdmin, setEditAdmin] = useState<Admin | null>(null);
@@ -19,15 +31,23 @@ export function AdminsPage() {
     admin: Admin;
     type: AdminActionType;
   } | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+
   const { data, isLoading, error } = useAdminsQuery();
 
-  if (data) {
-    console.log("Admins API Response:", data);
-  }
-
-  if (error) {
-    console.error("Admins API Error:", error);
-  }
+  const filteredData = useMemo(() => {
+    if (!data) return [];
+    return data.filter((row) => {
+      if (!rowMatchesSearch(row, searchQuery)) return false;
+      if (!rowMatchesDateField(row.createdAt, dateFilter)) return false;
+      if (statusFilter !== "all") {
+        if (row.status?.toLowerCase() !== statusFilter) return false;
+      }
+      return true;
+    });
+  }, [data, searchQuery, dateFilter, statusFilter]);
 
   return (
     <SidebarProvider>
@@ -38,8 +58,8 @@ export function AdminsPage() {
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
               <div className="px-4 lg:px-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h1 className="text-2xl font-bold">Admins</h1>
+                <div className="mb-4 flex items-center justify-between">
+                  <h1 className="text-3xl font-bold">Admin Users</h1>
                   <CreateAdminDialog
                     viewAdmin={viewAdmin}
                     onViewClose={() => setViewAdmin(null)}
@@ -69,20 +89,38 @@ export function AdminsPage() {
                     Error loading admins. Check console for details.
                   </div>
                 ) : data ? (
-                  <AdminsTable
-                    data={data}
-                    onViewAdmin={(admin) => setViewAdmin(admin)}
-                    onEditAdmin={(admin) => setEditAdmin(admin)}
-                    onDeleteAdmin={(admin) =>
-                      setActionAdmin({ admin, type: "delete" })
-                    }
-                    onActivateAdmin={(admin) =>
-                      setActionAdmin({ admin, type: "activate" })
-                    }
-                    onDeactivateAdmin={(admin) =>
-                      setActionAdmin({ admin, type: "deactivate" })
-                    }
-                  />
+                  <>
+                    <TableFilterBar
+                      searchValue={searchQuery}
+                      onSearchChange={setSearchQuery}
+                      searchPlaceholder="Search admins..."
+                      dateValue={dateFilter}
+                      onDateChange={setDateFilter}
+                      extraFilters={
+                        <TableFilterSelect
+                          value={statusFilter}
+                          onValueChange={setStatusFilter}
+                          placeholder="Status"
+                          options={STATUS_OPTIONS}
+                          aria-label="Filter by status"
+                        />
+                      }
+                    />
+                    <AdminsTable
+                      data={filteredData}
+                      onViewAdmin={(admin) => setViewAdmin(admin)}
+                      onEditAdmin={(admin) => setEditAdmin(admin)}
+                      onDeleteAdmin={(admin) =>
+                        setActionAdmin({ admin, type: "delete" })
+                      }
+                      onActivateAdmin={(admin) =>
+                        setActionAdmin({ admin, type: "activate" })
+                      }
+                      onDeactivateAdmin={(admin) =>
+                        setActionAdmin({ admin, type: "deactivate" })
+                      }
+                    />
+                  </>
                 ) : null}
               </div>
             </div>
