@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import { useMemo } from "react";
+
+import { useToast } from "@/hooks/use-toast";
 import {
   IconActivity,
   IconBarbell,
@@ -119,6 +121,8 @@ function RegistrationDocumentsSection({
 }: {
   documents: RegistrationDocuments;
 }) {
+  const { showInfo } = useToast();
+
   if (!documents) {
     return (
       <Card className="rounded-md border-[#F4F4F4] bg-white p-6 shadow-none">
@@ -177,36 +181,52 @@ function RegistrationDocumentsSection({
         </div>
       </Card>
 
-      {(rc?.verified != null || rc?.proofUrl) && (
-        <Card className="rounded-md border-[#F4F4F4] bg-white p-6 shadow-none">
-          <SectionTitle>RC validation</SectionTitle>
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            {rc.verified != null && (
-              <Badge
-                variant="outline"
-                className={
-                  rc.verified
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-900"
-                    : ""
-                }
-              >
-                {rc.verified ? "Verified" : "Not verified"}
-              </Badge>
-            )}
-            {rc.proofUrl?.trim() && (
-              <a
-                href={rc.proofUrl.trim()}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary inline-flex items-center gap-1.5 text-sm font-medium underline-offset-4 hover:underline"
-              >
-                <IconExternalLink className="size-4" />
-                Validation proof
-              </a>
-            )}
-          </div>
-        </Card>
-      )}
+      <Card className="rounded-md border-[#F4F4F4] bg-white p-6 shadow-none">
+        <SectionTitle>RC validation</SectionTitle>
+        <p className="text-muted-foreground mt-1 text-sm">
+          Run a compliance check against the submitted company / RC details. API
+          wiring is not live yet.
+        </p>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="shrink-0"
+            onClick={() =>
+              showInfo(
+                "Coming soon",
+                "RC validation from the admin dashboard is not available yet.",
+              )
+            }
+          >
+            Validate RC
+          </Button>
+          {rc?.verified != null && (
+            <Badge
+              variant="outline"
+              className={
+                rc.verified
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+                  : ""
+              }
+            >
+              {rc.verified ? "Verified" : "Not verified"}
+            </Badge>
+          )}
+          {rc?.proofUrl?.trim() && (
+            <a
+              href={rc.proofUrl.trim()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary inline-flex items-center gap-1.5 text-sm font-medium underline-offset-4 hover:underline"
+            >
+              <IconExternalLink className="size-4" />
+              Validation proof
+            </a>
+          )}
+        </div>
+      </Card>
 
       {additional.length > 0 && (
         <Card className="rounded-md border-[#F4F4F4] bg-white p-6 shadow-none">
