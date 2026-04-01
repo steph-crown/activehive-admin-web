@@ -179,6 +179,94 @@ export function StackedDetailSkeleton({
   );
 }
 
+/** Matches gym detail: header + 4 KPI tiles + tab bar + overview-style panels. */
+export function GymDetailPageSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex items-start gap-3">
+          <Skeleton className="mt-0.5 size-10 shrink-0 rounded-md" />
+          <div className="min-w-0 flex-1 space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <Skeleton className="h-9 w-[min(100%,14rem)]" />
+              <Skeleton className="h-6 w-28 rounded-full" />
+              <Skeleton className="h-6 w-20 rounded-full" />
+            </div>
+            <Skeleton className="h-4 w-[min(100%,20rem)]" />
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <Skeleton className="h-9 w-20" />
+          <Skeleton className="h-9 w-24" />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div
+            key={i}
+            className="flex flex-col gap-2 rounded-md border border-[#F4F4F4] bg-white p-5 shadow-none"
+          >
+            <div className="flex flex-col items-start gap-5">
+              <Skeleton className="size-12 rounded-md" />
+              <Skeleton className="h-3 w-28" />
+            </div>
+            <Skeleton className="h-9 w-16" />
+            <div className="flex items-center gap-2 pt-1">
+              <Skeleton className="h-3 w-12" />
+              <Skeleton className="h-3 w-24" />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="w-full space-y-4">
+        <div className="bg-muted flex h-auto min-h-9 w-full flex-wrap justify-start gap-1 rounded-lg p-[3px]">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton
+              key={i}
+              className="h-8 min-w-[5.5rem] flex-1 rounded-md sm:flex-none sm:min-w-[6.5rem]"
+            />
+          ))}
+        </div>
+        <div className="mt-4 grid gap-4 lg:grid-cols-2">
+          <div className="rounded-md border border-[#F4F4F4] bg-white p-6 shadow-none">
+            <Skeleton className="h-6 w-32" />
+            <Skeleton className="mt-4 h-4 w-full" />
+            <Skeleton className="mt-2 h-4 w-full" />
+            <Skeleton className="mt-2 h-4 w-full max-w-md" />
+          </div>
+          <div className="rounded-md border border-[#F4F4F4] bg-white p-6 shadow-none">
+            <Skeleton className="h-6 w-36" />
+            <div className="mt-5 space-y-5">
+              {Array.from({ length: 5 }).map((_, j) => (
+                <div key={j} className="flex gap-3">
+                  <Skeleton className="mt-0.5 size-5 shrink-0 rounded" />
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <Skeleton className="h-3 w-20" />
+                    <Skeleton className="h-4 w-full max-w-xs" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="rounded-md border border-[#F4F4F4] bg-white p-6 shadow-none">
+          <Skeleton className="h-6 w-40" />
+          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, k) => (
+              <div key={k} className="space-y-2">
+                <Skeleton className="h-3 w-24" />
+                <Skeleton className="h-4 w-32" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function ApplicationReviewSkeleton() {
   return (
     <div className="space-y-4">

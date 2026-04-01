@@ -9,6 +9,8 @@ import {
   IconCreditCard,
   IconCurrencyDollar,
   IconEdit,
+  IconExternalLink,
+  IconFileText,
   IconMail,
   IconMapPin,
   IconPhone,
@@ -28,7 +30,12 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TabsContent } from "@/components/ui/tabs";
 import { cn, formatDate } from "@/lib/utils";
-import type { Gym, GymLocation, GymSubscription } from "../types";
+import type {
+  Gym,
+  GymLocation,
+  GymRegistrationStatusRegistration,
+  GymSubscription,
+} from "../types";
 
 function SectionTitle({ children }: { children: ReactNode }) {
   return <h3 className="text-lg font-semibold text-foreground">{children}</h3>;
@@ -63,6 +70,166 @@ function formatCityState(gym: Gym): string {
   const state = a.state?.trim();
   if (city && state) return `${city}, ${state}`;
   return [city, state].filter(Boolean).join(", ") || "—";
+}
+
+type RegistrationDocuments =
+  GymRegistrationStatusRegistration["documents"];
+
+function isProbablyUrl(value: string): boolean {
+  const v = value.trim();
+  return /^https?:\/\//i.test(v) || v.startsWith("/");
+}
+
+function DocumentValue({
+  label,
+  value,
+  preferLink = false,
+}: {
+  label: string;
+  value: string | null | undefined;
+  preferLink?: boolean;
+}) {
+  const raw = value?.trim();
+  return (
+    <div className="space-y-1.5">
+      <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+        {label}
+      </p>
+      {!raw ? (
+        <p className="text-sm text-foreground">—</p>
+      ) : preferLink || isProbablyUrl(raw) ? (
+        <a
+          href={raw}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary inline-flex items-center gap-1.5 text-sm font-medium underline-offset-4 hover:underline"
+        >
+          <IconExternalLink className="size-4 shrink-0" aria-hidden />
+          Open document
+        </a>
+      ) : (
+        <p className="text-sm font-medium text-foreground break-words">{raw}</p>
+      )}
+    </div>
+  );
+}
+
+function RegistrationDocumentsSection({
+  documents,
+}: {
+  documents: RegistrationDocuments;
+}) {
+  if (!documents) {
+    return (
+      <Card className="rounded-md border-[#F4F4F4] bg-white p-6 shadow-none">
+        <SectionTitle>Compliance documents</SectionTitle>
+        <p className="text-muted-foreground mt-3 text-sm">
+          No registration document payload was returned for this gym.
+        </p>
+      </Card>
+    );
+  }
+
+  const additional = documents.additionalDocuments?.filter(Boolean) ?? [];
+  const rc = documents.rcValidation;
+
+  return (
+    <div className="space-y-4">
+      <Card className="rounded-md border-[#F4F4F4] bg-white p-6 shadow-none">
+        <SectionTitle>Registration & IDs</SectionTitle>
+        <p className="text-muted-foreground mt-1 text-sm">
+          Submitted during gym owner onboarding (step 3 · compliance).
+        </p>
+        <div className="mt-6 grid gap-6 sm:grid-cols-2">
+          <DocumentValue
+            label="Company registration no. (RC)"
+            value={documents.companyRegNo ?? undefined}
+          />
+          <DocumentValue label="RC number" value={documents.rcNumber ?? undefined} />
+          <DocumentValue
+            label="Government ID type"
+            value={documents.governmentIdType ?? undefined}
+          />
+          <DocumentValue
+            label="Government-issued ID"
+            value={documents.governmentId ?? undefined}
+            preferLink
+          />
+        </div>
+      </Card>
+
+      <Card className="rounded-md border-[#F4F4F4] bg-white p-6 shadow-none">
+        <SectionTitle>Address proof</SectionTitle>
+        <div className="mt-6 grid gap-6 sm:grid-cols-2">
+          <DocumentValue
+            label="Date on address proof"
+            value={
+              documents.addressProofDate
+                ? formatDate(documents.addressProofDate)
+                : undefined
+            }
+          />
+          <DocumentValue
+            label="Address proof file"
+            value={documents.addressProof ?? undefined}
+            preferLink
+          />
+        </div>
+      </Card>
+
+      {(rc?.verified != null || rc?.proofUrl) && (
+        <Card className="rounded-md border-[#F4F4F4] bg-white p-6 shadow-none">
+          <SectionTitle>RC validation</SectionTitle>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            {rc.verified != null && (
+              <Badge
+                variant="outline"
+                className={
+                  rc.verified
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+                    : ""
+                }
+              >
+                {rc.verified ? "Verified" : "Not verified"}
+              </Badge>
+            )}
+            {rc.proofUrl?.trim() && (
+              <a
+                href={rc.proofUrl.trim()}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary inline-flex items-center gap-1.5 text-sm font-medium underline-offset-4 hover:underline"
+              >
+                <IconExternalLink className="size-4" />
+                Validation proof
+              </a>
+            )}
+          </div>
+        </Card>
+      )}
+
+      {additional.length > 0 && (
+        <Card className="rounded-md border-[#F4F4F4] bg-white p-6 shadow-none">
+          <SectionTitle>Additional documents</SectionTitle>
+          <ul className="mt-4 space-y-3">
+            {additional.map((url, i) => (
+              <li key={`${url}-${i}`}>
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary inline-flex items-center gap-1.5 text-sm font-medium underline-offset-4 hover:underline"
+                >
+                  <IconFileText className="size-4 shrink-0" aria-hidden />
+                  Document {i + 1}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
+    </div>
+  );
 }
 
 type DemoMemberRow = {
@@ -100,6 +267,7 @@ export type GymDetailTabPanelsProps = {
   locations: GymLocation[];
   subscription: GymSubscription | null;
   planLabel: string;
+  registrationDocuments: RegistrationDocuments;
   metrics: {
     totalMembers: number;
     activeMembers: number;
@@ -115,6 +283,7 @@ export function GymDetailTabPanels({
   locations,
   subscription,
   planLabel,
+  registrationDocuments,
   metrics,
 }: GymDetailTabPanelsProps) {
   const aboutText =
@@ -383,6 +552,10 @@ export function GymDetailTabPanels({
         </Card>
       </TabsContent>
 
+      <TabsContent value="documents" className="mt-4">
+        <RegistrationDocumentsSection documents={registrationDocuments} />
+      </TabsContent>
+
       <TabsContent value="members" className="mt-4 space-y-4">
         <div className="grid gap-4 md:grid-cols-2">
           <SectionMetricCard
@@ -505,6 +678,7 @@ export function GymDetailTabPanels({
 
 export const GYM_DETAIL_TAB_ITEMS = [
   { value: "overview", label: "Overview", icon: IconBuilding },
+  { value: "documents", label: "Documents", icon: IconFileText },
   { value: "members", label: "Members", icon: IconUsers },
   { value: "activity", label: "Activity log", icon: IconActivity },
   { value: "subscription", label: "Subscription", icon: IconCreditCard },

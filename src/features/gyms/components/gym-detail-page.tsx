@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { StackedDetailSkeleton } from "@/components/loader/page-skeleton";
+import { GymDetailPageSkeleton } from "@/components/loader/page-skeleton";
 import { AppSidebar } from "@/features/dashboard/components/app-sidebar";
 import {
   mergeSectionMetricCssVars,
@@ -183,11 +183,7 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
             <div className="@container/main flex flex-1 flex-col gap-2">
               <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
                 <div className="space-y-6 px-4 lg:px-6">
-                  <StackedDetailSkeleton
-                    toolbar
-                    cardCount={4}
-                    cardFields={6}
-                  />
+                  <GymDetailPageSkeleton />
                 </div>
               </div>
             </div>
@@ -428,6 +424,9 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
                     locations={locations}
                     subscription={subscription}
                     planLabel={displayPlan}
+                    registrationDocuments={
+                      registration?.registration?.documents ?? null
+                    }
                     metrics={{
                       totalMembers,
                       activeMembers,
