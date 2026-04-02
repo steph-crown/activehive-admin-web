@@ -10,7 +10,7 @@ import { SectionCards } from "./section-cards";
 import { RevenueChart } from "./revenue-chart";
 import { MembersChart } from "./members-chart";
 import { recentActivitiesColumns } from "./recent-activities-columns";
-import { useDashboardDocumentsQuery } from "../services";
+import { useDashboardDocumentsQuery, useDashboardStatsQuery } from "../services";
 import {
   ChartsSkeleton,
   DashboardTableSkeleton,
@@ -25,6 +25,7 @@ import type { RecentActivity } from "../types";
 
 export function DashboardPage() {
   const { data, isLoading } = useDashboardDocumentsQuery();
+  const { data: stats, isLoading: statsLoading } = useDashboardStatsQuery();
   const [searchQuery, setSearchQuery] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -62,7 +63,7 @@ export function DashboardPage() {
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-              {isLoading ? (
+              {isLoading || statsLoading ? (
                 <>
                   <SectionCardsSkeleton />
                   <div className="px-4 lg:px-6">
@@ -74,7 +75,7 @@ export function DashboardPage() {
                 </>
               ) : (
                 <>
-                  <SectionCards />
+                  <SectionCards stats={stats} />
                   <div className="px-4 lg:px-6">
                     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                       <RevenueChart />

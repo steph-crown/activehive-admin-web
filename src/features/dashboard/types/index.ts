@@ -7,3 +7,17 @@ export type RecentActivity = {
   when: string;
   status: string;
 };
+
+export type DashboardStats = {
+  totalUsers: number;
+  totalGymOwners: number;
+  totalStaff: number;
+  totalMembers: number;
+  totalTrainers: number;
+  totalGyms: number;
+  totalLocations: number;
+  totalMemberships: number;
+  totalSubscriptions: number;
+  activeGyms: number;
+  activeSubscriptions: number;
+};

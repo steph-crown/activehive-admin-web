@@ -10,6 +10,7 @@ import {
   mergeSectionMetricCssVars,
   SectionMetricCard,
 } from "./section-metric-card";
+import type { DashboardStats } from "../types";
 
 type MetricCardTheme = {
   icon: React.ReactNode;
@@ -26,7 +27,7 @@ type MetricCardTheme = {
   href: string;
 };
 
-export function SectionCards() {
+export function SectionCards({ stats }: { stats?: DashboardStats }) {
   const baseVars = {
     "--success-500": "#22c55e",
     "--error-400": "#dc5959",
@@ -37,10 +38,12 @@ export function SectionCards() {
   const cardThemes: MetricCardTheme[] = [
     {
       title: "Total Gyms",
-      value: "24",
+      value: stats ? String(stats.totalGyms) : "24",
       percentChange: 2.4,
       isPositive: true,
-      comparisonText: "vs last month",
+      comparisonText: stats
+        ? `${stats.activeGyms} active`
+        : "vs last month",
       icon: <IconHomeFilled className="size-6" />,
       iconBgVar: "var(--primary-50)",
       iconColorVar: "var(--primary-500)",
@@ -55,7 +58,7 @@ export function SectionCards() {
     },
     {
       title: "Total Members",
-      value: "8,746",
+      value: stats ? stats.totalMembers.toLocaleString() : "8,746",
       percentChange: 2.4,
       isPositive: true,
       comparisonText: "vs last month",
@@ -74,7 +77,7 @@ export function SectionCards() {
     },
     {
       title: "Total Trainers",
-      value: "56",
+      value: stats ? String(stats.totalTrainers) : "56",
       percentChange: 1.9,
       isPositive: true,
       comparisonText: "vs last month",
