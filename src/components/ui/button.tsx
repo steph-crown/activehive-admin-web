@@ -67,16 +67,17 @@ function Button({
   const mergedDisabled = disabled || loading;
 
   // Radix Slot requires exactly ONE React element child. Never pass `null` + child.
+  // `Slot` does not accept `disabled` in its props types; merge onto the child instead.
   if (shouldUseSlot) {
     return (
-      <Slot
-        data-slot="button"
-        className={mergedClassName}
-        disabled={mergedDisabled}
-        aria-busy={loading || undefined}
-        {...props}
-      >
-        {soleChild}
+      <Slot data-slot="button" className={mergedClassName} {...props}>
+        {React.cloneElement(
+          soleChild as React.ReactElement<Record<string, unknown>>,
+          {
+            disabled: mergedDisabled,
+            "aria-busy": loading || undefined,
+          },
+        )}
       </Slot>
     );
   }
