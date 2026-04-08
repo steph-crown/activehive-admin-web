@@ -23,9 +23,24 @@ export type CreateSubscriptionPlanPayload = {
 
 export type UpdateSubscriptionPlanPayload = Partial<CreateSubscriptionPlanPayload>;
 
+/** POST `/api/admin/subscriptions/:id/renew` — optional body for plan change / promo (backend-specific). */
+export type RenewSubscriptionPayload = {
+  subscriptionPlanId?: string;
+  promoCode?: string | null;
+};
+
 export const subscriptionsApi = {
   getSubscriptions: async (): Promise<Subscription[]> => {
     return await apiClient.get<Subscription[]>(subscriptionsBasePath);
+  },
+  renewSubscription: async (
+    id: string,
+    payload?: RenewSubscriptionPayload,
+  ): Promise<unknown> => {
+    return await apiClient.post<unknown>(
+      `${subscriptionsBasePath}/${id}/renew`,
+      payload ?? {},
+    );
   },
   getActivePlans: async (
     planType: "gym_owner" | "trainer",

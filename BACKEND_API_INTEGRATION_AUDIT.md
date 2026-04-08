@@ -1,5 +1,7 @@
 # Activehive Admin Web — backend API checklist
 
+**List format (same content):** [`BACKEND_API_INTEGRATION_AUDIT_LIST.md`](./BACKEND_API_INTEGRATION_AUDIT_LIST.md)
+
 Audience: **backend only.** Each table states what to **change on an existing API** or what **new API** to ship. No frontend implementation notes.
 
 ---

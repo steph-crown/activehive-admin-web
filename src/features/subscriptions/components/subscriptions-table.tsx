@@ -1,4 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { type ColumnDef } from "@tanstack/react-table";
 import {
@@ -6,6 +7,7 @@ import {
   IconDotsVertical,
   IconLoader,
 } from "@tabler/icons-react";
+import { Loader2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,13 +15,20 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DataTable } from "@/components/data-table/data-table";
+import { useToast } from "@/hooks/use-toast";
 import { formatDate } from "@/lib/utils";
 import type { Subscription } from "../types";
+import { useRenewSubscriptionMutation } from "../services";
 
-export const subscriptionsColumns: ColumnDef<Subscription>[] = [
+function isExpiredSubscriptionStatus(status: string): boolean {
+  return status?.trim().toLowerCase() === "expired";
+}
+
+const baseColumns: ColumnDef<Subscription>[] = [
   {
     accessorKey: "gym",
     header: "Gym",
@@ -132,30 +141,6 @@ export const subscriptionsColumns: ColumnDef<Subscription>[] = [
       );
     },
   },
-  {
-    id: "actions",
-    cell: ({ row }) => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
-            size="icon"
-          >
-            <IconDotsVertical />
-            <span className="sr-only">Open menu</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-32">
-          <DropdownMenuItem asChild>
-            <Link to={`/dashboard/subscriptions/${row.original.id}`}>
-              View Details
-            </Link>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
-  },
 ];
 
 type SubscriptionsTableProps = {
@@ -163,10 +148,87 @@ type SubscriptionsTableProps = {
 };
 
 export function SubscriptionsTable({ data }: SubscriptionsTableProps) {
+  const {
+    mutate: renew,
+    isPending,
+    variables: renewingId,
+  } = useRenewSubscriptionMutation();
+  const { showSuccess, showError } = useToast();
+
+  const columns = useMemo<ColumnDef<Subscription>[]>(
+    () => [
+      ...baseColumns,
+      {
+        id: "actions",
+        cell: ({ row }) => {
+          const subscription = row.original;
+          const canRenew = isExpiredSubscriptionStatus(subscription.status);
+          const isRenewingThis = isPending && renewingId === subscription.id;
+
+          return (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
+                  size="icon"
+                >
+                  <IconDotsVertical />
+                  <span className="sr-only">Open menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-[11rem]">
+                <DropdownMenuItem asChild>
+                  <Link to={`/dashboard/subscriptions/${subscription.id}`}>
+                    View Details
+                  </Link>
+                </DropdownMenuItem>
+                {canRenew ? (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      disabled={isPending}
+                      onSelect={() => {
+                        renew(subscription.id, {
+                          onSuccess: () => {
+                            showSuccess(
+                              "Subscription renewed",
+                              "The subscription was renewed successfully.",
+                            );
+                          },
+                          onError: (error) => {
+                            const message =
+                              error instanceof Error
+                                ? error.message
+                                : "Could not renew this subscription.";
+                            showError("Renewal failed", message);
+                          },
+                        });
+                      }}
+                    >
+                      {isRenewingThis ? (
+                        <Loader2
+                          className="size-4 shrink-0 animate-spin"
+                          aria-hidden
+                        />
+                      ) : null}
+                      Renew subscription
+                    </DropdownMenuItem>
+                  </>
+                ) : null}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          );
+        },
+      },
+    ],
+    [isPending, renewingId, renew, showError, showSuccess],
+  );
+
   return (
     <DataTable
       data={data}
-      columns={subscriptionsColumns}
+      columns={columns}
       enableDrag={false}
       enableSelection={false}
       getRowId={(row) => row.id}
