@@ -1,3 +1,5 @@
+import { formatMoneyDisplayAsNgn, formatNgn } from "@/lib/format-ngn";
+
 import type { Gym } from "../types";
 
 const PLAN_KEYS = ["basic", "pro", "enterprise", "trial"] as const;
@@ -14,6 +16,12 @@ function stableHash(id: string): number {
     h = (h * 31 + id.charCodeAt(i)) | 0;
   }
   return Math.abs(h);
+}
+
+/** Placeholder monthly revenue when the API omits `revenue` (matches list row logic). */
+export function formatGymRevenueFallbackForId(gymId: string): string {
+  const h = stableHash(gymId);
+  return formatNgn(((h % 420) + 12) * 1000);
 }
 
 function normalizePlanKey(
@@ -60,12 +68,8 @@ export function toGymListRow(gym: Gym): GymListRow {
 
   const displayRevenue =
     gym.revenue && String(gym.revenue).trim()
-      ? String(gym.revenue)
-      : new Intl.NumberFormat("en-NG", {
-          style: "currency",
-          currency: "NGN",
-          maximumFractionDigits: 0,
-        }).format(((h % 420) + 12) * 1000);
+      ? formatMoneyDisplayAsNgn(gym.revenue)
+      : formatGymRevenueFallbackForId(gym.id);
 
   return {
     ...gym,

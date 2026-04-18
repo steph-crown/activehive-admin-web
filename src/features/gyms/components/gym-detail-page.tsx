@@ -20,6 +20,7 @@ import {
   SectionMetricCard,
 } from "@/features/dashboard/components/section-metric-card";
 import { SiteHeader } from "@/features/dashboard/components/site-header";
+import { formatMoneyDisplayAsNgn } from "@/lib/format-ngn";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -33,6 +34,7 @@ import {
   GYM_DETAIL_TAB_ITEMS,
   GymDetailTabPanels,
 } from "./gym-detail-tab-panels";
+import { formatGymRevenueFallbackForId } from "../lib/gym-list-display";
 import type { Gym } from "../types";
 
 function formatCityState(gym: Gym): string {
@@ -244,8 +246,8 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
   const checkInsToday = 47;
   const monthlyRevenueDisplay =
     gym.revenue && String(gym.revenue).trim()
-      ? String(gym.revenue)
-      : "$14,200";
+      ? formatMoneyDisplayAsNgn(gym.revenue)
+      : formatGymRevenueFallbackForId(gym.id);
 
   const subheading = `${formatCityState(gym)} · ${displayPlan}`;
 
