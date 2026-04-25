@@ -2,7 +2,7 @@ import { apiClient } from "@/lib/api-client";
 import type { DashboardStats, RecentActivity } from "../types";
 import mockData from "./data.json";
 
-const basePath = "/dashboard/recent-activities";
+const basePath = "/api/admin/dashboard/recent-activities";
 const statsPath = "/api/admin/dashboard/stats";
 
 export const dashboardApi = {
