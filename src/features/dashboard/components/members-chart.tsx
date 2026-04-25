@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Bar,
   BarChart,
@@ -8,23 +9,16 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-
-const chartData = [
-  { month: "Jan", participants: 560 },
-  { month: "Feb", participants: 635 },
-  { month: "Mar", participants: 590 },
-  { month: "Apr", participants: 728 },
-  { month: "May", participants: 682 },
-  { month: "Jun", participants: 845 },
-  { month: "Jul", participants: 798 },
-  { month: "Aug", participants: 976 },
-  { month: "Sep", participants: 926 },
-  { month: "Oct", participants: 1115 },
-  { month: "Nov", participants: 1068 },
-  { month: "Dec", participants: 1238 },
-];
+import { useParticipantsOverTimeQuery } from "../services";
 
 export function MembersChart() {
+  const { data, isLoading } = useParticipantsOverTimeQuery();
+
+  const chartData = (data ?? []).map((d) => ({
+    month: d.monthLabel,
+    participants: d.count,
+  }));
+
   return (
     <Card className="!rounded-md border border-[#F4F4F4] p-0 shadow-none">
       <div className="flex flex-col">
@@ -35,45 +29,49 @@ export function MembersChart() {
         </div>
 
         <div className="flex flex-col gap-4 p-6">
-          <div className="h-[300px] w-full [&_*]:outline-none [&_*]:focus:outline-none">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} barSize={18}>
-                <CartesianGrid
-                  strokeDasharray="0"
-                  vertical={false}
-                  stroke="#F4F4F4"
-                />
-                <XAxis
-                  dataKey="month"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: "#9CA3AF", fontSize: 12 }}
-                  dy={10}
-                />
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: "#9CA3AF", fontSize: 12 }}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#1F2937",
-                    border: "none",
-                    borderRadius: "8px",
-                    color: "#fff",
-                    fontSize: "12px",
-                  }}
-                  formatter={(value) => [value, "Participants"]}
-                />
-                <Bar
-                  dataKey="participants"
-                  fill="#FABE12"
-                  name="Participants"
-                  radius={[8, 8, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          {isLoading ? (
+            <Skeleton className="h-[300px] w-full" />
+          ) : (
+            <div className="h-[300px] w-full [&_*]:outline-none [&_*]:focus:outline-none">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData} barSize={18}>
+                  <CartesianGrid
+                    strokeDasharray="0"
+                    vertical={false}
+                    stroke="#F4F4F4"
+                  />
+                  <XAxis
+                    dataKey="month"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: "#9CA3AF", fontSize: 12 }}
+                    dy={10}
+                  />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: "#9CA3AF", fontSize: 12 }}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#1F2937",
+                      border: "none",
+                      borderRadius: "8px",
+                      color: "#fff",
+                      fontSize: "12px",
+                    }}
+                    formatter={(value) => [value, "Participants"]}
+                  />
+                  <Bar
+                    dataKey="participants"
+                    fill="#FABE12"
+                    name="Participants"
+                    radius={[8, 8, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
         </div>
       </div>
     </Card>

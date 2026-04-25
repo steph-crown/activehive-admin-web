@@ -9,11 +9,9 @@ import {
 } from "@/components/molecules/table-filter-bar";
 import { AppSidebar } from "@/features/dashboard/components/app-sidebar";
 import { SiteHeader } from "@/features/dashboard/components/site-header";
-import {
-  rowMatchesDateField,
-  rowMatchesSearch,
-} from "@/lib/table-filters";
+import { rowMatchesDateField } from "@/lib/table-filters";
 import { gymsQueryKeys, useGymsQuery } from "../services";
+import type { GymsListParams } from "../services/api";
 import type { Gym } from "../types";
 import {
   GYM_PLAN_FILTER_OPTIONS,
@@ -56,17 +54,30 @@ export function GymsPage() {
   const [approvalFilter, setApprovalFilter] = useState("all");
   const [activeFilter, setActiveFilter] = useState("all");
   const [planFilter, setPlanFilter] = useState("all");
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
 
-  const { data, isLoading, error } = useGymsQuery();
+  const apiParams = useMemo<GymsListParams>(() => {
+    const params: GymsListParams = { page, limit };
+    if (searchQuery) params.search = searchQuery;
+    if (approvalFilter !== "all" && approvalFilter !== "none") {
+      params.approvalStatus = approvalFilter;
+    }
+    if (activeFilter === "active") params.isActive = true;
+    if (activeFilter === "inactive") params.isActive = false;
+    return params;
+  }, [page, limit, searchQuery, approvalFilter, activeFilter]);
+
+  const { data: response, isLoading, error } = useGymsQuery(apiParams);
 
   const listRows = useMemo(
-    () => (data ?? []).map(toGymListRow),
-    [data],
+    () => (response?.data ?? []).map(toGymListRow),
+    [response],
   );
 
   const summary = useMemo(() => {
     const rows = listRows;
-    const totalGyms = rows.length;
+    const totalGyms = response?.pagination.total ?? rows.length;
     const activeGyms = rows.filter((g) => g.isActive).length;
     const pendingApproval = rows.filter(
       (g) => g.approvalStatus === "pending",
@@ -76,35 +87,25 @@ export function GymsPage() {
       0,
     );
     return { totalGyms, activeGyms, pendingApproval, totalMembers };
-  }, [listRows]);
+  }, [listRows, response]);
 
+  // dateFilter and planFilter have no API support — applied client-side on current page.
+  // approvalFilter="none" (rows with no approval status) also has no server equivalent.
   const filteredData = useMemo(() => {
     return listRows.filter((row) => {
-      if (!rowMatchesSearch(row, searchQuery)) return false;
       if (!rowMatchesDateField(row.createdAt, dateFilter)) return false;
-      if (approvalFilter !== "all") {
-        const current = row.approvalStatus;
-        if (approvalFilter === "none") {
-          if (current != null && String(current).length > 0) return false;
-        } else if ((current ?? "").toLowerCase() !== approvalFilter) {
+      if (approvalFilter === "none") {
+        if (row.approvalStatus != null && String(row.approvalStatus).length > 0)
           return false;
-        }
       }
-      if (activeFilter === "active" && !row.isActive) return false;
-      if (activeFilter === "inactive" && row.isActive) return false;
       if (planFilter !== "all" && row.displayPlanKey !== planFilter) {
         return false;
       }
       return true;
     });
-  }, [
-    listRows,
-    searchQuery,
-    dateFilter,
-    approvalFilter,
-    activeFilter,
-    planFilter,
-  ]);
+  }, [listRows, dateFilter, approvalFilter, planFilter]);
+
+  const pageCount = response?.pagination.totalPages;
 
   return (
     <SidebarProvider>
@@ -156,7 +157,7 @@ export function GymsPage() {
                   <div className="text-destructive">
                     Error loading gyms. Check console for details.
                   </div>
-                ) : data ? (
+                ) : response ? (
                   <>
                     <GymsSummaryCards
                       totalGyms={summary.totalGyms}
@@ -166,7 +167,10 @@ export function GymsPage() {
                     />
                     <TableFilterBar
                       searchValue={searchQuery}
-                      onSearchChange={setSearchQuery}
+                      onSearchChange={(v) => {
+                        setSearchQuery(v);
+                        setPage(1);
+                      }}
                       searchPlaceholder="Search gyms..."
                       dateValue={dateFilter}
                       onDateChange={setDateFilter}
@@ -174,14 +178,20 @@ export function GymsPage() {
                         <>
                           <TableFilterSelect
                             value={approvalFilter}
-                            onValueChange={setApprovalFilter}
+                            onValueChange={(v) => {
+                              setApprovalFilter(v);
+                              setPage(1);
+                            }}
                             placeholder="Approval"
                             options={APPROVAL_OPTIONS}
                             aria-label="Filter by approval status"
                           />
                           <TableFilterSelect
                             value={activeFilter}
-                            onValueChange={setActiveFilter}
+                            onValueChange={(v) => {
+                              setActiveFilter(v);
+                              setPage(1);
+                            }}
                             placeholder="Gym status"
                             options={ACTIVE_OPTIONS}
                             aria-label="Filter by active state"
@@ -210,6 +220,12 @@ export function GymsPage() {
                       onRejectApplication={(gym: GymListRow) =>
                         setFinalizeApp({ gym, mode: "reject" })
                       }
+                      pageIndex={page - 1}
+                      pageCount={pageCount}
+                      onPageChange={(pageIndex, pageSize) => {
+                        setPage(pageIndex + 1);
+                        setLimit(pageSize);
+                      }}
                     />
                   </>
                 ) : null}

@@ -1,4 +1,4 @@
-/* eslint-disable react-refresh/only-export-components */
+ 
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { type ColumnDef } from "@tanstack/react-table";
@@ -145,9 +145,17 @@ const baseColumns: ColumnDef<Subscription>[] = [
 
 type SubscriptionsTableProps = {
   data: Subscription[];
+  pageIndex?: number;
+  pageCount?: number;
+  onPageChange?: (pageIndex: number, pageSize: number) => void;
 };
 
-export function SubscriptionsTable({ data }: SubscriptionsTableProps) {
+export function SubscriptionsTable({
+  data,
+  pageIndex,
+  pageCount,
+  onPageChange,
+}: SubscriptionsTableProps) {
   const {
     mutate: renew,
     isPending,
@@ -232,6 +240,9 @@ export function SubscriptionsTable({ data }: SubscriptionsTableProps) {
       enableDrag={false}
       enableSelection={false}
       getRowId={(row) => row.id}
+      pageIndex={pageIndex}
+      pageCount={pageCount}
+      onPageChange={onPageChange}
     />
   );
 }

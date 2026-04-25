@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api-client";
+import type { PaginatedResponse } from "@/lib/types";
 import type { BillingPeriod } from "../constants";
 import type { Subscription, SubscriptionPlan } from "../types";
 
@@ -29,9 +30,17 @@ export type RenewSubscriptionPayload = {
   promoCode?: string | null;
 };
 
+export type SubscriptionsListParams = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string;
+  dateFrom?: string;
+};
+
 export const subscriptionsApi = {
-  getSubscriptions: async (): Promise<Subscription[]> => {
-    return await apiClient.get<Subscription[]>(subscriptionsBasePath);
+  getSubscriptions: async (params: SubscriptionsListParams = {}): Promise<PaginatedResponse<Subscription>> => {
+    return await apiClient.get<PaginatedResponse<Subscription>>(subscriptionsBasePath, { params });
   },
   renewSubscription: async (
     id: string,

@@ -8,6 +8,11 @@ export type RecentActivity = {
   status: string;
 };
 
+export type ChartDataPoint = {
+  monthLabel: string;
+  count: number;
+};
+
 export type DashboardStats = {
   totalUsers: number;
   totalGymOwners: number;

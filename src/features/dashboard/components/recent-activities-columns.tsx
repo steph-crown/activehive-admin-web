@@ -1,23 +1,5 @@
 import { type ColumnDef } from "@tanstack/react-table";
-
-import { Badge } from "@/components/ui/badge";
 import type { RecentActivity } from "../types";
-
-function statusVariant(status: string): "default" | "secondary" | "destructive" {
-  const s = status.toLowerCase();
-  if (
-    s === "success" ||
-    s === "completed" ||
-    s === "done" ||
-    s === "active"
-  ) {
-    return "default";
-  }
-  if (s === "pending" || s === "in process" || s === "in_progress") {
-    return "secondary";
-  }
-  return "destructive";
-}
 
 export const recentActivitiesColumns: ColumnDef<RecentActivity>[] = [
   {
@@ -51,15 +33,6 @@ export const recentActivitiesColumns: ColumnDef<RecentActivity>[] = [
           timeStyle: "short",
         })}
       </div>
-    ),
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => (
-      <Badge variant={statusVariant(row.original.status)} className="capitalize">
-        {row.original.status}
-      </Badge>
     ),
   },
 ];

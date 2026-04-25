@@ -229,6 +229,9 @@ type GymsTableProps = {
   onDeactivateGym?: (gym: GymListRow) => void;
   onApproveApplication?: (gym: GymListRow) => void;
   onRejectApplication?: (gym: GymListRow) => void;
+  pageIndex?: number;
+  pageCount?: number;
+  onPageChange?: (pageIndex: number, pageSize: number) => void;
 };
 
 export function GymsTable({
@@ -237,6 +240,9 @@ export function GymsTable({
   onDeactivateGym,
   onApproveApplication,
   onRejectApplication,
+  pageIndex,
+  pageCount,
+  onPageChange,
 }: GymsTableProps) {
   return (
     <DataTable
@@ -250,6 +256,9 @@ export function GymsTable({
       enableDrag={false}
       enableSelection={false}
       getRowId={(row) => row.id}
+      pageIndex={pageIndex}
+      pageCount={pageCount}
+      onPageChange={onPageChange}
     />
   );
 }

@@ -7,11 +7,9 @@ import {
 } from "@/components/molecules/table-filter-bar";
 import { AppSidebar } from "@/features/dashboard/components/app-sidebar";
 import { SiteHeader } from "@/features/dashboard/components/site-header";
-import {
-  rowMatchesDateField,
-  rowMatchesSearch,
-} from "@/lib/table-filters";
+import { rowMatchesDateField } from "@/lib/table-filters";
 import { useTrainersQuery } from "../services";
+import type { TrainersListParams } from "../services/api";
 import type { Trainer } from "../types";
 import { TrainersTable } from "./trainers-table";
 import { ViewTrainerDialog } from "./view-trainer-dialog";
@@ -42,17 +40,23 @@ export function TrainersPage() {
   const [dateFilter, setDateFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [onboardingFilter, setOnboardingFilter] = useState("all");
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
 
-  const { data, isLoading, error } = useTrainersQuery();
+  const apiParams = useMemo<TrainersListParams>(() => {
+    const params: TrainersListParams = { page, limit };
+    if (searchQuery) params.search = searchQuery;
+    if (statusFilter !== "all") params.status = statusFilter;
+    return params;
+  }, [page, limit, searchQuery, statusFilter]);
 
+  const { data: response, isLoading, error } = useTrainersQuery(apiParams);
+
+  // dateFilter and onboardingFilter have no API support — applied client-side on current page.
   const filteredData = useMemo(() => {
-    if (!data) return [];
-    return data.filter((row) => {
-      if (!rowMatchesSearch(row, searchQuery)) return false;
+    const trainers = response?.data ?? [];
+    return trainers.filter((row) => {
       if (!rowMatchesDateField(row.createdAt, dateFilter)) return false;
-      if (statusFilter !== "all") {
-        if (row.status?.toLowerCase() !== statusFilter) return false;
-      }
       if (onboardingFilter === "complete" && !row.onboardingCompleted) {
         return false;
       }
@@ -61,7 +65,9 @@ export function TrainersPage() {
       }
       return true;
     });
-  }, [data, searchQuery, dateFilter, statusFilter, onboardingFilter]);
+  }, [response, dateFilter, onboardingFilter]);
+
+  const pageCount = response?.pagination.totalPages;
 
   return (
     <SidebarProvider>
@@ -106,11 +112,14 @@ export function TrainersPage() {
                   <div className="text-destructive">
                     Error loading trainers. Check console for details.
                   </div>
-                ) : data ? (
+                ) : response?.data ? (
                   <>
                     <TableFilterBar
                       searchValue={searchQuery}
-                      onSearchChange={setSearchQuery}
+                      onSearchChange={(v) => {
+                        setSearchQuery(v);
+                        setPage(1);
+                      }}
                       searchPlaceholder="Search trainers..."
                       dateValue={dateFilter}
                       onDateChange={setDateFilter}
@@ -118,7 +127,10 @@ export function TrainersPage() {
                         <>
                           <TableFilterSelect
                             value={statusFilter}
-                            onValueChange={setStatusFilter}
+                            onValueChange={(v) => {
+                              setStatusFilter(v);
+                              setPage(1);
+                            }}
                             placeholder="Status"
                             options={STATUS_OPTIONS}
                             aria-label="Filter by status"
@@ -146,6 +158,12 @@ export function TrainersPage() {
                       onDeactivateTrainer={(trainer) =>
                         setAction({ trainer, action: "deactivate" })
                       }
+                      pageIndex={page - 1}
+                      pageCount={pageCount}
+                      onPageChange={(pageIndex, pageSize) => {
+                        setPage(pageIndex + 1);
+                        setLimit(pageSize);
+                      }}
                     />
                   </>
                 ) : null}

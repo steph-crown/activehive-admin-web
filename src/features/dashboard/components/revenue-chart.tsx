@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Area,
   AreaChart,
@@ -8,23 +9,16 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-
-const chartData = [
-  { month: "Jan", gyms: 42 },
-  { month: "Feb", gyms: 47 },
-  { month: "Mar", gyms: 45 },
-  { month: "Apr", gyms: 53 },
-  { month: "May", gyms: 50 },
-  { month: "Jun", gyms: 61 },
-  { month: "Jul", gyms: 58 },
-  { month: "Aug", gyms: 70 },
-  { month: "Sep", gyms: 66 },
-  { month: "Oct", gyms: 79 },
-  { month: "Nov", gyms: 75 },
-  { month: "Dec", gyms: 88 },
-];
+import { useGymsOverTimeQuery } from "../services";
 
 export function RevenueChart() {
+  const { data, isLoading } = useGymsOverTimeQuery();
+
+  const chartData = (data ?? []).map((d) => ({
+    month: d.monthLabel,
+    gyms: d.count,
+  }));
+
   return (
     <Card className="!rounded-md border border-[#F4F4F4] p-0 shadow-none">
       <div className="flex flex-col">
@@ -35,54 +29,58 @@ export function RevenueChart() {
         </div>
 
         <div className="flex flex-col gap-4 p-6">
-          <div className="h-[300px] w-full [&_*]:outline-none [&_*]:focus:outline-none">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData}>
-                <defs>
-                  <linearGradient id="gymsFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#FABE12" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="#FABE12" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid
-                  strokeDasharray="0"
-                  vertical={false}
-                  stroke="#F4F4F4"
-                />
-                <XAxis
-                  dataKey="month"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: "#9CA3AF", fontSize: 12 }}
-                  dy={10}
-                />
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: "#9CA3AF", fontSize: 12 }}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#1F2937",
-                    border: "none",
-                    borderRadius: "8px",
-                    color: "#fff",
-                    fontSize: "12px",
-                  }}
-                  formatter={(value) => [value, "Gyms"]}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="gyms"
-                  stroke="#FABE12"
-                  strokeWidth={2}
-                  fill="url(#gymsFill)"
-                  name="Gyms"
-                  dot={false}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+          {isLoading ? (
+            <Skeleton className="h-[300px] w-full" />
+          ) : (
+            <div className="h-[300px] w-full [&_*]:outline-none [&_*]:focus:outline-none">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData}>
+                  <defs>
+                    <linearGradient id="gymsFill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#FABE12" stopOpacity={0.2} />
+                      <stop offset="95%" stopColor="#FABE12" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid
+                    strokeDasharray="0"
+                    vertical={false}
+                    stroke="#F4F4F4"
+                  />
+                  <XAxis
+                    dataKey="month"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: "#9CA3AF", fontSize: 12 }}
+                    dy={10}
+                  />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: "#9CA3AF", fontSize: 12 }}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#1F2937",
+                      border: "none",
+                      borderRadius: "8px",
+                      color: "#fff",
+                      fontSize: "12px",
+                    }}
+                    formatter={(value) => [value, "Gyms"]}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="gyms"
+                    stroke="#FABE12"
+                    strokeWidth={2}
+                    fill="url(#gymsFill)"
+                    name="Gyms"
+                    dot={false}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          )}
         </div>
       </div>
     </Card>

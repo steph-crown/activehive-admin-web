@@ -1,5 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { subscriptionsApi } from "./api";
+import type { SubscriptionsListParams } from "./api";
+import type { PaginatedResponse } from "@/lib/types";
 import type { Subscription, SubscriptionPlan } from "../types";
 
 export const subscriptionsQueryKeys = {
@@ -15,10 +17,11 @@ export const subscriptionPlansQueryKeys = {
     [...subscriptionPlansQueryKeys.all, "detail", id] as const,
 };
 
-export const useSubscriptionsQuery = () =>
-  useQuery<Subscription[]>({
-    queryKey: subscriptionsQueryKeys.list(),
-    queryFn: () => subscriptionsApi.getSubscriptions(),
+export const useSubscriptionsQuery = (params: SubscriptionsListParams = {}) =>
+  useQuery<PaginatedResponse<Subscription>>({
+    queryKey: [...subscriptionsQueryKeys.list(), params],
+    queryFn: () => subscriptionsApi.getSubscriptions(params),
+    placeholderData: keepPreviousData,
   });
 
 export const useSubscriptionPlansQuery = (planType: "gym_owner" | "trainer") =>

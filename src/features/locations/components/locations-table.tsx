@@ -167,6 +167,9 @@ type LocationsTableProps = {
   onViewDetails?: (location: Location) => void;
   onActivateLocation?: (location: Location) => void;
   onDeactivateLocation?: (location: Location) => void;
+  pageIndex?: number;
+  pageCount?: number;
+  onPageChange?: (pageIndex: number, pageSize: number) => void;
 };
 
 export function LocationsTable({
@@ -174,6 +177,9 @@ export function LocationsTable({
   onViewDetails,
   onActivateLocation,
   onDeactivateLocation,
+  pageIndex,
+  pageCount,
+  onPageChange,
 }: LocationsTableProps) {
   return (
     <DataTable
@@ -186,6 +192,9 @@ export function LocationsTable({
       enableDrag={false}
       enableSelection={false}
       getRowId={(row) => row.id}
+      pageIndex={pageIndex}
+      pageCount={pageCount}
+      onPageChange={onPageChange}
     />
   );
 }

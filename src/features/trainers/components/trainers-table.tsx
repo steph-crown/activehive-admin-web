@@ -1,4 +1,4 @@
-/* eslint-disable react-refresh/only-export-components */
+ 
 import { type ColumnDef } from "@tanstack/react-table";
 import {
   IconCircleCheckFilled,
@@ -172,6 +172,9 @@ type TrainersTableProps = {
   onDeleteTrainer?: (trainer: Trainer) => void;
   onActivateTrainer?: (trainer: Trainer) => void;
   onDeactivateTrainer?: (trainer: Trainer) => void;
+  pageIndex?: number;
+  pageCount?: number;
+  onPageChange?: (pageIndex: number, pageSize: number) => void;
 };
 
 export function TrainersTable({
@@ -181,6 +184,9 @@ export function TrainersTable({
   onDeleteTrainer,
   onActivateTrainer,
   onDeactivateTrainer,
+  pageIndex,
+  pageCount,
+  onPageChange,
 }: TrainersTableProps) {
   return (
     <DataTable
@@ -195,6 +201,9 @@ export function TrainersTable({
       enableDrag={false}
       enableSelection={false}
       getRowId={(row) => row.id}
+      pageIndex={pageIndex}
+      pageCount={pageCount}
+      onPageChange={onPageChange}
     />
   );
 }

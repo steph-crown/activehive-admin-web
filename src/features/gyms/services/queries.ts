@@ -1,5 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { gymsApi } from "./api";
+import type { GymsListParams } from "./api";
+import type { PaginatedResponse } from "@/lib/types";
 import type {
   Gym,
   GymDetailResponse,
@@ -14,10 +16,11 @@ export const gymsQueryKeys = {
     [...gymsQueryKeys.all, "registration-status", id] as const,
 };
 
-export const useGymsQuery = () =>
-  useQuery<Gym[]>({
-    queryKey: gymsQueryKeys.list(),
-    queryFn: () => gymsApi.getGyms(),
+export const useGymsQuery = (params: GymsListParams = {}) =>
+  useQuery<PaginatedResponse<Gym>>({
+    queryKey: [...gymsQueryKeys.list(), params],
+    queryFn: () => gymsApi.getGyms(params),
+    placeholderData: keepPreviousData,
   });
 
 export const useGymByIdQuery = (id: string | undefined, enabled = true) =>

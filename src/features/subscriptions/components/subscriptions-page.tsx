@@ -8,11 +8,8 @@ import {
 } from "@/components/molecules/table-filter-bar";
 import { AppSidebar } from "@/features/dashboard/components/app-sidebar";
 import { SiteHeader } from "@/features/dashboard/components/site-header";
-import {
-  rowMatchesDateField,
-  rowMatchesSearch,
-} from "@/lib/table-filters";
 import { useSubscriptionsQuery } from "../services";
+import type { SubscriptionsListParams } from "../services/api";
 import type { Subscription } from "../types";
 import { SubscriptionsTable } from "./subscriptions-table";
 
@@ -31,10 +28,7 @@ const SUBSCRIBER_TYPE_OPTIONS = [
   { value: "trainer", label: "Trainers" },
 ];
 
-function matchesSubscriberType(
-  row: Subscription,
-  filter: string,
-): boolean {
+function matchesSubscriberType(row: Subscription, filter: string): boolean {
   if (filter === "all") return true;
   const hasTrainer = row.trainerId != null && String(row.trainerId).trim() !== "";
   if (filter === "trainer") return hasTrainer;
@@ -43,36 +37,32 @@ function matchesSubscriberType(
 }
 
 export function SubscriptionsPage() {
-  const { data, isLoading, error } = useSubscriptionsQuery();
-
   const [searchQuery, setSearchQuery] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [subscriptionStatusFilter, setSubscriptionStatusFilter] =
     useState("all");
   const [subscriberTypeFilter, setSubscriberTypeFilter] = useState("all");
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
 
+  const apiParams = useMemo<SubscriptionsListParams>(() => {
+    const params: SubscriptionsListParams = { page, limit };
+    if (searchQuery) params.search = searchQuery;
+    if (subscriptionStatusFilter !== "all")
+      params.status = subscriptionStatusFilter;
+    if (dateFilter) params.dateFrom = dateFilter;
+    return params;
+  }, [page, limit, searchQuery, subscriptionStatusFilter, dateFilter]);
+
+  const { data: response, isLoading, error } = useSubscriptionsQuery(apiParams);
+
+  // subscriberTypeFilter has no API support — applied client-side on current page.
   const filteredSubscriptions = useMemo(() => {
-    const list = data ?? [];
-    return list.filter((row) => {
-      if (!matchesSubscriberType(row, subscriberTypeFilter)) return false;
-      if (!rowMatchesSearch(row, searchQuery)) return false;
-      if (!rowMatchesDateField(row.createdAt, dateFilter)) return false;
-      if (subscriptionStatusFilter !== "all") {
-        const s = row.status?.toLowerCase() ?? "";
-        const f = subscriptionStatusFilter.toLowerCase();
-        const cancelled =
-          f === "cancelled" && (s === "cancelled" || s === "canceled");
-        if (!cancelled && s !== f) return false;
-      }
-      return true;
-    });
-  }, [
-    data,
-    subscriberTypeFilter,
-    searchQuery,
-    dateFilter,
-    subscriptionStatusFilter,
-  ]);
+    const list = response?.data ?? [];
+    return list.filter((row) => matchesSubscriberType(row, subscriberTypeFilter));
+  }, [response, subscriberTypeFilter]);
+
+  const pageCount = response?.pagination.totalPages;
 
   return (
     <SidebarProvider>
@@ -102,10 +92,16 @@ export function SubscriptionsPage() {
                   <>
                     <TableFilterBar
                       searchValue={searchQuery}
-                      onSearchChange={setSearchQuery}
+                      onSearchChange={(v) => {
+                        setSearchQuery(v);
+                        setPage(1);
+                      }}
                       searchPlaceholder="Search subscriptions..."
                       dateValue={dateFilter}
-                      onDateChange={setDateFilter}
+                      onDateChange={(v) => {
+                        setDateFilter(v);
+                        setPage(1);
+                      }}
                       extraFilters={
                         <>
                           <TableFilterSelect
@@ -117,7 +113,10 @@ export function SubscriptionsPage() {
                           />
                           <TableFilterSelect
                             value={subscriptionStatusFilter}
-                            onValueChange={setSubscriptionStatusFilter}
+                            onValueChange={(v) => {
+                              setSubscriptionStatusFilter(v);
+                              setPage(1);
+                            }}
                             placeholder="Status"
                             options={SUBSCRIPTION_STATUS_OPTIONS}
                             aria-label="Filter by subscription status"
@@ -126,7 +125,15 @@ export function SubscriptionsPage() {
                       }
                     />
                     <div className="mt-4">
-                      <SubscriptionsTable data={filteredSubscriptions} />
+                      <SubscriptionsTable
+                        data={filteredSubscriptions}
+                        pageIndex={page - 1}
+                        pageCount={pageCount}
+                        onPageChange={(pageIndex, pageSize) => {
+                          setPage(pageIndex + 1);
+                          setLimit(pageSize);
+                        }}
+                      />
                     </div>
                   </>
                 )}

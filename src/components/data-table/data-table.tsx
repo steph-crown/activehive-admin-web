@@ -79,9 +79,16 @@ type DataTableProps<TData> = {
   isLoading?: boolean;
   searchQuery?: string;
   emptyMessage?: string;
+  /**
+   * Controlled pagination. When both pageIndex and onPageChange are provided
+   * the table renders a pagination footer and delegates all navigation to the parent.
+   * pageCount is optional — omit it to hide the "of N" label and the last-page button.
+   */
+  pageIndex?: number;
+  pageCount?: number;
+  onPageChange?: (pageIndex: number, pageSize: number) => void;
 };
 
-// Create a separate component for the drag handle
 function DragHandle({ id }: { id: string | number }) {
   const { attributes, listeners } = useSortable({
     id: id.toString(),
@@ -159,6 +166,9 @@ export function DataTable<TData extends { id: string | number }>({
   isLoading = false,
   searchQuery,
   emptyMessage = "No results.",
+  pageIndex,
+  pageCount,
+  onPageChange,
 }: DataTableProps<TData>) {
   const [data, setData] = React.useState(() => initialData);
   const [rowSelection, setRowSelection] = React.useState({});
@@ -168,10 +178,7 @@ export function DataTable<TData extends { id: string | number }>({
     [],
   );
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [pagination, setPagination] = React.useState({
-    pageIndex: 0,
-    pageSize: 10,
-  });
+  const [pageSize, setPageSize] = React.useState(10);
   const sortableId = React.useId();
   const sensors = useSensors(
     useSensor(MouseSensor, {}),
@@ -179,10 +186,11 @@ export function DataTable<TData extends { id: string | number }>({
     useSensor(KeyboardSensor, {}),
   );
 
-  // Keep internal data in sync with incoming props (e.g. after refetch)
   React.useEffect(() => {
     setData(initialData);
   }, [initialData]);
+
+  const isControlled = pageIndex !== undefined && onPageChange !== undefined;
 
   const dataIds = React.useMemo<UniqueIdentifier[]>(
     () =>
@@ -191,22 +199,25 @@ export function DataTable<TData extends { id: string | number }>({
   );
 
   const normalizedQuery = (searchQuery || "").trim().toLowerCase();
-  const filteredData = React.useMemo(() => {
+  const displayData = React.useMemo(() => {
+    if (isControlled) return data;
     if (!normalizedQuery) return data;
     return data.filter((row) =>
       JSON.stringify(row).toLowerCase().includes(normalizedQuery),
     );
-  }, [data, normalizedQuery]);
+  }, [data, normalizedQuery, isControlled]);
 
   const table = useReactTable({
-    data: filteredData,
+    data: displayData,
     columns,
     state: {
       sorting,
       columnVisibility,
       rowSelection,
       columnFilters,
-      pagination,
+      pagination: isControlled
+        ? { pageIndex: pageIndex, pageSize }
+        : { pageIndex: 0, pageSize: Math.max(displayData.length, 1) },
     },
     getRowId: getRowId || ((row) => String(row.id)),
     enableRowSelection: enableSelection,
@@ -214,7 +225,11 @@ export function DataTable<TData extends { id: string | number }>({
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
-    onPaginationChange: setPagination,
+    onPaginationChange: () => {
+      // Pagination is driven by direct button handlers below; this is intentionally a no-op.
+    },
+    manualPagination: isControlled,
+    pageCount: isControlled ? (pageCount ?? -1) : undefined,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -234,7 +249,6 @@ export function DataTable<TData extends { id: string | number }>({
     }
   }
 
-  // Add drag column if enabled
   const finalColumns = React.useMemo(() => {
     if (enableDrag) {
       return [
@@ -264,6 +278,18 @@ export function DataTable<TData extends { id: string | number }>({
     "skeleton-row-7",
   ];
   const skeletonColumns = finalColumns;
+
+  const canGoPrev = isControlled && pageIndex > 0;
+  const canGoNext = isControlled
+    ? pageCount !== undefined
+      ? pageIndex < pageCount - 1
+      : data.length > 0
+    : false;
+
+  function handlePageSizeChange(newSize: number) {
+    setPageSize(newSize);
+    onPageChange?.(0, newSize);
+  }
 
   return (
     <div className="relative flex flex-col gap-4 overflow-auto">
@@ -461,112 +487,115 @@ export function DataTable<TData extends { id: string | number }>({
           </Table>
         )}
       </div>
-      <div className="flex items-center justify-end px-1 py-2">
-        <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
-          {enableSelection ? (
-            <>
-              {table.getFilteredSelectedRowModel().rows.length} of{" "}
-              {table.getFilteredRowModel().rows.length} row(s) selected.
-            </>
-          ) : (
-            <>
-              {table.getFilteredRowModel().rows.length} item(s) total.
-            </>
-          )}
+
+      {isControlled && (
+        <div className="flex items-center justify-end px-1 py-2">
+          <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
+            {enableSelection ? (
+              <>
+                {table.getFilteredSelectedRowModel().rows.length} of{" "}
+                {table.getFilteredRowModel().rows.length} row(s) selected.
+              </>
+            ) : (
+              <>{table.getFilteredRowModel().rows.length} item(s) on this page.</>
+            )}
+          </div>
+          <div className="flex w-full items-center gap-8 lg:w-fit">
+            <div className="hidden items-center gap-2 lg:flex">
+              <Label htmlFor="rows-per-page" className="text-sm font-medium">
+                Rows per page
+              </Label>
+              {isLoading ? (
+                <Skeleton className="h-9 w-24" />
+              ) : (
+                <Select
+                  value={`${pageSize}`}
+                  onValueChange={(value) =>
+                    handlePageSizeChange(Number(value))
+                  }
+                >
+                  <SelectTrigger size="sm" className="w-20" id="rows-per-page">
+                    <SelectValue placeholder={pageSize} />
+                  </SelectTrigger>
+                  <SelectContent side="top">
+                    {[10, 20, 30, 40, 50].map((size) => (
+                      <SelectItem key={size} value={`${size}`}>
+                        {size}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+            <div className="flex items-center justify-center text-sm font-medium">
+              {isLoading ? (
+                <Skeleton className="h-4 w-44" />
+              ) : (
+                <>
+                  Page {pageIndex + 1}
+                  {pageCount ? ` of ${pageCount}` : ""}
+                </>
+              )}
+            </div>
+            <div className="ml-auto flex items-center gap-2 lg:ml-0">
+              {isLoading ? (
+                <>
+                  <Skeleton className="hidden h-9 w-9 rounded-md lg:flex" />
+                  <Skeleton className="h-9 w-9 rounded-md" />
+                  <Skeleton className="h-9 w-9 rounded-md" />
+                  {pageCount && (
+                    <Skeleton className="hidden h-9 w-9 rounded-md lg:flex" />
+                  )}
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="outline"
+                    className="hidden h-8 w-8 p-0 lg:flex"
+                    onClick={() => onPageChange!(0, pageSize)}
+                    disabled={!canGoPrev}
+                  >
+                    <span className="sr-only">Go to first page</span>
+                    <IconChevronsLeft />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="size-8"
+                    size="icon"
+                    onClick={() => onPageChange!(pageIndex - 1, pageSize)}
+                    disabled={!canGoPrev}
+                  >
+                    <span className="sr-only">Go to previous page</span>
+                    <IconChevronLeft />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="size-8"
+                    size="icon"
+                    onClick={() => onPageChange!(pageIndex + 1, pageSize)}
+                    disabled={!canGoNext}
+                  >
+                    <span className="sr-only">Go to next page</span>
+                    <IconChevronRight />
+                  </Button>
+                  {pageCount && (
+                    <Button
+                      variant="outline"
+                      className="hidden size-8 lg:flex"
+                      size="icon"
+                      onClick={() => onPageChange!(pageCount - 1, pageSize)}
+                      disabled={!canGoNext}
+                    >
+                      <span className="sr-only">Go to last page</span>
+                      <IconChevronsRight />
+                    </Button>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
         </div>
-        <div className="flex w-full items-center gap-8 lg:w-fit">
-          <div className="hidden items-center gap-2 lg:flex">
-            <Label htmlFor="rows-per-page" className="text-sm font-medium">
-              Rows per page
-            </Label>
-            {isLoading ? (
-              <Skeleton className="h-9 w-24" />
-            ) : (
-              <Select
-                value={`${table.getState().pagination.pageSize}`}
-                onValueChange={(value) => {
-                  table.setPageSize(Number(value));
-                }}
-              >
-                <SelectTrigger size="sm" className="w-20" id="rows-per-page">
-                  <SelectValue
-                    placeholder={table.getState().pagination.pageSize}
-                  />
-                </SelectTrigger>
-                <SelectContent side="top">
-                  {[10, 20, 30, 40, 50].map((pageSize) => (
-                    <SelectItem key={pageSize} value={`${pageSize}`}>
-                      {pageSize}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          </div>
-          <div className="flex items-center justify-center text-sm font-medium">
-            {isLoading ? (
-              <Skeleton className="h-4 w-44" />
-            ) : (
-              <>
-                Page {table.getState().pagination.pageIndex + 1} of{" "}
-                {table.getPageCount()}
-              </>
-            )}
-          </div>
-          <div className="ml-auto flex items-center gap-2 lg:ml-0">
-            {isLoading ? (
-              <>
-                <Skeleton className="hidden h-9 w-9 rounded-md lg:flex" />
-                <Skeleton className="h-9 w-9 rounded-md" />
-                <Skeleton className="h-9 w-9 rounded-md" />
-                <Skeleton className="hidden h-9 w-9 rounded-md lg:flex" />
-              </>
-            ) : (
-              <>
-                <Button
-                  variant="outline"
-                  className="hidden h-8 w-8 p-0 lg:flex"
-                  onClick={() => table.setPageIndex(0)}
-                  disabled={!table.getCanPreviousPage()}
-                >
-                  <span className="sr-only">Go to first page</span>
-                  <IconChevronsLeft />
-                </Button>
-                <Button
-                  variant="outline"
-                  className="size-8"
-                  size="icon"
-                  onClick={() => table.previousPage()}
-                  disabled={!table.getCanPreviousPage()}
-                >
-                  <span className="sr-only">Go to previous page</span>
-                  <IconChevronLeft />
-                </Button>
-                <Button
-                  variant="outline"
-                  className="size-8"
-                  size="icon"
-                  onClick={() => table.nextPage()}
-                  disabled={!table.getCanNextPage()}
-                >
-                  <span className="sr-only">Go to next page</span>
-                  <IconChevronRight />
-                </Button>
-                <Button
-                  variant="outline"
-                  className="hidden size-8 lg:flex"
-                  size="icon"
-                  onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                  disabled={!table.getCanNextPage()}
-                >
-                  <span className="sr-only">Go to last page</span>
-                  <IconChevronsRight />
-                </Button>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

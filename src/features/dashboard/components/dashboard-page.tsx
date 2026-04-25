@@ -1,9 +1,6 @@
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { DataTable } from "@/components/data-table/data-table";
-import {
-  TableFilterBar,
-  TableFilterSelect,
-} from "@/components/molecules/table-filter-bar";
+import { TableFilterBar } from "@/components/molecules/table-filter-bar";
 import { AppSidebar } from "./app-sidebar";
 import { SiteHeader } from "./site-header";
 import { SectionCards } from "./section-cards";
@@ -16,44 +13,17 @@ import {
   DashboardTableSkeleton,
   SectionCardsSkeleton,
 } from "./dashboard-skeleton";
-import {
-  rowMatchesDateField,
-  rowMatchesSearch,
-} from "@/lib/table-filters";
-import { useMemo, useState } from "react";
-import type { RecentActivity } from "../types";
+import { useState } from "react";
 
 export function DashboardPage() {
-  const { data, isLoading } = useDashboardDocumentsQuery();
-  const { data: stats, isLoading: statsLoading } = useDashboardStatsQuery();
   const [searchQuery, setSearchQuery] = useState("");
   const [dateFilter, setDateFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const tableData = useMemo(() => data ?? [], [data]);
 
-  const activityStatusOptions = useMemo(() => {
-    const set = new Set(
-      tableData.map((r: RecentActivity) => r.status.toLowerCase()),
-    );
-    return [
-      { value: "all", label: "All statuses" },
-      ...[...set].sort().map((s) => ({
-        value: s,
-        label: s.replace(/_/g, " "),
-      })),
-    ];
-  }, [tableData]);
-
-  const filteredActivities = useMemo(() => {
-    return tableData.filter((row: RecentActivity) => {
-      if (!rowMatchesSearch(row, searchQuery)) return false;
-      if (!rowMatchesDateField(row.when, dateFilter)) return false;
-      if (statusFilter !== "all" && row.status.toLowerCase() !== statusFilter) {
-        return false;
-      }
-      return true;
-    });
-  }, [tableData, searchQuery, dateFilter, statusFilter]);
+  const { data, isLoading } = useDashboardDocumentsQuery({
+    search: searchQuery || undefined,
+    dateFrom: dateFilter || undefined,
+  });
+  const { data: stats, isLoading: statsLoading } = useDashboardStatsQuery();
 
   return (
     <SidebarProvider>
@@ -63,7 +33,7 @@ export function DashboardPage() {
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-              {isLoading || statsLoading ? (
+              {statsLoading ? (
                 <>
                   <SectionCardsSkeleton />
                   <div className="px-4 lg:px-6">
@@ -95,24 +65,19 @@ export function DashboardPage() {
                           searchPlaceholder="Search activities..."
                           dateValue={dateFilter}
                           onDateChange={setDateFilter}
-                          extraFilters={
-                            <TableFilterSelect
-                              value={statusFilter}
-                              onValueChange={setStatusFilter}
-                              placeholder="Status"
-                              options={activityStatusOptions}
-                              aria-label="Filter by activity status"
-                            />
-                          }
                         />
-                        <DataTable
-                          data={filteredActivities}
-                          columns={recentActivitiesColumns}
-                          enableDrag={false}
-                          enableSelection={false}
-                          getRowId={(row) => row.id.toString()}
-                          emptyMessage="No recent activities."
-                        />
+                        {isLoading ? (
+                          <DashboardTableSkeleton />
+                        ) : (
+                          <DataTable
+                            data={data ?? []}
+                            columns={recentActivitiesColumns}
+                            enableDrag={false}
+                            enableSelection={false}
+                            getRowId={(row) => row.id.toString()}
+                            emptyMessage="No recent activities."
+                          />
+                        )}
                       </div>
                     </div>
                   </div>

@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api-client";
+import type { PaginatedResponse } from "@/lib/types";
 import type {
   Gym,
   GymDetailResponse,
@@ -7,9 +8,17 @@ import type {
 
 const basePath = "/api/admin/gyms";
 
+export type GymsListParams = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  approvalStatus?: string;
+  isActive?: boolean;
+};
+
 export const gymsApi = {
-  getGyms: async (): Promise<Gym[]> => {
-    return await apiClient.get<Gym[]>(basePath);
+  getGyms: async (params: GymsListParams = {}): Promise<PaginatedResponse<Gym>> => {
+    return await apiClient.get<PaginatedResponse<Gym>>(basePath, { params });
   },
   getGymById: async (id: string): Promise<GymDetailResponse> => {
     return await apiClient.get<GymDetailResponse>(`${basePath}/${id}`);

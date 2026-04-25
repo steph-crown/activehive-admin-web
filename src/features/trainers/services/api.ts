@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api-client";
+import type { PaginatedResponse } from "@/lib/types";
 import type { Trainer } from "../types";
 
 const trainersBasePath = "/api/admin/trainers";
@@ -10,11 +11,16 @@ export type UpdateTrainerPayload = {
   phoneNumber?: string | null;
 };
 
+export type TrainersListParams = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string;
+};
+
 export const trainersApi = {
-  getTrainers: async (): Promise<Trainer[]> => {
-    return await apiClient.get<Trainer[]>("/api/admin/users", {
-      params: { role: "trainer" },
-    });
+  getTrainers: async (params: TrainersListParams = {}): Promise<PaginatedResponse<Trainer>> => {
+    return await apiClient.get<PaginatedResponse<Trainer>>(trainersBasePath, { params });
   },
   updateTrainer: async (
     id: string,

@@ -7,11 +7,9 @@ import {
 } from "@/components/molecules/table-filter-bar";
 import { AppSidebar } from "@/features/dashboard/components/app-sidebar";
 import { SiteHeader } from "@/features/dashboard/components/site-header";
-import {
-  rowMatchesDateField,
-  rowMatchesSearch,
-} from "@/lib/table-filters";
+import { rowMatchesDateField } from "@/lib/table-filters";
 import { useLocationsQuery } from "../services";
+import type { LocationsListParams } from "../services/api";
 import type { Location } from "../types";
 import { LocationDetailsDialog } from "./location-details-dialog";
 import { LocationsTable } from "./locations-table";
@@ -43,21 +41,31 @@ export function LocationsPage() {
   const [detailsLocationId, setDetailsLocationId] = useState<string | null>(
     null,
   );
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
 
-  const { data, isLoading, error } = useLocationsQuery();
+  const apiParams = useMemo<LocationsListParams>(() => {
+    const params: LocationsListParams = { page, limit };
+    if (searchQuery) params.search = searchQuery;
+    if (activeFilter === "active") params.isActive = true;
+    if (activeFilter === "inactive") params.isActive = false;
+    return params;
+  }, [page, limit, searchQuery, activeFilter]);
 
+  const { data: response, isLoading, error } = useLocationsQuery(apiParams);
+
+  // dateFilter and hqFilter have no API support — applied client-side on current page.
   const filteredData = useMemo(() => {
-    if (!data) return [];
-    return data.filter((row) => {
-      if (!rowMatchesSearch(row, searchQuery)) return false;
+    const locations = response?.data ?? [];
+    return locations.filter((row) => {
       if (!rowMatchesDateField(row.createdAt, dateFilter)) return false;
-      if (activeFilter === "active" && !row.isActive) return false;
-      if (activeFilter === "inactive" && row.isActive) return false;
       if (hqFilter === "hq" && !row.isHeadquarters) return false;
       if (hqFilter === "branch" && row.isHeadquarters) return false;
       return true;
     });
-  }, [data, searchQuery, dateFilter, activeFilter, hqFilter]);
+  }, [response, dateFilter, hqFilter]);
+
+  const pageCount = response?.pagination.totalPages;
 
   return (
     <SidebarProvider>
@@ -98,11 +106,14 @@ export function LocationsPage() {
                   <div className="text-destructive">
                     Error loading locations. Check console for details.
                   </div>
-                ) : data ? (
+                ) : response ? (
                   <>
                     <TableFilterBar
                       searchValue={searchQuery}
-                      onSearchChange={setSearchQuery}
+                      onSearchChange={(v) => {
+                        setSearchQuery(v);
+                        setPage(1);
+                      }}
                       searchPlaceholder="Search locations..."
                       dateValue={dateFilter}
                       onDateChange={setDateFilter}
@@ -110,7 +121,10 @@ export function LocationsPage() {
                         <>
                           <TableFilterSelect
                             value={activeFilter}
-                            onValueChange={setActiveFilter}
+                            onValueChange={(v) => {
+                              setActiveFilter(v);
+                              setPage(1);
+                            }}
                             placeholder="Status"
                             options={ACTIVE_OPTIONS}
                             aria-label="Filter by active state"
@@ -136,6 +150,12 @@ export function LocationsPage() {
                       onDeactivateLocation={(location) =>
                         setStatusAction({ location, type: "deactivate" })
                       }
+                      pageIndex={page - 1}
+                      pageCount={pageCount}
+                      onPageChange={(pageIndex, pageSize) => {
+                        setPage(pageIndex + 1);
+                        setLimit(pageSize);
+                      }}
                     />
                   </>
                 ) : null}
