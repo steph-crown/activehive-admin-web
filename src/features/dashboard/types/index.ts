@@ -20,4 +20,5 @@ export type DashboardStats = {
   totalSubscriptions: number;
   activeGyms: number;
   activeSubscriptions: number;
+  activeChallengesCount: number;
 };

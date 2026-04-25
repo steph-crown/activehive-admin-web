@@ -38,12 +38,10 @@ export function SectionCards({ stats }: { stats?: DashboardStats }) {
   const cardThemes: MetricCardTheme[] = [
     {
       title: "Total Gyms",
-      value: stats ? String(stats.totalGyms) : "24",
+      value: stats ? String(stats.totalGyms) : "0",
       percentChange: 2.4,
       isPositive: true,
-      comparisonText: stats
-        ? `${stats.activeGyms} active`
-        : "vs last month",
+      comparisonText: stats ? `${stats.activeGyms} active` : "vs last month",
       icon: <IconHomeFilled className="size-6" />,
       iconBgVar: "var(--primary-50)",
       iconColorVar: "var(--primary-500)",
@@ -58,7 +56,7 @@ export function SectionCards({ stats }: { stats?: DashboardStats }) {
     },
     {
       title: "Total Members",
-      value: stats ? stats.totalMembers.toLocaleString() : "8,746",
+      value: stats ? stats.totalMembers.toLocaleString() : "0",
       percentChange: 2.4,
       isPositive: true,
       comparisonText: "vs last month",
@@ -77,7 +75,7 @@ export function SectionCards({ stats }: { stats?: DashboardStats }) {
     },
     {
       title: "Total Trainers",
-      value: stats ? String(stats.totalTrainers) : "56",
+      value: stats ? String(stats.totalTrainers) : "0",
       percentChange: 1.9,
       isPositive: true,
       comparisonText: "vs last month",
@@ -95,7 +93,7 @@ export function SectionCards({ stats }: { stats?: DashboardStats }) {
     },
     {
       title: "Active Challenges",
-      value: "14",
+      value: stats ? String(stats.activeChallengesCount) : "0",
       percentChange: -1.7,
       isPositive: false,
       comparisonText: "vs last month",

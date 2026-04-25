@@ -1,0 +1,29 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // \"\"' | { read -r f; case \"$f\" in *.ts|*.tsx) pnpm exec eslint --fix \"$f\" 2>/dev/null || true;; esac; }",
+            "statusMessage": "ESLint fixing..."
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pnpm tsc -b --noEmit 2>&1 | tail -30 || true",
+            "statusMessage": "Type-checking project...",
+            "timeout": 60,
+            "async": true
+          }
+        ]
+      }
+    ]
+  }
+}
