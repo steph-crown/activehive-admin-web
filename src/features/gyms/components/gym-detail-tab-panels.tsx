@@ -19,6 +19,10 @@ import {
   IconUser,
   IconUserFilled,
   IconUsers,
+  IconBrandInstagram,
+  IconBrandFacebook,
+  IconBrandX,
+  IconWorld,
 } from "@tabler/icons-react";
 import { type ColumnDef } from "@tanstack/react-table";
 
@@ -32,11 +36,14 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TabsContent } from "@/components/ui/tabs";
 import { cn, formatDate } from "@/lib/utils";
+import { formatMoneyDisplayAsNgn } from "@/lib/format-ngn";
 import type {
   Gym,
   GymLocation,
+  GymMembership,
   GymRegistrationStatusRegistration,
   GymSubscription,
+  GymTrainer,
 } from "../types";
 
 function SectionTitle({ children }: { children: ReactNode }) {
@@ -252,30 +259,6 @@ function RegistrationDocumentsSection({
   );
 }
 
-type DemoMemberRow = {
-  id: string;
-  name: string;
-  email: string;
-  status: "Active" | "Inactive";
-  join: string;
-  lastIn: string;
-};
-
-type DemoActivityRow = {
-  id: string;
-  date: string;
-  action: string;
-  by: string;
-  details: string;
-};
-
-type DemoTrainerRow = {
-  id: string;
-  name: string;
-  status: string;
-  sessions: string;
-};
-
 const METRIC_BASE_VARS = {
   "--success-500": "#22c55e",
   "--error-400": "#dc5959",
@@ -288,6 +271,8 @@ export type GymDetailTabPanelsProps = {
   subscription: GymSubscription | null;
   planLabel: string;
   registrationDocuments: RegistrationDocuments;
+  memberships: GymMembership[];
+  trainers: GymTrainer[];
   metrics: {
     totalMembers: number;
     activeMembers: number;
@@ -304,18 +289,20 @@ export function GymDetailTabPanels({
   subscription,
   planLabel,
   registrationDocuments,
+  memberships,
+  trainers,
   metrics,
 }: GymDetailTabPanelsProps) {
-  const aboutText =
-    gym.description?.trim() ||
-    "Weightlifting and powerlifting focused gym in West Hollywood.";
+  const aboutText = gym.description?.trim() || null;
 
   const ownerName = gym.owner
     ? `${gym.owner.firstName} ${gym.owner.lastName}`.trim()
-    : "Sarah Lee";
-  const ownerEmail = gym.owner?.email ?? gym.email ?? "sarah@iron.com";
+    : "—";
+  const ownerEmail = gym.owner?.email ?? gym.email ?? "—";
   const ownerPhone =
-    gym.phoneNumber ?? gym.owner?.phoneNumber?.toString() ?? "+1 310 555 0200";
+    gym.phoneNumber ??
+    (gym.owner?.phoneNumber ? String(gym.owner.phoneNumber) : null) ??
+    "—";
   const ownerLocation = formatCityState(gym);
   const createdLabel = formatDate(gym.createdAt);
 
@@ -327,68 +314,32 @@ export function GymDetailTabPanels({
   const nextBilling =
     subscription?.nextPaymentDate != null
       ? formatDate(subscription.nextPaymentDate)
-      : "Apr 20, 2026";
+      : "—";
 
-  const demoMembers: DemoMemberRow[] = [
-    {
-      id: "1",
-      name: "Riley Patel",
-      email: "riley@mail.com",
-      status: "Active",
-      join: "Apr 2024",
-      lastIn: "Mar 16, 2026",
-    },
-    {
-      id: "2",
-      name: "Morgan Blake",
-      email: "morgan@mail.com",
-      status: "Inactive",
-      join: "May 2024",
-      lastIn: "Jan 05, 2026",
-    },
-  ];
+  const monthlyPriceDisplay =
+    subscription?.monthlyPrice && String(subscription.monthlyPrice).trim()
+      ? formatMoneyDisplayAsNgn(subscription.monthlyPrice)
+      : "—";
 
-  const demoActivity: DemoActivityRow[] = [
-    {
-      id: "a1",
-      date: "Mar 17, 2026",
-      action: "Signup completed",
-      by: "Sarah Lee",
-      details: "Owner completed registration",
-    },
-    {
-      id: "a2",
-      date: "Mar 20, 2024",
-      action: "Gym created",
-      by: "Admin",
-      details: "Invitation sent to sarah@iron.com",
-    },
-  ];
-
-  const demoTrainers: DemoTrainerRow[] = [
-    {
-      id: "t1",
-      name: "Coach Sarah",
-      status: "Active",
-      sessions: "180",
-    },
-  ];
-
-  const memberColumns = useMemo<ColumnDef<DemoMemberRow>[]>(
+  const memberColumns = useMemo<ColumnDef<GymMembership>[]>(
     () => [
       {
-        accessorKey: "name",
+        accessorKey: "member",
         header: "Name",
-        cell: ({ row }) => (
-          <div className="font-medium">{row.original.name}</div>
-        ),
+        cell: ({ row }) => {
+          const m = row.original.member;
+          const name = m
+            ? `${m.firstName} ${m.lastName}`.trim() || "—"
+            : "—";
+          return <div className="font-medium">{name}</div>;
+        },
       },
       {
         accessorKey: "email",
         header: "Email",
         cell: ({ row }) => (
           <div className="text-muted-foreground text-sm">
-            {row.original.email}
+            {row.original.member?.email ?? "—"}
           </div>
         ),
       },
@@ -396,7 +347,8 @@ export function GymDetailTabPanels({
         accessorKey: "status",
         header: "Status",
         cell: ({ row }) => {
-          const active = row.original.status === "Active";
+          const active =
+            row.original.status?.toLowerCase() === "active";
           return (
             <Badge
               variant="outline"
@@ -418,81 +370,85 @@ export function GymDetailTabPanels({
         },
       },
       {
-        accessorKey: "join",
-        header: "Join date",
-        cell: ({ row }) => row.original.join,
+        accessorKey: "type",
+        header: "Type",
+        cell: ({ row }) => (
+          <span className="capitalize">{row.original.type || "—"}</span>
+        ),
       },
       {
-        accessorKey: "lastIn",
-        header: "Last check-in",
-        cell: ({ row }) => row.original.lastIn,
+        accessorKey: "startDate",
+        header: "Start date",
+        cell: ({ row }) =>
+          row.original.startDate ? formatDate(row.original.startDate) : "—",
+      },
+      {
+        accessorKey: "endDate",
+        header: "End date",
+        cell: ({ row }) =>
+          row.original.endDate ? formatDate(row.original.endDate) : "—",
       },
     ],
     [],
   );
 
-  const activityColumns = useMemo<ColumnDef<DemoActivityRow>[]>(
+  const trainerColumns = useMemo<ColumnDef<GymTrainer>[]>(
     () => [
       {
-        accessorKey: "date",
-        header: "Date",
-        cell: ({ row }) => (
-          <span className="text-muted-foreground">{row.original.date}</span>
-        ),
-      },
-      {
-        accessorKey: "action",
-        header: "Action",
-        cell: ({ row }) => (
-          <span className="font-semibold">{row.original.action}</span>
-        ),
-      },
-      {
-        accessorKey: "by",
-        header: "Performed by",
-        cell: ({ row }) => row.original.by,
-      },
-      {
-        accessorKey: "details",
-        header: "Details",
-        cell: ({ row }) => (
-          <span className="text-muted-foreground">{row.original.details}</span>
-        ),
-      },
-    ],
-    [],
-  );
-
-  const trainerColumns = useMemo<ColumnDef<DemoTrainerRow>[]>(
-    () => [
-      {
-        accessorKey: "name",
+        accessorKey: "firstName",
         header: "Trainer",
         cell: ({ row }) => (
-          <span className="font-semibold">{row.original.name}</span>
+          <span className="font-semibold">
+            {row.original.firstName} {row.original.lastName}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "email",
+        header: "Email",
+        cell: ({ row }) => (
+          <span className="text-muted-foreground text-sm">
+            {row.original.email}
+          </span>
         ),
       },
       {
         accessorKey: "status",
         header: "Status",
-        cell: ({ row }) => (
-          <Badge
-            variant="outline"
-            className="gap-1.5 border-emerald-200 bg-emerald-50 font-normal text-emerald-800"
-          >
-            <span className="size-1.5 rounded-full bg-emerald-600" />
-            {row.original.status}
-          </Badge>
-        ),
+        cell: ({ row }) => {
+          const active = row.original.status?.toLowerCase() === "active";
+          return (
+            <Badge
+              variant="outline"
+              className={cn(
+                "gap-1.5 font-normal capitalize",
+                active &&
+                  "border-emerald-200 bg-emerald-50 text-emerald-800",
+                !active && "text-muted-foreground",
+              )}
+            >
+              <span
+                className={cn(
+                  "size-1.5 rounded-full",
+                  active ? "bg-emerald-600" : "bg-muted-foreground",
+                )}
+              />
+              {row.original.status}
+            </Badge>
+          );
+        },
       },
       {
-        accessorKey: "sessions",
-        header: () => (
-          <span className="block text-right">Sessions completed</span>
-        ),
-        cell: ({ row }) => (
-          <div className="text-right">{row.original.sessions}</div>
-        ),
+        accessorKey: "specialties",
+        header: "Specialties",
+        cell: ({ row }) => {
+          const specs = row.original.specialties;
+          return (
+            <span className="text-muted-foreground text-sm">
+              {specs && specs.length > 0 ? specs.join(", ") : "—"}
+            </span>
+          );
+        },
       },
     ],
     [],
@@ -504,14 +460,68 @@ export function GymDetailTabPanels({
         <div className="grid gap-4 lg:grid-cols-2">
           <Card className="rounded-md border-[#F4F4F4] bg-white p-6 shadow-none">
             <SectionTitle>About</SectionTitle>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              {aboutText}
-            </p>
+            {aboutText ? (
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                {aboutText}
+              </p>
+            ) : (
+              <p className="text-muted-foreground text-sm italic">
+                No description provided.
+              </p>
+            )}
             {locations.length > 0 && (
               <p className="text-muted-foreground mt-4 text-xs">
                 {locations.length} location{locations.length !== 1 ? "s" : ""}{" "}
                 on file
               </p>
+            )}
+            {(gym.website || gym.socialLinks) && (
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                {gym.website?.trim() && (
+                  <a
+                    href={gym.website.trim()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary inline-flex items-center gap-1.5 text-sm font-medium underline-offset-4 hover:underline"
+                  >
+                    <IconWorld className="size-4 shrink-0" />
+                    Website
+                  </a>
+                )}
+                {gym.socialLinks?.instagram?.trim() && (
+                  <a
+                    href={gym.socialLinks.instagram.trim()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary inline-flex items-center gap-1.5 text-sm font-medium underline-offset-4 hover:underline"
+                  >
+                    <IconBrandInstagram className="size-4 shrink-0" />
+                    Instagram
+                  </a>
+                )}
+                {gym.socialLinks?.facebook?.trim() && (
+                  <a
+                    href={gym.socialLinks.facebook.trim()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary inline-flex items-center gap-1.5 text-sm font-medium underline-offset-4 hover:underline"
+                  >
+                    <IconBrandFacebook className="size-4 shrink-0" />
+                    Facebook
+                  </a>
+                )}
+                {gym.socialLinks?.twitterX?.trim() && (
+                  <a
+                    href={gym.socialLinks.twitterX.trim()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary inline-flex items-center gap-1.5 text-sm font-medium underline-offset-4 hover:underline"
+                  >
+                    <IconBrandX className="size-4 shrink-0" />
+                    X
+                  </a>
+                )}
+              </div>
             )}
           </Card>
           <Card className="rounded-md border-[#F4F4F4] bg-white p-6 shadow-none">
@@ -593,6 +603,14 @@ export function GymDetailTabPanels({
               "--purple-50": "#f2eeff",
               "--purple-500": "#7e52ff",
             })}
+            bottomSlot={
+              <span
+                className="text-xs font-medium"
+                style={{ color: "var(--grey-500)" }}
+              >
+                {metrics.activeMembers} active members
+              </span>
+            }
           />
           <SectionMetricCard
             title="Active members"
@@ -611,29 +629,22 @@ export function GymDetailTabPanels({
             })}
           />
         </div>
-        {/* <Card className="rounded-md border-[#F4F4F4] bg-white p-0 shadow-none"> */}
         <DataTable
-          data={demoMembers}
+          data={memberships}
           columns={memberColumns}
           enableDrag={false}
           enableSelection={false}
           getRowId={(row) => row.id}
           emptyMessage="No members to show."
         />
-        {/* </Card> */}
       </TabsContent>
 
       <TabsContent value="activity" className="mt-4">
-        {/* <Card className="rounded-md border-[#F4F4F4] bg-white p-0 shadow-none"> */}
-        <DataTable
-          data={demoActivity}
-          columns={activityColumns}
-          enableDrag={false}
-          enableSelection={false}
-          getRowId={(row) => row.id}
-          emptyMessage="No activity yet."
-        />
-        {/* </Card> */}
+        <Card className="rounded-md border-[#F4F4F4] bg-white p-6 shadow-none">
+          <p className="text-muted-foreground text-sm">
+            Activity log is not available yet.
+          </p>
+        </Card>
       </TabsContent>
 
       <TabsContent value="subscription" className="mt-4">
@@ -663,11 +674,9 @@ export function GymDetailTabPanels({
               </div>
               <div>
                 <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                  Usage limits
+                  Monthly price
                 </p>
-                <p className="mt-1 text-sm font-medium">
-                  Up to 200 members, 10 classes
-                </p>
+                <p className="mt-1 text-sm font-medium">{monthlyPriceDisplay}</p>
               </div>
             </div>
           </div>
@@ -681,16 +690,14 @@ export function GymDetailTabPanels({
       </TabsContent>
 
       <TabsContent value="trainers" className="mt-4">
-        {/* <Card className="rounded-md border-[#F4F4F4] bg-white p-0 shadow-none"> */}
         <DataTable
-          data={demoTrainers}
+          data={trainers}
           columns={trainerColumns}
           enableDrag={false}
           enableSelection={false}
           getRowId={(row) => row.id}
           emptyMessage="No trainers to show."
         />
-        {/* </Card> */}
       </TabsContent>
     </>
   );

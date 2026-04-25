@@ -92,18 +92,23 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
     if (!data) {
       return [];
     }
-    const { gym } = data;
     const stats = registration?.stats;
     const totalMembers =
-      typeof stats?.totalMembers === "number"
-        ? stats.totalMembers
-        : typeof gym.memberCount === "number"
-          ? gym.memberCount
-          : 198;
+      typeof data.memberCount === "number"
+        ? data.memberCount
+        : typeof stats?.totalMembers === "number"
+          ? stats.totalMembers
+          : 0;
+    const activeMembers =
+      typeof data.activeMemberCount === "number"
+        ? data.activeMemberCount
+        : typeof stats?.activeMemberships === "number"
+          ? stats.activeMemberships
+          : 0;
     const totalTrainers =
-      typeof stats?.totalTrainers === "number" ? stats.totalTrainers : 12;
-    const totalClasses = 24;
-    const checkInsToday = 47;
+      typeof stats?.totalTrainers === "number" ? stats.totalTrainers : 0;
+    const totalClasses = stats?.totalClasses ?? 0;
+    const checkInsToday = stats?.checkInsToday ?? 0;
 
     return [
       {
@@ -119,6 +124,14 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
           "--purple-50": "#f2eeff",
           "--purple-500": "#7e52ff",
         }),
+        bottomSlot: (
+          <span
+            className="text-xs font-medium"
+            style={{ color: "var(--grey-500)" }}
+          >
+            {activeMembers} active members
+          </span>
+        ),
       },
       {
         title: "Total trainers",
@@ -133,6 +146,7 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
           "--primary-50": "#ffefe6",
           "--primary-500": "#ff5b04",
         }),
+        bottomSlot: undefined,
       },
       {
         title: "Total classes",
@@ -147,6 +161,7 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
           "--sky-50": "#e0f2fe",
           "--sky-500": "#0ea5e9",
         }),
+        bottomSlot: undefined,
       },
       {
         title: "Check-ins today",
@@ -161,6 +176,7 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
           "--success-50": "#ecfdf3",
           "--success-500": "#22c55e",
         }),
+        bottomSlot: undefined,
       },
     ];
   }, [data, registration, metricBaseVars]);
@@ -229,25 +245,27 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
 
   const stats = registration?.stats;
   const totalMembers =
-    typeof stats?.totalMembers === "number"
-      ? stats.totalMembers
-      : typeof gym.memberCount === "number"
-        ? gym.memberCount
-        : 198;
+    typeof data.memberCount === "number"
+      ? data.memberCount
+      : typeof stats?.totalMembers === "number"
+        ? stats.totalMembers
+        : 0;
   const activeMembers =
-    typeof stats?.activeMemberships === "number"
-      ? stats.activeMemberships
-      : typeof gym.activeMemberCount === "number"
-        ? gym.activeMemberCount
-        : 156;
+    typeof data.activeMemberCount === "number"
+      ? data.activeMemberCount
+      : typeof stats?.activeMemberships === "number"
+        ? stats.activeMemberships
+        : 0;
   const totalTrainers =
-    typeof stats?.totalTrainers === "number" ? stats.totalTrainers : 12;
-  const totalClasses = 24;
-  const checkInsToday = 47;
+    typeof stats?.totalTrainers === "number" ? stats.totalTrainers : 0;
+  const totalClasses = stats?.totalClasses ?? 0;
+  const checkInsToday = stats?.checkInsToday ?? 0;
   const monthlyRevenueDisplay =
-    gym.revenue && String(gym.revenue).trim()
-      ? formatMoneyDisplayAsNgn(gym.revenue)
-      : formatGymRevenueFallbackForId(gym.id);
+    data.revenue && String(data.revenue).trim()
+      ? formatMoneyDisplayAsNgn(data.revenue)
+      : gym.revenue && String(gym.revenue).trim()
+        ? formatMoneyDisplayAsNgn(gym.revenue)
+        : formatGymRevenueFallbackForId(gym.id);
 
   const subheading = `${formatCityState(gym)} · ${displayPlan}`;
 
@@ -402,6 +420,7 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
                       comparisonText="vs last period"
                       hoverShadowClass={card.hoverShadowClass}
                       style={card.style}
+                      bottomSlot={card.bottomSlot}
                     />
                   ))}
                 </div>
@@ -429,6 +448,8 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
                     registrationDocuments={
                       registration?.registration?.documents ?? null
                     }
+                    memberships={data.memberships ?? []}
+                    trainers={gym.trainers}
                     metrics={{
                       totalMembers,
                       activeMembers,

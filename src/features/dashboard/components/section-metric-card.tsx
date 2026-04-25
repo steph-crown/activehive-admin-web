@@ -23,6 +23,8 @@ export type SectionMetricCardProps = {
   /** When set, the whole tile is wrapped in a dashboard-style link. */
   href?: string;
   className?: string;
+  /** When provided, replaces the default trend/comparison row. */
+  bottomSlot?: React.ReactNode;
 };
 
 export function SectionMetricCard({
@@ -38,6 +40,7 @@ export function SectionMetricCard({
   style,
   href,
   className,
+  bottomSlot,
 }: SectionMetricCardProps) {
   const TrendIcon = isPositive ? IconTrendingUp : IconTrendingDown;
   const percent = Math.abs(percentChange);
@@ -76,20 +79,24 @@ export function SectionMetricCard({
             {value}
           </div>
 
-          <div className="flex items-center gap-2">
-            <div
-              className="flex items-center gap-1 text-xs font-medium"
-              style={{ color: varianceColor }}
-            >
-              <TrendIcon className="size-4" stroke={2} />~{percent}%
+          {bottomSlot != null ? (
+            <div>{bottomSlot}</div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <div
+                className="flex items-center gap-1 text-xs font-medium"
+                style={{ color: varianceColor }}
+              >
+                <TrendIcon className="size-4" stroke={2} />~{percent}%
+              </div>
+              <span
+                className="text-xs font-medium"
+                style={{ color: "var(--grey-500)" }}
+              >
+                {comparisonText}
+              </span>
             </div>
-            <span
-              className="text-xs font-medium"
-              style={{ color: "var(--grey-500)" }}
-            >
-              {comparisonText}
-            </span>
-          </div>
+          )}
         </div>
       </div>
     </Card>

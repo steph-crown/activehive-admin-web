@@ -11,6 +11,40 @@ export type GymOwner = {
   [key: string]: unknown;
 };
 
+export type GymTrainer = {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string | null;
+  status: string;
+  profileImage: string | null;
+  specialties: string[] | null;
+  bio: string | null;
+  onboardingCompleted: boolean;
+};
+
+export type GymMembershipMember = {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  [key: string]: unknown;
+};
+
+export type GymMembership = {
+  id: string;
+  memberId: string;
+  gymId: string;
+  type: string;
+  status: string;
+  price: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  autoRenew: boolean;
+  member: GymMembershipMember | null;
+};
+
 export type Gym = {
   id: string;
   name: string;
@@ -21,6 +55,11 @@ export type Gym = {
   phoneNumber: string | null;
   email: string | null;
   website: string | null;
+  socialLinks?: {
+    instagram?: string | null;
+    facebook?: string | null;
+    twitterX?: string | null;
+  } | null;
   operatingHours: unknown | null;
   amenities: unknown | null;
   facilities: unknown | null;
@@ -29,7 +68,7 @@ export type Gym = {
   createdAt: string;
   updatedAt: string;
   owner: GymOwner | null;
-  trainers: unknown[];
+  trainers: GymTrainer[];
   approvalStatus?: "pending" | "approved" | "rejected" | null;
   /** When provided by the API; otherwise the list view uses placeholders. */
   memberCount?: number | null;
@@ -73,8 +112,11 @@ export type GymDetailResponse = {
   gym: Gym;
   locations: GymLocation[];
   staffMembers: unknown[];
-  memberships: unknown[];
+  memberships: GymMembership[];
   subscription: GymSubscription | null;
+  memberCount?: number;
+  activeMemberCount?: number;
+  revenue?: string;
 };
 
 export type GymRegistrationStatusOwner = {
@@ -111,6 +153,13 @@ export type GymRegistrationStatusRegistration = {
   currentStep: string | null;
   stepData: GymRegistrationStepData;
   isApproved: boolean;
+  approvalDetails?: {
+    reviewedBy?: string | null;
+    reviewedAt?: string | null;
+  } | null;
+  rejectionReason?: string | null;
+  adminComments?: string | null;
+  canResubmit?: boolean;
   subscriptionStatus: {
     hasSubscription: boolean;
     isExpired: boolean;
@@ -125,6 +174,8 @@ export type GymRegistrationStatusStats = {
   totalTrainers: number;
   totalLocations: number;
   activeMemberships: number;
+  totalClasses?: number;
+  checkInsToday?: number;
 };
 
 export type GymRegistrationStatusResponse = {
