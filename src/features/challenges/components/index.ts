@@ -1,3 +1,4 @@
+export * from "./challenge-form-dialog";
 export * from "./challenges-page";
 export * from "./challenges-table";
 export * from "./confirm-delete-challenge-dialog";
