@@ -1,4 +1,4 @@
-/* eslint-disable react-refresh/only-export-components */
+ 
 import { type ColumnDef } from "@tanstack/react-table";
 import {
   IconCircleCheckFilled,
@@ -171,6 +171,9 @@ type AdminsTableProps = {
   onDeleteAdmin?: (admin: Admin) => void;
   onActivateAdmin?: (admin: Admin) => void;
   onDeactivateAdmin?: (admin: Admin) => void;
+  pageIndex?: number;
+  pageCount?: number;
+  onPageChange?: (pageIndex: number, pageSize: number) => void;
 };
 
 export function AdminsTable({
@@ -180,6 +183,9 @@ export function AdminsTable({
   onDeleteAdmin,
   onActivateAdmin,
   onDeactivateAdmin,
+  pageIndex,
+  pageCount,
+  onPageChange,
 }: AdminsTableProps) {
   return (
     <DataTable
@@ -194,6 +200,9 @@ export function AdminsTable({
       enableDrag={false}
       enableSelection={false}
       getRowId={(row) => row.id}
+      pageIndex={pageIndex}
+      pageCount={pageCount}
+      onPageChange={onPageChange}
     />
   );
 }

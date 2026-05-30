@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api-client";
+import type { PaginatedResponse } from "@/lib/types";
 import type { Admin } from "../types";
 
 export type CreateAdminFormData = {
@@ -17,10 +18,19 @@ export type UpdateAdminPayload = {
   password?: string;
 };
 
+export type AdminsListParams = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string;
+};
+
 export const adminsApi = {
-  getAdmins: async (): Promise<Admin[]> => {
-    return await apiClient.get<Admin[]>("/api/admin/users", {
-      params: { role: "admin" },
+  getAdmins: async (
+    params: AdminsListParams = {},
+  ): Promise<PaginatedResponse<Admin>> => {
+    return await apiClient.get<PaginatedResponse<Admin>>("/api/admin/users", {
+      params: { role: "admin", ...params },
     });
   },
   createAdmin: async (payload: CreateAdminFormData): Promise<Admin> => {

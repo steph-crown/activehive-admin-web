@@ -7,8 +7,9 @@ import {
 } from "@/components/molecules/table-filter-bar";
 import { AppSidebar } from "@/features/dashboard/components/app-sidebar";
 import { SiteHeader } from "@/features/dashboard/components/site-header";
-import { rowMatchesDateField, rowMatchesSearch } from "@/lib/table-filters";
+import { rowMatchesDateField } from "@/lib/table-filters";
 import { useAdminsQuery } from "../services";
+import type { AdminsListParams } from "../services/api";
 import type { Admin } from "../types";
 import { AdminsTable } from "./admins-table";
 import { CreateAdminDialog } from "./create-admin-dialog";
@@ -34,20 +35,28 @@ export function AdminsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
 
-  const { data, isLoading, error } = useAdminsQuery();
+  const apiParams = useMemo<AdminsListParams>(() => {
+    const params: AdminsListParams = { page, limit };
+    if (searchQuery) params.search = searchQuery;
+    if (statusFilter !== "all") params.status = statusFilter;
+    return params;
+  }, [page, limit, searchQuery, statusFilter]);
 
+  const { data: response, isLoading, error } = useAdminsQuery(apiParams);
+
+  // dateFilter has no API support — applied client-side on current page.
   const filteredData = useMemo(() => {
-    if (!data) return [];
-    return data.filter((row) => {
-      if (!rowMatchesSearch(row, searchQuery)) return false;
+    const admins = response?.data ?? [];
+    return admins.filter((row) => {
       if (!rowMatchesDateField(row.createdAt, dateFilter)) return false;
-      if (statusFilter !== "all") {
-        if (row.status?.toLowerCase() !== statusFilter) return false;
-      }
       return true;
     });
-  }, [data, searchQuery, dateFilter, statusFilter]);
+  }, [response, dateFilter]);
+
+  const pageCount = response?.pagination.totalPages;
 
   return (
     <SidebarProvider>
@@ -93,18 +102,24 @@ export function AdminsPage() {
                   <div className="text-destructive">
                     Error loading admins. Check console for details.
                   </div>
-                ) : data ? (
+                ) : response?.data ? (
                   <>
                     <TableFilterBar
                       searchValue={searchQuery}
-                      onSearchChange={setSearchQuery}
+                      onSearchChange={(value) => {
+                        setSearchQuery(value);
+                        setPage(1);
+                      }}
                       searchPlaceholder="Search admins..."
                       dateValue={dateFilter}
                       onDateChange={setDateFilter}
                       extraFilters={
                         <TableFilterSelect
                           value={statusFilter}
-                          onValueChange={setStatusFilter}
+                          onValueChange={(value) => {
+                            setStatusFilter(value);
+                            setPage(1);
+                          }}
                           placeholder="Status"
                           options={STATUS_OPTIONS}
                           aria-label="Filter by status"
@@ -124,6 +139,12 @@ export function AdminsPage() {
                       onDeactivateAdmin={(admin) =>
                         setActionAdmin({ admin, type: "deactivate" })
                       }
+                      pageIndex={page - 1}
+                      pageCount={pageCount}
+                      onPageChange={(pageIndex, pageSize) => {
+                        setPage(pageIndex + 1);
+                        setLimit(pageSize);
+                      }}
                     />
                   </>
                 ) : null}
