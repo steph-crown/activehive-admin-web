@@ -96,12 +96,7 @@ const makeChallengesColumns = (
       accessorKey: "name",
       header: "Challenge",
       cell: ({ row }) => (
-        <div className="flex flex-col gap-0.5">
-          <span className="font-medium">{row.original.name}</span>
-          <span className="text-muted-foreground text-xs">
-            {row.original.slug}
-          </span>
-        </div>
+        <div className="font-medium">{row.original.name}</div>
       ),
     },
     {

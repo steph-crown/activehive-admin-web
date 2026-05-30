@@ -6,6 +6,7 @@ type EditChallengeDialogProps = {
   readonly challenge: PlatformChallenge | null;
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
+  readonly isSubmitting?: boolean;
   readonly onSave: (payload: UpdateChallengePayload) => void;
 };
 
@@ -13,6 +14,7 @@ export function EditChallengeDialog({
   challenge,
   open,
   onOpenChange,
+  isSubmitting = false,
   onSave,
 }: EditChallengeDialogProps) {
   return (
@@ -20,6 +22,7 @@ export function EditChallengeDialog({
       mode="edit"
       open={open}
       onOpenChange={onOpenChange}
+      isSubmitting={isSubmitting}
       challenge={challenge}
       onSubmit={(values) => {
         if (!challenge || !canEditChallenge(challenge.startsAt)) return;

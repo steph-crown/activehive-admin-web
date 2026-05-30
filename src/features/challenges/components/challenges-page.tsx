@@ -158,6 +158,7 @@ export function ChallengesPage() {
                 <CreateChallengeDialog
                   open={createOpen}
                   onOpenChange={setCreateOpen}
+                  isSubmitting={createMutation.isPending}
                   onCreate={handleCreate}
                 />
                 <EditChallengeDialog
@@ -166,6 +167,7 @@ export function ChallengesPage() {
                   onOpenChange={(open) => {
                     if (!open) setEditChallenge(null);
                   }}
+                  isSubmitting={updateMutation.isPending}
                   onSave={handleEditSave}
                 />
                 <ConfirmDeleteChallengeDialog

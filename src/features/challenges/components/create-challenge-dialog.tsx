@@ -5,12 +5,14 @@ import { ChallengeFormDialog } from "./challenge-form-dialog";
 type CreateChallengeDialogProps = {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
+  readonly isSubmitting?: boolean;
   readonly onCreate: (payload: CreateChallengePayload) => void;
 };
 
 export function CreateChallengeDialog({
   open,
   onOpenChange,
+  isSubmitting = false,
   onCreate,
 }: CreateChallengeDialogProps) {
   return (
@@ -18,6 +20,7 @@ export function CreateChallengeDialog({
       mode="create"
       open={open}
       onOpenChange={onOpenChange}
+      isSubmitting={isSubmitting}
       onSubmit={(values) =>
         onCreate({
           ...values,

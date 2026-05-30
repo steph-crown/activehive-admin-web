@@ -63,6 +63,7 @@ type ChallengeFormDialogProps = {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
   readonly challenge?: PlatformChallenge | null;
+  readonly isSubmitting?: boolean;
   readonly onSubmit: (values: ChallengeFormSubmitValues) => void;
 };
 
@@ -83,6 +84,7 @@ export function ChallengeFormDialog({
   open,
   onOpenChange,
   challenge,
+  isSubmitting = false,
   onSubmit,
 }: ChallengeFormDialogProps) {
   const isEdit = mode === "edit";
@@ -308,10 +310,11 @@ export function ChallengeFormDialog({
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
+                disabled={isSubmitting}
               >
                 Cancel
               </Button>
-              <Button type="submit">
+              <Button type="submit" loading={isSubmitting}>
                 {isEdit ? "Save changes" : "Create challenge"}
               </Button>
             </DialogFooter>
