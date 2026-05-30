@@ -4,26 +4,27 @@ import { isFutureDateInput } from "./challenge-form-utils";
 import type { ChallengeStatus, ChallengeType } from "../types";
 
 export const CHALLENGE_TYPES: ChallengeType[] = [
-  "workout_streak",
-  "check_in",
+  "fitness",
+  "weight_loss",
+  "attendance",
   "steps",
-  "referral",
+  "custom",
 ];
 
 export const CHALLENGE_STATUSES: ChallengeStatus[] = [
   "draft",
-  "scheduled",
   "active",
   "completed",
   "cancelled",
+  "archived",
 ];
 
 export const challengeStatusLabel: Record<ChallengeStatus, string> = {
   draft: "Draft",
-  scheduled: "Scheduled",
   active: "Active",
   completed: "Completed",
   cancelled: "Cancelled",
+  archived: "Archived",
 };
 
 const dateFields = {
@@ -91,7 +92,7 @@ export type ChallengeFormValues = {
 export const emptyChallengeFormValues: ChallengeFormValues = {
   name: "",
   description: "",
-  type: "workout_streak",
+  type: "fitness",
   startsAt: "",
   endsAt: "",
   rewardPoints: "",

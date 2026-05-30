@@ -185,12 +185,18 @@ type ChallengesTableProps = {
   readonly data: PlatformChallenge[];
   readonly onEditChallenge: (challenge: PlatformChallenge) => void;
   readonly onDeleteChallenge: (challenge: PlatformChallenge) => void;
+  readonly pageIndex?: number;
+  readonly pageCount?: number;
+  readonly onPageChange?: (pageIndex: number, pageSize: number) => void;
 };
 
 export function ChallengesTable({
   data,
   onEditChallenge,
   onDeleteChallenge,
+  pageIndex,
+  pageCount,
+  onPageChange,
 }: ChallengesTableProps) {
   return (
     <DataTable
@@ -202,6 +208,9 @@ export function ChallengesTable({
       enableDrag={false}
       enableSelection={false}
       getRowId={(row) => row.id}
+      pageIndex={pageIndex}
+      pageCount={pageCount}
+      onPageChange={onPageChange}
     />
   );
 }

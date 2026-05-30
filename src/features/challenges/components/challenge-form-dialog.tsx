@@ -124,7 +124,6 @@ export function ChallengeFormDialog({
       rewardPoints: values.rewardPoints as number,
       ...(isEdit ? { status: values.status! } : {}),
     });
-    onOpenChange(false);
   };
 
   return (

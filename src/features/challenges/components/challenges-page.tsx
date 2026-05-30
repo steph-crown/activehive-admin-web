@@ -6,17 +6,23 @@ import {
 } from "@/components/molecules/table-filter-bar";
 import { Button } from "@/components/ui/button";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { TableCardSkeleton } from "@/components/loader/page-skeleton";
 import { AppSidebar } from "@/features/dashboard/components/app-sidebar";
 import { SiteHeader } from "@/features/dashboard/components/site-header";
 import { useToast } from "@/hooks/use-toast";
-import { rowMatchesDateField, rowMatchesSearch } from "@/lib/table-filters";
 import { IconPlus } from "@tabler/icons-react";
-import { DEMO_CHALLENGES } from "../data/demo-challenges";
 import type {
   CreateChallengePayload,
   PlatformChallenge,
   UpdateChallengePayload,
 } from "../types";
+import {
+  useChallengesQuery,
+  useCreateChallengeMutation,
+  useDeleteChallengeMutation,
+  useUpdateChallengeMutation,
+} from "../services";
+import type { ChallengesListParams } from "../services/api";
 import { ChallengesTable } from "./challenges-table";
 import { ConfirmDeleteChallengeDialog } from "./confirm-delete-challenge-dialog";
 import { CreateChallengeDialog } from "./create-challenge-dialog";
@@ -24,26 +30,29 @@ import { EditChallengeDialog } from "./edit-challenge-dialog";
 
 const TYPE_FILTER_OPTIONS = [
   { value: "all", label: "All types" },
-  { value: "workout_streak", label: "Workout streak" },
-  { value: "check_in", label: "Check-in" },
+  { value: "fitness", label: "Fitness" },
+  { value: "weight_loss", label: "Weight loss" },
+  { value: "attendance", label: "Attendance" },
   { value: "steps", label: "Steps" },
-  { value: "referral", label: "Referral" },
+  { value: "custom", label: "Custom" },
 ];
 
 const STATUS_FILTER_OPTIONS = [
   { value: "all", label: "All statuses" },
   { value: "draft", label: "Draft" },
-  { value: "scheduled", label: "Scheduled" },
   { value: "active", label: "Active" },
   { value: "completed", label: "Completed" },
   { value: "cancelled", label: "Cancelled" },
+  { value: "archived", label: "Archived" },
 ];
 
+function getErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof Error && error.message) return error.message;
+  return fallback;
+}
+
 export function ChallengesPage() {
-  const { showSuccess } = useToast();
-  const [challenges, setChallenges] = useState<PlatformChallenge[]>(() => [
-    ...DEMO_CHALLENGES,
-  ]);
+  const { showSuccess, showError } = useToast();
   const [createOpen, setCreateOpen] = useState(false);
   const [editChallenge, setEditChallenge] = useState<PlatformChallenge | null>(
     null,
@@ -54,67 +63,74 @@ export function ChallengesPage() {
   const [dateFilter, setDateFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
 
-  const filtered = useMemo(() => {
-    return challenges.filter((row) => {
-      if (!rowMatchesSearch(row, searchQuery)) return false;
-      if (!rowMatchesDateField(row.startsAt, dateFilter)) return false;
-      if (typeFilter !== "all" && row.type !== typeFilter) return false;
-      if (statusFilter !== "all" && row.status !== statusFilter) {
-        return false;
-      }
-      return true;
-    });
-  }, [challenges, searchQuery, dateFilter, typeFilter, statusFilter]);
+  const apiParams = useMemo<ChallengesListParams>(() => {
+    const params: ChallengesListParams = { page, limit };
+    if (searchQuery) params.search = searchQuery;
+    if (typeFilter !== "all") params.type = typeFilter;
+    if (statusFilter !== "all") params.status = statusFilter;
+    if (dateFilter) {
+      params.dateFrom = dateFilter;
+      params.dateTo = dateFilter;
+    }
+    return params;
+  }, [page, limit, searchQuery, typeFilter, statusFilter, dateFilter]);
+
+  const { data: response, isLoading, error } = useChallengesQuery(apiParams);
+  const createMutation = useCreateChallengeMutation();
+  const updateMutation = useUpdateChallengeMutation();
+  const deleteMutation = useDeleteChallengeMutation();
+
+  const challenges = response?.data ?? [];
+  const pageCount = response?.pagination.totalPages;
 
   const handleCreate = (payload: CreateChallengePayload) => {
-    const next: PlatformChallenge = {
-      id: crypto.randomUUID(),
-      name: payload.name,
-      slug: payload.slug,
-      description: payload.description,
-      type: payload.type,
-      status: "draft",
-      startsAt: payload.startsAt,
-      endsAt: payload.endsAt,
-      rewardPoints: payload.rewardPoints,
-      participantCount: 0,
-      createdAt: new Date().toISOString(),
-    };
-    setChallenges((prev) => [next, ...prev]);
-    showSuccess(
-      "Challenge created",
-      `${payload.name} was saved as a draft.`,
-    );
+    createMutation.mutate(payload, {
+      onSuccess: (created) => {
+        setCreateOpen(false);
+        showSuccess("Challenge created", `${created.name} was saved.`);
+      },
+      onError: (err) => {
+        showError(
+          "Could not create challenge",
+          getErrorMessage(err, "Please try again."),
+        );
+      },
+    });
   };
 
   const handleEditSave = (payload: UpdateChallengePayload) => {
-    setChallenges((prev) =>
-      prev.map((c) =>
-        c.id === payload.id
-          ? {
-              ...c,
-              name: payload.name,
-              slug: payload.slug,
-              description: payload.description,
-              type: payload.type,
-              status: payload.status,
-              startsAt: payload.startsAt,
-              endsAt: payload.endsAt,
-              rewardPoints: payload.rewardPoints,
-            }
-          : c,
-      ),
-    );
-    showSuccess("Challenge updated", `${payload.name} was saved.`);
+    updateMutation.mutate(payload, {
+      onSuccess: (updated) => {
+        setEditChallenge(null);
+        showSuccess("Challenge updated", `${updated.name} was saved.`);
+      },
+      onError: (err) => {
+        showError(
+          "Could not update challenge",
+          getErrorMessage(err, "Please try again."),
+        );
+      },
+    });
   };
 
   const handleDeleteConfirm = () => {
     if (!deleteChallenge) return;
     const { id, name } = deleteChallenge;
-    setChallenges((prev) => prev.filter((c) => c.id !== id));
-    showSuccess("Challenge deleted", `${name} was removed.`);
-    setDeleteChallenge(null);
+    deleteMutation.mutate(id, {
+      onSuccess: () => {
+        showSuccess("Challenge deleted", `${name} was removed.`);
+        setDeleteChallenge(null);
+      },
+      onError: (err) => {
+        showError(
+          "Could not delete challenge",
+          getErrorMessage(err, "Please try again."),
+        );
+      },
+    });
   };
 
   return (
@@ -161,39 +177,67 @@ export function ChallengesPage() {
                   onConfirm={handleDeleteConfirm}
                 />
 
-                <TableFilterBar
-                  searchValue={searchQuery}
-                  onSearchChange={setSearchQuery}
-                  searchPlaceholder="Search challenges..."
-                  dateValue={dateFilter}
-                  onDateChange={setDateFilter}
-                  extraFilters={
-                    <>
-                      <TableFilterSelect
-                        value={typeFilter}
-                        onValueChange={setTypeFilter}
-                        placeholder="Type"
-                        options={TYPE_FILTER_OPTIONS}
-                        aria-label="Filter by challenge type"
-                      />
-                      <TableFilterSelect
-                        value={statusFilter}
-                        onValueChange={setStatusFilter}
-                        placeholder="Status"
-                        options={STATUS_FILTER_OPTIONS}
-                        aria-label="Filter by challenge status"
-                      />
-                    </>
-                  }
-                />
+                {isLoading ? (
+                  <TableCardSkeleton rows={8} columns={8} />
+                ) : error ? (
+                  <div className="text-destructive">
+                    Error loading challenges. Check console for details.
+                  </div>
+                ) : (
+                  <>
+                    <TableFilterBar
+                      searchValue={searchQuery}
+                      onSearchChange={(value) => {
+                        setSearchQuery(value);
+                        setPage(1);
+                      }}
+                      searchPlaceholder="Search challenges..."
+                      dateValue={dateFilter}
+                      onDateChange={(value) => {
+                        setDateFilter(value);
+                        setPage(1);
+                      }}
+                      extraFilters={
+                        <>
+                          <TableFilterSelect
+                            value={typeFilter}
+                            onValueChange={(value) => {
+                              setTypeFilter(value);
+                              setPage(1);
+                            }}
+                            placeholder="Type"
+                            options={TYPE_FILTER_OPTIONS}
+                            aria-label="Filter by challenge type"
+                          />
+                          <TableFilterSelect
+                            value={statusFilter}
+                            onValueChange={(value) => {
+                              setStatusFilter(value);
+                              setPage(1);
+                            }}
+                            placeholder="Status"
+                            options={STATUS_FILTER_OPTIONS}
+                            aria-label="Filter by challenge status"
+                          />
+                        </>
+                      }
+                    />
 
-                <div className="mt-4">
-                  <ChallengesTable
-                    data={filtered}
-                    onEditChallenge={(c) => setEditChallenge(c)}
-                    onDeleteChallenge={(c) => setDeleteChallenge(c)}
-                  />
-                </div>
+                    <div className="mt-4">
+                      <ChallengesTable
+                        data={challenges}
+                        onEditChallenge={(c) => setEditChallenge(c)}
+                        onDeleteChallenge={(c) => setDeleteChallenge(c)}
+                        pageIndex={page - 1}
+                        pageCount={pageCount}
+                        onPageChange={(pageIndex, pageSize) => {
+                          setPage(pageIndex + 1);
+                          setLimit(pageSize);
+                        }}
+                      />
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>

@@ -1,10 +1,11 @@
 import type { ChallengeStatus, ChallengeType } from "../types";
 
 export const challengeTypeLabel: Record<ChallengeType, string> = {
-  workout_streak: "Workout streak",
-  check_in: "Check-in",
+  fitness: "Fitness",
+  weight_loss: "Weight loss",
+  attendance: "Attendance",
   steps: "Steps",
-  referral: "Referral",
+  custom: "Custom",
 };
 
 export function challengeDurationLabel(
@@ -35,11 +36,10 @@ export function challengeStatusBadgeVariant(
   switch (status) {
     case "active":
       return "default";
-    case "scheduled":
-      return "secondary";
     case "draft":
       return "outline";
     case "completed":
+    case "archived":
       return "secondary";
     case "cancelled":
       return "destructive";
