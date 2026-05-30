@@ -24,6 +24,20 @@ export function isFutureDateInput(date: string): boolean {
   return date > todayDateInput();
 }
 
+/** Local calendar date (`YYYY-MM-DD`) for a challenge start ISO timestamp. */
+export function challengeStartDateInput(startsAt: string): string {
+  const d = new Date(startsAt);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+/** Editable only while the start date is strictly in the future (not today). */
+export function canEditChallenge(startsAt: string): boolean {
+  return isFutureDateInput(challengeStartDateInput(startsAt));
+}
+
 export function minFutureDateInput(): string {
   const d = new Date();
   d.setDate(d.getDate() + 1);

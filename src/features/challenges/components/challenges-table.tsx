@@ -17,6 +17,7 @@ import {
   challengeTypeLabel,
   formatChallengeSchedule,
 } from "../lib/challenge-display";
+import { canEditChallenge } from "../lib/challenge-form-utils";
 import type { ChallengeStatus, PlatformChallenge } from "../types";
 
 type ChallengeRowActionsProps = {
@@ -31,6 +32,7 @@ function ChallengeRowActions({
   onDelete,
 }: ChallengeRowActionsProps) {
   const [open, setOpen] = useState(false);
+  const showEdit = canEditChallenge(challenge.startsAt);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -46,18 +48,20 @@ function ChallengeRowActions({
       </PopoverTrigger>
       <PopoverContent align="end" className="w-40 p-1">
         <div className="flex flex-col gap-0.5">
-          <button
-            type="button"
-            className={cn(
-              "focus:bg-accent focus:text-accent-foreground relative flex w-full cursor-default items-center rounded-sm px-2 py-1.5 text-left text-sm outline-hidden select-none",
-            )}
-            onClick={() => {
-              onEdit(challenge);
-              setOpen(false);
-            }}
-          >
-            Edit
-          </button>
+          {showEdit && (
+            <button
+              type="button"
+              className={cn(
+                "focus:bg-accent focus:text-accent-foreground relative flex w-full cursor-default items-center rounded-sm px-2 py-1.5 text-left text-sm outline-hidden select-none",
+              )}
+              onClick={() => {
+                onEdit(challenge);
+                setOpen(false);
+              }}
+            >
+              Edit
+            </button>
+          )}
           <button
             type="button"
             className={cn(

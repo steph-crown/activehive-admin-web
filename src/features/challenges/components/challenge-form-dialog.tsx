@@ -39,6 +39,7 @@ import {
   type ChallengeFormValues,
 } from "../lib/challenge-form-schema";
 import {
+  canEditChallenge,
   dateInputToRangeIso,
   isoToDateInput,
   minEndDateInput,
@@ -85,6 +86,8 @@ export function ChallengeFormDialog({
   onSubmit,
 }: ChallengeFormDialogProps) {
   const isEdit = mode === "edit";
+  const isLockedEdit =
+    isEdit && challenge != null && !canEditChallenge(challenge.startsAt);
   const form = useForm<ChallengeFormValues>({
     resolver: yupResolver(
       isEdit ? editChallengeFormSchema : createChallengeFormSchema,
@@ -95,6 +98,10 @@ export function ChallengeFormDialog({
 
   useEffect(() => {
     if (!open) return;
+    if (isLockedEdit) {
+      onOpenChange(false);
+      return;
+    }
     if (isEdit && challenge) {
       form.reset(toFormValues(challenge));
       return;
@@ -106,6 +113,7 @@ export function ChallengeFormDialog({
   }, [open, isEdit, challenge?.id]);
 
   const handleSubmit = (values: ChallengeFormValues) => {
+    if (isLockedEdit) return;
     const range = dateInputToRangeIso(values.startsAt, values.endsAt);
     onSubmit({
       name: values.name,

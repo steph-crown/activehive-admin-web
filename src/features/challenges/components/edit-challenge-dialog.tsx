@@ -1,3 +1,4 @@
+import { canEditChallenge } from "../lib/challenge-form-utils";
 import type { PlatformChallenge, UpdateChallengePayload } from "../types";
 import { ChallengeFormDialog } from "./challenge-form-dialog";
 
@@ -21,7 +22,7 @@ export function EditChallengeDialog({
       onOpenChange={onOpenChange}
       challenge={challenge}
       onSubmit={(values) => {
-        if (!challenge) return;
+        if (!challenge || !canEditChallenge(challenge.startsAt)) return;
         onSave({
           id: challenge.id,
           slug: challenge.slug,
