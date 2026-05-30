@@ -25,7 +25,7 @@ export function EditChallengeDialog({
       isSubmitting={isSubmitting}
       challenge={challenge}
       onSubmit={(values) => {
-        if (!challenge || !canEditChallenge(challenge.startsAt)) return;
+        if (!challenge || !canEditChallenge(challenge.startDate)) return;
         onSave({
           id: challenge.id,
           slug: challenge.slug,

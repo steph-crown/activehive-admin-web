@@ -32,6 +32,10 @@ export function toPlatformChallenge(raw: ChallengeApi): PlatformChallenge {
     description: raw.description ?? null,
     type: raw.type,
     status: raw.status,
+    startDate,
+    endDate,
+    durationDays:
+      raw.schedule?.durationDays ?? scheduleDurationDays(startDate, endDate),
     startsAt: startDate ? scheduleStartToIso(startDate) : new Date().toISOString(),
     endsAt: endDate ? scheduleEndToIso(endDate) : new Date().toISOString(),
     rewardPoints: raw.rewards?.points ?? 0,

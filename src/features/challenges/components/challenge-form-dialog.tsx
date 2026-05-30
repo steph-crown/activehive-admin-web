@@ -41,7 +41,6 @@ import {
 import {
   canEditChallenge,
   dateInputToRangeIso,
-  isoToDateInput,
   minEndDateInput,
   minFutureDateInput,
 } from "../lib/challenge-form-utils";
@@ -73,8 +72,8 @@ function toFormValues(challenge: PlatformChallenge): ChallengeFormValues {
     description: challenge.description ?? "",
     type: challenge.type,
     status: challenge.status,
-    startsAt: isoToDateInput(challenge.startsAt),
-    endsAt: isoToDateInput(challenge.endsAt),
+    startsAt: challenge.startDate,
+    endsAt: challenge.endDate,
     rewardPoints: challenge.rewardPoints,
   };
 }
@@ -89,7 +88,7 @@ export function ChallengeFormDialog({
 }: ChallengeFormDialogProps) {
   const isEdit = mode === "edit";
   const isLockedEdit =
-    isEdit && challenge != null && !canEditChallenge(challenge.startsAt);
+    isEdit && challenge != null && !canEditChallenge(challenge.startDate);
   const form = useForm<ChallengeFormValues>({
     resolver: yupResolver(
       isEdit ? editChallengeFormSchema : createChallengeFormSchema,

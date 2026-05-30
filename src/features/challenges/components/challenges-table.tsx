@@ -32,7 +32,7 @@ function ChallengeRowActions({
   onDelete,
 }: ChallengeRowActionsProps) {
   const [open, setOpen] = useState(false);
-  const showEdit = canEditChallenge(challenge.startsAt);
+  const showEdit = canEditChallenge(challenge.startDate);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -120,7 +120,7 @@ const makeChallengesColumns = (
       header: "Duration",
       cell: ({ row }) => (
         <span className="text-sm">
-          {challengeDurationLabel(row.original.startsAt, row.original.endsAt)}
+          {challengeDurationLabel(row.original.durationDays)}
         </span>
       ),
     },
@@ -159,7 +159,10 @@ const makeChallengesColumns = (
       header: () => <span className="block min-w-[220px]">Schedule</span>,
       cell: ({ row }) => (
         <span className="text-muted-foreground block min-w-[220px] text-sm whitespace-nowrap">
-          {formatChallengeSchedule(row.original.startsAt, row.original.endsAt)}
+          {formatChallengeSchedule(
+            row.original.startDate,
+            row.original.endDate,
+          )}
         </span>
       ),
     },

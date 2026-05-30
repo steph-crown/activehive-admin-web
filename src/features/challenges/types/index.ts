@@ -35,10 +35,14 @@ export type ChallengeApi = {
   schedule: ChallengeSchedule;
   rewards: ChallengeRewards;
   gymId?: string | null;
+  createdBy?: string | null;
   metadata?: Record<string, unknown> | null;
   participantCount?: number | null;
+  completionCount?: number | null;
   createdAt?: string;
   updatedAt?: string;
+  gym?: unknown | null;
+  creator?: unknown | null;
 };
 
 export type PlatformChallenge = {
@@ -48,6 +52,11 @@ export type PlatformChallenge = {
   description: string | null;
   type: ChallengeType;
   status: ChallengeStatus;
+  /** API schedule dates (`YYYY-MM-DD`). */
+  startDate: string;
+  endDate: string;
+  durationDays: number;
+  /** ISO timestamps derived from schedule — used by forms and edit guards. */
   startsAt: string;
   endsAt: string;
   rewardPoints: number;

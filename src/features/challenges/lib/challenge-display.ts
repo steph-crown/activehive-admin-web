@@ -8,25 +8,23 @@ export const challengeTypeLabel: Record<ChallengeType, string> = {
   custom: "Custom",
 };
 
-export function challengeDurationLabel(
-  startsAt: string,
-  endsAt: string,
-): string {
-  const ms = new Date(endsAt).getTime() - new Date(startsAt).getTime();
-  const days = Math.max(0, Math.round(ms / 86_400_000));
+export function challengeDurationLabel(days: number): string {
   if (days === 0) return "Same day";
   if (days === 1) return "1 day";
   return `${days} days`;
 }
 
-export function formatChallengeSchedule(startsAt: string, endsAt: string): string {
+export function formatChallengeSchedule(
+  startDate: string,
+  endDate: string,
+): string {
   const opts: Intl.DateTimeFormatOptions = {
     month: "short",
     day: "numeric",
     year: "numeric",
   };
-  const a = new Date(startsAt).toLocaleDateString(undefined, opts);
-  const b = new Date(endsAt).toLocaleDateString(undefined, opts);
+  const a = new Date(`${startDate}T12:00:00`).toLocaleDateString(undefined, opts);
+  const b = new Date(`${endDate}T12:00:00`).toLocaleDateString(undefined, opts);
   return `${a} – ${b}`;
 }
 
