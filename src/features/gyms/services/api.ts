@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/api-client";
-import type { PaginatedResponse } from "@/lib/types";
+import type { PaginatedResponse, SortOrder } from "@/lib/types";
 import type {
   Gym,
   GymDetailResponse,
@@ -11,9 +11,14 @@ const basePath = "/api/admin/gyms";
 export type GymsListParams = {
   page?: number;
   limit?: number;
+  sort?: string;
+  order?: SortOrder;
   search?: string;
   approvalStatus?: string;
   isActive?: boolean;
+  dateFrom?: string;
+  dateTo?: string;
+  subscriptionPlan?: string;
 };
 
 export const gymsApi = {

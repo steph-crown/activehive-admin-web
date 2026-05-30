@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import type { SortingState } from "@tanstack/react-table";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { TableCardSkeleton } from "@/components/loader/page-skeleton";
 import { SectionCardsSkeleton } from "@/features/dashboard/components/dashboard-skeleton";
@@ -9,7 +10,6 @@ import {
 } from "@/components/molecules/table-filter-bar";
 import { AppSidebar } from "@/features/dashboard/components/app-sidebar";
 import { SiteHeader } from "@/features/dashboard/components/site-header";
-import { rowMatchesDateField } from "@/lib/table-filters";
 import { gymsQueryKeys, useGymsQuery } from "../services";
 import type { GymsListParams } from "../services/api";
 import type { Gym } from "../types";
@@ -56,17 +56,39 @@ export function GymsPage() {
   const [planFilter, setPlanFilter] = useState("all");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [sorting, setSorting] = useState<SortingState>([]);
 
   const apiParams = useMemo<GymsListParams>(() => {
     const params: GymsListParams = { page, limit };
     if (searchQuery) params.search = searchQuery;
-    if (approvalFilter !== "all" && approvalFilter !== "none") {
+    if (approvalFilter !== "all") {
       params.approvalStatus = approvalFilter;
     }
     if (activeFilter === "active") params.isActive = true;
     if (activeFilter === "inactive") params.isActive = false;
+    if (dateFilter) {
+      params.dateFrom = dateFilter;
+      params.dateTo = dateFilter;
+    }
+    if (planFilter !== "all") {
+      params.subscriptionPlan = planFilter;
+    }
+    const activeSort = sorting[0];
+    if (activeSort) {
+      params.sort = activeSort.id;
+      params.order = activeSort.desc ? "DESC" : "ASC";
+    }
     return params;
-  }, [page, limit, searchQuery, approvalFilter, activeFilter]);
+  }, [
+    page,
+    limit,
+    searchQuery,
+    approvalFilter,
+    activeFilter,
+    dateFilter,
+    planFilter,
+    sorting,
+  ]);
 
   const { data: response, isLoading, error } = useGymsQuery(apiParams);
 
@@ -88,22 +110,6 @@ export function GymsPage() {
     );
     return { totalGyms, activeGyms, pendingApproval, totalMembers };
   }, [listRows, response]);
-
-  // dateFilter and planFilter have no API support — applied client-side on current page.
-  // approvalFilter="none" (rows with no approval status) also has no server equivalent.
-  const filteredData = useMemo(() => {
-    return listRows.filter((row) => {
-      if (!rowMatchesDateField(row.createdAt, dateFilter)) return false;
-      if (approvalFilter === "none") {
-        if (row.approvalStatus != null && String(row.approvalStatus).length > 0)
-          return false;
-      }
-      if (planFilter !== "all" && row.displayPlanKey !== planFilter) {
-        return false;
-      }
-      return true;
-    });
-  }, [listRows, dateFilter, approvalFilter, planFilter]);
 
   const pageCount = response?.pagination.totalPages;
 
@@ -173,7 +179,10 @@ export function GymsPage() {
                       }}
                       searchPlaceholder="Search gyms..."
                       dateValue={dateFilter}
-                      onDateChange={setDateFilter}
+                      onDateChange={(value) => {
+                        setDateFilter(value);
+                        setPage(1);
+                      }}
                       extraFilters={
                         <>
                           <TableFilterSelect
@@ -198,7 +207,10 @@ export function GymsPage() {
                           />
                           <TableFilterSelect
                             value={planFilter}
-                            onValueChange={setPlanFilter}
+                            onValueChange={(value) => {
+                              setPlanFilter(value);
+                              setPage(1);
+                            }}
                             placeholder="Plans"
                             options={GYM_PLAN_FILTER_OPTIONS}
                             aria-label="Filter by subscription plan"
@@ -207,7 +219,7 @@ export function GymsPage() {
                       }
                     />
                     <GymsTable
-                      data={filteredData}
+                      data={listRows}
                       onActivateGym={(gym: GymListRow) =>
                         setStatusAction({ gym, type: "activate" })
                       }
@@ -225,6 +237,11 @@ export function GymsPage() {
                       onPageChange={(pageIndex, pageSize) => {
                         setPage(pageIndex + 1);
                         setLimit(pageSize);
+                      }}
+                      sorting={sorting}
+                      onSortingChange={(nextSorting) => {
+                        setSorting(nextSorting);
+                        setPage(1);
                       }}
                     />
                   </>

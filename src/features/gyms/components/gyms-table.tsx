@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { type ColumnDef } from "@tanstack/react-table";
+import { type ColumnDef, type SortingState } from "@tanstack/react-table";
 import {
   IconCircleCheckFilled,
   IconDotsVertical,
@@ -47,6 +47,7 @@ function makeGymsColumns({
     {
       accessorKey: "owner",
       header: "Owner",
+      enableSorting: false,
       cell: ({ row }) => {
         const owner = row.original.owner;
         if (!owner) return <span className="text-muted-foreground">N/A</span>;
@@ -60,6 +61,7 @@ function makeGymsColumns({
     {
       accessorKey: "address",
       header: "Location",
+      enableSorting: false,
       cell: ({ row }) => {
         const address = row.original.address;
         if (!address) return <span className="text-muted-foreground">N/A</span>;
@@ -71,7 +73,8 @@ function makeGymsColumns({
       },
     },
     {
-      accessorKey: "displayRevenue",
+      id: "revenue",
+      accessorFn: (row) => row.revenue ?? row.displayRevenue,
       header: "Revenue",
       cell: ({ row }) => (
         <div className="text-sm font-medium">{row.original.displayRevenue}</div>
@@ -80,6 +83,7 @@ function makeGymsColumns({
     {
       accessorKey: "displayPlanLabel",
       header: "Plans",
+      enableSorting: false,
       cell: ({ row }) => (
         <Badge variant="outline" className="font-normal capitalize">
           {row.original.displayPlanLabel}
@@ -126,7 +130,7 @@ function makeGymsColumns({
       ),
     },
     {
-      id: "members",
+      id: "memberCount",
       accessorFn: (row) => row.displayMemberTotal,
       header: () => (
         <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
@@ -165,6 +169,7 @@ function makeGymsColumns({
     },
     {
       id: "actions",
+      enableSorting: false,
       cell: ({ row }) => {
         const gym = row.original;
         const isActive = gym.isActive;
@@ -232,6 +237,8 @@ type GymsTableProps = {
   pageIndex?: number;
   pageCount?: number;
   onPageChange?: (pageIndex: number, pageSize: number) => void;
+  sorting?: SortingState;
+  onSortingChange?: (sorting: SortingState) => void;
 };
 
 export function GymsTable({
@@ -243,6 +250,8 @@ export function GymsTable({
   pageIndex,
   pageCount,
   onPageChange,
+  sorting,
+  onSortingChange,
 }: GymsTableProps) {
   return (
     <DataTable
@@ -259,6 +268,8 @@ export function GymsTable({
       pageIndex={pageIndex}
       pageCount={pageCount}
       onPageChange={onPageChange}
+      sorting={sorting}
+      onSortingChange={onSortingChange}
     />
   );
 }

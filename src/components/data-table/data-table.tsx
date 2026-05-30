@@ -87,6 +87,9 @@ type DataTableProps<TData> = {
   pageIndex?: number;
   pageCount?: number;
   onPageChange?: (pageIndex: number, pageSize: number) => void;
+  /** Controlled server-side sorting. Requires both sorting and onSortingChange. */
+  sorting?: SortingState;
+  onSortingChange?: (sorting: SortingState) => void;
 };
 
 function DragHandle({ id }: { id: string | number }) {
@@ -169,6 +172,8 @@ export function DataTable<TData extends { id: string | number }>({
   pageIndex,
   pageCount,
   onPageChange,
+  sorting: sortingProp,
+  onSortingChange,
 }: DataTableProps<TData>) {
   const [data, setData] = React.useState(() => initialData);
   const [rowSelection, setRowSelection] = React.useState({});
@@ -177,7 +182,9 @@ export function DataTable<TData extends { id: string | number }>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
   );
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [internalSorting, setInternalSorting] = React.useState<SortingState>(
+    [],
+  );
   const [pageSize, setPageSize] = React.useState(10);
   const sortableId = React.useId();
   const sensors = useSensors(
@@ -191,6 +198,22 @@ export function DataTable<TData extends { id: string | number }>({
   }, [initialData]);
 
   const isControlled = pageIndex !== undefined && onPageChange !== undefined;
+  const isSortingControlled =
+    sortingProp !== undefined && onSortingChange !== undefined;
+  const sorting = isSortingControlled ? sortingProp : internalSorting;
+
+  const handleSortingChange = React.useCallback(
+    (updater: SortingState | ((old: SortingState) => SortingState)) => {
+      const next =
+        typeof updater === "function" ? updater(sorting) : updater;
+      if (isSortingControlled) {
+        onSortingChange(next);
+      } else {
+        setInternalSorting(next);
+      }
+    },
+    [isSortingControlled, onSortingChange, sorting],
+  );
 
   const dataIds = React.useMemo<UniqueIdentifier[]>(
     () =>
@@ -222,18 +245,19 @@ export function DataTable<TData extends { id: string | number }>({
     getRowId: getRowId || ((row) => String(row.id)),
     enableRowSelection: enableSelection,
     onRowSelectionChange: setRowSelection,
-    onSortingChange: setSorting,
+    onSortingChange: handleSortingChange,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     onPaginationChange: () => {
       // Pagination is driven by direct button handlers below; this is intentionally a no-op.
     },
     manualPagination: isControlled,
+    manualSorting: isSortingControlled,
     pageCount: isControlled ? (pageCount ?? -1) : undefined,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
+    ...(isSortingControlled ? {} : { getSortedRowModel: getSortedRowModel() }),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
