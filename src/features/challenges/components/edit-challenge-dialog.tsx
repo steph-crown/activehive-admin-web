@@ -183,11 +183,8 @@ export function EditChallengeDialog({
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4"
-          >
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-start">
               <FormField
                 control={form.control}
                 name="name"
@@ -202,11 +199,9 @@ export function EditChallengeDialog({
                           field.onBlur();
                           const slug = form.getValues("slug");
                           if (!slug.trim()) {
-                            form.setValue(
-                              "slug",
-                              slugifyName(e.target.value),
-                              { shouldValidate: true },
-                            );
+                            form.setValue("slug", slugifyName(e.target.value), {
+                              shouldValidate: true,
+                            });
                           }
                         }}
                       />
@@ -302,9 +297,7 @@ export function EditChallengeDialog({
                         value={field.value ?? ""}
                         onChange={(e) =>
                           field.onChange(
-                            e.target.value === ""
-                              ? ""
-                              : Number(e.target.value),
+                            e.target.value === "" ? "" : Number(e.target.value),
                           )
                         }
                       />

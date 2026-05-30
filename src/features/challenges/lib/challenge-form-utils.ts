@@ -11,6 +11,42 @@ export function generateChallengeSlug(name: string): string {
   return `${base}-${Date.now()}`;
 }
 
+/** Local `YYYY-MM-DD` for comparing against `<input type="date" />` values. */
+export function todayDateInput(): string {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+export function isFutureDateInput(date: string): boolean {
+  return date > todayDateInput();
+}
+
+export function minFutureDateInput(): string {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+export function minEndDateInput(startsAt: string): string {
+  const baseline = minFutureDateInput();
+  if (!startsAt) return baseline;
+
+  const d = new Date(`${startsAt}T12:00:00`);
+  d.setDate(d.getDate() + 1);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  const dayAfterStart = `${year}-${month}-${day}`;
+
+  return dayAfterStart > baseline ? dayAfterStart : baseline;
+}
+
 export function dateInputToRangeIso(startsAt: string, endsAt: string): {
   startsAt: string;
   endsAt: string;

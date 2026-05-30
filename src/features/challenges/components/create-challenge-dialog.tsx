@@ -33,6 +33,9 @@ import {
 import {
   dateInputToRangeIso,
   generateChallengeSlug,
+  isFutureDateInput,
+  minEndDateInput,
+  minFutureDateInput,
 } from "../lib/challenge-form-utils";
 import type { ChallengeType, CreateChallengePayload } from "../types";
 
@@ -50,27 +53,45 @@ const challengeSchema = yup.object({
     .mixed<ChallengeType>()
     .oneOf(CHALLENGE_TYPES)
     .required("Type is required"),
-  startsAt: yup.string().required("Start date is required"),
+  startsAt: yup
+    .string()
+    .required("Start date is required")
+    .test("future", "Start date must be in the future", (value) =>
+      value ? isFutureDateInput(value) : false,
+    ),
   endsAt: yup
     .string()
     .required("End date is required")
+    .test("future", "End date must be in the future", (value) =>
+      value ? isFutureDateInput(value) : false,
+    )
     .test(
       "after-start",
-      "End date must be on or after start date",
+      "End date must be after start date",
       function (endsAt) {
         const { startsAt } = this.parent as { startsAt?: string };
         if (!startsAt || !endsAt) return true;
-        return endsAt >= startsAt;
+        return endsAt > startsAt;
       },
     ),
   rewardPoints: yup
     .number()
+    .transform((value, originalValue) =>
+      originalValue === "" ? undefined : value,
+    )
     .typeError("Reward must be a number")
     .required("Reward is required")
     .min(0, "Reward cannot be negative"),
 });
 
-type FormValues = yup.InferType<typeof challengeSchema>;
+type FormValues = {
+  name: string;
+  description: string | null | undefined;
+  type: ChallengeType;
+  startsAt: string;
+  endsAt: string;
+  rewardPoints: number | "";
+};
 
 const defaultValues: FormValues = {
   name: "",
@@ -78,7 +99,7 @@ const defaultValues: FormValues = {
   type: "workout_streak",
   startsAt: "",
   endsAt: "",
-  rewardPoints: 0,
+  rewardPoints: "",
 };
 
 type CreateChallengeDialogProps = {
@@ -96,6 +117,7 @@ export function CreateChallengeDialog({
     resolver: yupResolver(challengeSchema) as any,
     defaultValues,
   });
+  const startsAtValue = form.watch("startsAt");
 
   useEffect(() => {
     if (open) {
@@ -113,7 +135,7 @@ export function CreateChallengeDialog({
       type: values.type,
       startsAt: range.startsAt,
       endsAt: range.endsAt,
-      rewardPoints: values.rewardPoints,
+      rewardPoints: values.rewardPoints as number,
     });
     onOpenChange(false);
   };
@@ -130,11 +152,8 @@ export function CreateChallengeDialog({
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4"
-          >
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-start">
               <FormField
                 control={form.control}
                 name="name"
@@ -189,13 +208,12 @@ export function CreateChallengeDialog({
                         type="number"
                         min={0}
                         step={1}
+                        placeholder="0"
                         {...field}
-                        value={field.value ?? ""}
+                        value={field.value === "" ? "" : field.value}
                         onChange={(e) =>
                           field.onChange(
-                            e.target.value === ""
-                              ? ""
-                              : Number(e.target.value),
+                            e.target.value === "" ? "" : Number(e.target.value),
                           )
                         }
                       />
@@ -211,7 +229,15 @@ export function CreateChallengeDialog({
                   <FormItem className="min-w-0">
                     <FormLabel>Start date</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input
+                        type="date"
+                        min={minFutureDateInput()}
+                        {...field}
+                        onChange={(event) => {
+                          field.onChange(event);
+                          void form.trigger("endsAt");
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -224,7 +250,11 @@ export function CreateChallengeDialog({
                   <FormItem className="min-w-0">
                     <FormLabel>End date</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input
+                        type="date"
+                        min={minEndDateInput(startsAtValue)}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
