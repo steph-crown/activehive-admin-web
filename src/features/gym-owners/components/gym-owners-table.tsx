@@ -141,7 +141,7 @@ function makeGymOwnersColumns({
       accessorKey: "status",
       header: "Status",
       cell: ({ row }) => (
-        <Badge variant="outline" className="text-muted-foreground px-1.5">
+        <Badge variant="outline" className="text-muted-foreground px-1.5 capitalize">
           {row.original.status === "active" ? (
             <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
           ) : (
