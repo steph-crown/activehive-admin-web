@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/select";
 import {
   dateInputToRangeIso,
-  slugifyName,
+  generateChallengeSlug,
 } from "../lib/challenge-form-utils";
 import type { ChallengeType, CreateChallengePayload } from "../types";
 
@@ -45,13 +45,6 @@ const CHALLENGE_TYPES: ChallengeType[] = [
 
 const challengeSchema = yup.object({
   name: yup.string().required("Name is required"),
-  slug: yup
-    .string()
-    .required("Slug is required")
-    .matches(
-      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-      "Use lowercase letters, numbers, and hyphens only",
-    ),
   description: yup.string().nullable(),
   type: yup
     .mixed<ChallengeType>()
@@ -81,7 +74,6 @@ type FormValues = yup.InferType<typeof challengeSchema>;
 
 const defaultValues: FormValues = {
   name: "",
-  slug: "",
   description: "",
   type: "workout_streak",
   startsAt: "",
@@ -116,7 +108,7 @@ export function CreateChallengeDialog({
     const range = dateInputToRangeIso(values.startsAt, values.endsAt);
     onCreate({
       name: values.name,
-      slug: values.slug,
+      slug: generateChallengeSlug(values.name),
       description: values.description?.trim() ? values.description : null,
       type: values.type,
       startsAt: range.startsAt,
@@ -150,34 +142,7 @@ export function CreateChallengeDialog({
                   <FormItem className="min-w-0 sm:col-span-2">
                     <FormLabel>Name</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="March movement"
-                        {...field}
-                        onBlur={(e) => {
-                          field.onBlur();
-                          const slug = form.getValues("slug");
-                          if (!slug.trim()) {
-                            form.setValue(
-                              "slug",
-                              slugifyName(e.target.value),
-                              { shouldValidate: true },
-                            );
-                          }
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="slug"
-                render={({ field }) => (
-                  <FormItem className="min-w-0 sm:col-span-2">
-                    <FormLabel>Slug</FormLabel>
-                    <FormControl>
-                      <Input placeholder="march-movement" {...field} />
+                      <Input placeholder="March movement" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

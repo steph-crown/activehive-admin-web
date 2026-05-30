@@ -6,6 +6,11 @@ export function slugifyName(name: string): string {
     .replace(/^-|-$/g, "");
 }
 
+export function generateChallengeSlug(name: string): string {
+  const base = slugifyName(name) || "challenge";
+  return `${base}-${Date.now()}`;
+}
+
 export function dateInputToRangeIso(startsAt: string, endsAt: string): {
   startsAt: string;
   endsAt: string;
