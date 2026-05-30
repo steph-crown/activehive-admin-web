@@ -157,9 +157,9 @@ const makeChallengesColumns = (
     },
     {
       id: "schedule",
-      header: "Schedule",
+      header: () => <span className="block min-w-[220px]">Schedule</span>,
       cell: ({ row }) => (
-        <span className="text-muted-foreground max-w-[200px] text-sm whitespace-normal">
+        <span className="text-muted-foreground block min-w-[220px] text-sm whitespace-nowrap">
           {formatChallengeSchedule(row.original.startsAt, row.original.endsAt)}
         </span>
       ),
