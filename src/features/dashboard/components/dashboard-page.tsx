@@ -1,28 +1,31 @@
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { DataTable } from "@/components/data-table/data-table";
-import { TableFilterBar } from "@/components/molecules/table-filter-bar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { useState } from "react";
+import {
+  useDashboardDocumentsQuery,
+  useDashboardStatsQuery,
+} from "../services";
 import { AppSidebar } from "./app-sidebar";
-import { SiteHeader } from "./site-header";
-import { SectionCards } from "./section-cards";
-import { RevenueChart } from "./revenue-chart";
-import { MembersChart } from "./members-chart";
-import { recentActivitiesColumns } from "./recent-activities-columns";
-import { useDashboardDocumentsQuery, useDashboardStatsQuery } from "../services";
 import {
   ChartsSkeleton,
   DashboardTableSkeleton,
   SectionCardsSkeleton,
 } from "./dashboard-skeleton";
-import { useState } from "react";
+import { MembersChart } from "./members-chart";
+import { recentActivitiesColumns } from "./recent-activities-columns";
+import { RevenueChart } from "./revenue-chart";
+import { SectionCards } from "./section-cards";
+import { SiteHeader } from "./site-header";
 
 export function DashboardPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [dateFilter, setDateFilter] = useState("");
+  const [searchQuery] = useState("");
+  const [dateFilter] = useState("");
 
   const { data, isLoading } = useDashboardDocumentsQuery({
     search: searchQuery || undefined,
     dateFrom: dateFilter || undefined,
   });
+
   const { data: stats, isLoading: statsLoading } = useDashboardStatsQuery();
 
   return (
@@ -58,14 +61,14 @@ export function DashboardPage() {
                         <h2 className="text-grey-900 text-lg font-semibold">
                           Recent activities
                         </h2>
-                        <TableFilterBar
+                        {/* <TableFilterBar
                           className="mt-4"
                           searchValue={searchQuery}
                           onSearchChange={setSearchQuery}
                           searchPlaceholder="Search activities..."
                           dateValue={dateFilter}
                           onDateChange={setDateFilter}
-                        />
+                        /> */}
                         {isLoading ? (
                           <DashboardTableSkeleton />
                         ) : (

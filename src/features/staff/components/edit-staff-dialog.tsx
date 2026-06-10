@@ -5,6 +5,7 @@ import * as yup from "yup";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/phone-input";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +23,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
+import { yupPhoneRequired } from "@/lib/phone";
 import { useUpdateStaffMutation } from "../services";
 import type { Staff } from "../types";
 
@@ -32,7 +34,7 @@ const editStaffSchema = yup.object({
     .required("Email is required"),
   firstName: yup.string().required("First name is required"),
   lastName: yup.string().required("Last name is required"),
-  phoneNumber: yup.string().required("Phone number is required"),
+  phoneNumber: yupPhoneRequired(),
 });
 
 type EditStaffFormValues = yup.InferType<typeof editStaffSchema>;
@@ -152,11 +154,12 @@ export function EditStaffDialog({
                 <FormItem>
                   <FormLabel>Phone Number</FormLabel>
                   <FormControl>
-                    <Input
-                      type="tel"
-                      placeholder="+1234567890"
-                      {...field}
-                      value={field.value || ""}
+                    <PhoneInput
+                      placeholder="Enter phone number"
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      name={field.name}
                     />
                   </FormControl>
                   <FormMessage />

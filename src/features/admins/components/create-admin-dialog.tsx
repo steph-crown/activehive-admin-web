@@ -5,6 +5,7 @@ import * as yup from "yup";
 import { IconPlus } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/phone-input";
 import {
   Dialog,
   DialogContent,
@@ -23,6 +24,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
+import { yupPhoneOptional } from "@/lib/phone";
 import { useCreateAdminMutation } from "../services";
 import type { Admin } from "../types";
 
@@ -37,7 +39,7 @@ const createAdminSchema = yup.object({
     .required("Password is required"),
   firstName: yup.string().required("First name is required"),
   lastName: yup.string().required("Last name is required"),
-  phoneNumber: yup.string().required("Phone number is required"),
+  phoneNumber: yupPhoneOptional(),
 });
 
 type CreateAdminFormValues = yup.InferType<typeof createAdminSchema>;
@@ -96,8 +98,15 @@ export function CreateAdminDialog({
   }, [open, viewAdmin, form]);
 
   const onSubmit = async (data: CreateAdminFormValues) => {
+    const phoneNumber = data.phoneNumber?.trim();
     try {
-      await createAdmin(data);
+      await createAdmin({
+        email: data.email,
+        password: data.password,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        ...(phoneNumber ? { phoneNumber } : {}),
+      });
       showSuccess("Success", "Admin created successfully");
       form.reset();
       setOpen(false);
@@ -208,11 +217,12 @@ export function CreateAdminDialog({
                 <FormItem>
                   <FormLabel>Phone Number (Optional)</FormLabel>
                   <FormControl>
-                    <Input
-                      type="tel"
-                      placeholder="+1234567890"
-                      {...field}
-                      value={field.value || ""}
+                    <PhoneInput
+                      placeholder="Enter phone number"
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      name={field.name}
                       readOnly={isViewMode}
                       className={isViewMode ? "bg-muted" : undefined}
                     />
