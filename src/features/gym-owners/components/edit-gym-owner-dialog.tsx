@@ -51,7 +51,8 @@ export function EditGymOwnerDialog({
   onOpenChange,
 }: EditGymOwnerDialogProps) {
   const { showSuccess, showError } = useToast();
-  const { mutateAsync: updateGymOwner, isPending } = useUpdateGymOwnerMutation();
+  const { mutateAsync: updateGymOwner, isPending } =
+    useUpdateGymOwnerMutation();
 
   const form = useForm<EditGymOwnerFormValues>({
     // Cast resolver to avoid overly strict generic mismatch between yup and react-hook-form
@@ -103,7 +104,7 @@ export function EditGymOwnerDialog({
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 items-start">
               <FormField
                 control={form.control}
                 name="firstName"

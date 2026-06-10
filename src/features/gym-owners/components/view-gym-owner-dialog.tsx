@@ -80,7 +80,7 @@ export function ViewGymOwnerDialog({
               {owner.onboardingCompleted ? "Completed" : "Pending"}
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 ">
             <div className="grid gap-1">
               <span className="text-muted-foreground">Created</span>
               <p className="font-medium">{formatDate(owner.createdAt)}</p>
@@ -103,12 +103,12 @@ export function ViewGymOwnerDialog({
                       {gym.name}
                     </Link>
                     <div className="pl-0 text-muted-foreground">
-                      {gym.address && (
-                        <p>{formatAddress(gym.address)}</p>
-                      )}
+                      {gym.address && <p>{formatAddress(gym.address)}</p>}
                       {(gym.phoneNumber || gym.email) && (
                         <p>
-                          {[gym.phoneNumber, gym.email].filter(Boolean).join(" · ")}
+                          {[gym.phoneNumber, gym.email]
+                            .filter(Boolean)
+                            .join(" · ")}
                         </p>
                       )}
                     </div>

@@ -6,14 +6,10 @@ import { Toast } from "./toast";
 export function ToastContainer() {
   const { toasts } = useToast();
 
-  console.log({ musiccc: toasts });
-
   if (toasts.length === 0) return null;
 
-  console.log({ trending: toasts });
-
   return (
-    <div className="fixed right-4 top-4 z-50 w-full max-w-sm space-y-3">
+    <div className="fixed right-4 top-4 z-9999 w-full max-w-sm space-y-3">
       {toasts.map((toast) => (
         <Toast key={toast.id} toast={toast} />
       ))}

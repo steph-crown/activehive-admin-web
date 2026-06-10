@@ -23,7 +23,9 @@ export function ViewMemberDialog({
 }: ViewMemberDialogProps) {
   if (!member) return null;
 
-  const memberships = Array.isArray(member.memberships) ? member.memberships : [];
+  const memberships = Array.isArray(member.memberships)
+    ? member.memberships
+    : [];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -69,7 +71,7 @@ export function ViewMemberDialog({
                 : "No memberships"}
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 ">
             <div className="grid gap-1">
               <span className="text-muted-foreground">Created</span>
               <p className="font-medium">{formatDate(member.createdAt)}</p>

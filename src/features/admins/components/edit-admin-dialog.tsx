@@ -45,7 +45,11 @@ type EditAdminDialogProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-export function EditAdminDialog({ admin, open, onOpenChange }: EditAdminDialogProps) {
+export function EditAdminDialog({
+  admin,
+  open,
+  onOpenChange,
+}: EditAdminDialogProps) {
   const { showSuccess, showError } = useToast();
   const { mutateAsync: updateAdmin, isPending } = useUpdateAdminMutation();
 
@@ -99,7 +103,7 @@ export function EditAdminDialog({ admin, open, onOpenChange }: EditAdminDialogPr
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4  items-start">
               <FormField
                 control={form.control}
                 name="firstName"

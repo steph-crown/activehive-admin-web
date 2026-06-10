@@ -24,6 +24,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
+import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import { yupPhoneOptional } from "@/lib/phone";
 import { useCreateAdminMutation } from "../services";
 import type { Admin } from "../types";
@@ -111,11 +112,10 @@ export function CreateAdminDialog({
       form.reset();
       setOpen(false);
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Failed to create admin. Please try again.";
-      showError("Error", message);
+      showError(
+        "Error",
+        getApiErrorMessage(error, "Failed to create admin. Please try again."),
+      );
     }
   };
 
@@ -129,7 +129,9 @@ export function CreateAdminDialog({
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>{isViewMode ? "View Admin" : "Create Admin"}</DialogTitle>
+          <DialogTitle>
+            {isViewMode ? "View Admin" : "Create Admin"}
+          </DialogTitle>
           <DialogDescription>
             {isViewMode
               ? "Admin account details."
@@ -138,7 +140,7 @@ export function CreateAdminDialog({
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 items-start">
               <FormField
                 control={form.control}
                 name="firstName"
@@ -203,7 +205,11 @@ export function CreateAdminDialog({
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} />
+                      <Input
+                        type="password"
+                        placeholder="••••••••"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
