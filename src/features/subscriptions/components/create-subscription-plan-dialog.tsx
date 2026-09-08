@@ -21,6 +21,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -301,11 +302,9 @@ export function CreateSubscriptionPlanDialog({
                   <FormItem className="min-w-0">
                     <FormLabel>Has Trial</FormLabel>
                     <FormControl>
-                      <Input
-                        type="checkbox"
-                        className="size-4"
+                      <Switch
                         checked={field.value}
-                        onChange={(event) => field.onChange(event.target.checked)}
+                        onCheckedChange={field.onChange}
                       />
                     </FormControl>
                     <FormMessage />
@@ -319,11 +318,9 @@ export function CreateSubscriptionPlanDialog({
                   <FormItem className="min-w-0">
                     <FormLabel>Default Plan</FormLabel>
                     <FormControl>
-                      <Input
-                        type="checkbox"
-                        className="size-4"
+                      <Switch
                         checked={field.value}
-                        onChange={(event) => field.onChange(event.target.checked)}
+                        onCheckedChange={field.onChange}
                       />
                     </FormControl>
                     <FormMessage />

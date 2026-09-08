@@ -21,6 +21,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useUpdateSubscriptionPlanMutation } from "../services";
@@ -273,13 +274,9 @@ export function EditSubscriptionPlanDialog({
                   <FormItem>
                     <FormLabel>Active</FormLabel>
                     <FormControl>
-                      <Input
-                        type="checkbox"
-                        className="size-4"
+                      <Switch
                         checked={field.value}
-                        onChange={(event) =>
-                          field.onChange(event.target.checked)
-                        }
+                        onCheckedChange={field.onChange}
                       />
                     </FormControl>
                     <FormMessage />
@@ -293,13 +290,9 @@ export function EditSubscriptionPlanDialog({
                   <FormItem>
                     <FormLabel>Popular</FormLabel>
                     <FormControl>
-                      <Input
-                        type="checkbox"
-                        className="size-4"
+                      <Switch
                         checked={field.value}
-                        onChange={(event) =>
-                          field.onChange(event.target.checked)
-                        }
+                        onCheckedChange={field.onChange}
                       />
                     </FormControl>
                     <FormMessage />
@@ -313,13 +306,9 @@ export function EditSubscriptionPlanDialog({
                   <FormItem>
                     <FormLabel>Default Plan</FormLabel>
                     <FormControl>
-                      <Input
-                        type="checkbox"
-                        className="size-4"
+                      <Switch
                         checked={field.value}
-                        onChange={(event) =>
-                          field.onChange(event.target.checked)
-                        }
+                        onCheckedChange={field.onChange}
                       />
                     </FormControl>
                     <FormMessage />

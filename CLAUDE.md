@@ -39,7 +39,7 @@ No test runner is installed. Do not add tests unless explicitly asked.
 ## Environment Variables
 
 ```
-VITE_API_BASE_URL   # defaults to https://activehiveapi.onrender.com
+VITE_API_BASE_URL   # required, no fallback — set to https://activehive-api-production.up.railway.app
 ```
 
 ## Project Structure
