@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import {
   IconCircleCheckFilled,
   IconClockHour4,
@@ -28,7 +28,7 @@ type CardSpec = {
   iconColorVar: string;
   valueColorVar: string;
   hoverShadowClass: string;
-  cssVars: React.CSSProperties;
+  cssVars: CSSProperties;
 };
 
 export function GymsSummaryCards({
@@ -50,7 +50,7 @@ export function GymsSummaryCards({
         ...baseVars,
         "--primary-50": "#ffefe6",
         "--primary-500": "#ff5b04",
-      } as React.CSSProperties,
+      } as CSSProperties,
     },
     {
       title: "Active gyms",
@@ -65,7 +65,7 @@ export function GymsSummaryCards({
         ...baseVars,
         "--success-50": "#ecfdf3",
         "--success-500": "#22c55e",
-      } as React.CSSProperties,
+      } as CSSProperties,
     },
     {
       title: "Pending approval",
@@ -80,7 +80,7 @@ export function GymsSummaryCards({
         ...baseVars,
         "--amber-50": "#fffbeb",
         "--amber-600": "#d97706",
-      } as React.CSSProperties,
+      } as CSSProperties,
     },
     {
       title: "Total members",
@@ -95,7 +95,7 @@ export function GymsSummaryCards({
         ...baseVars,
         "--purple-50": "#f2eeff",
         "--purple-500": "#7e52ff",
-      } as React.CSSProperties,
+      } as CSSProperties,
     },
   ];
 

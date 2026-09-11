@@ -78,4 +78,14 @@ export const subscriptionsApi = {
   deleteSubscriptionPlan: async (id: string): Promise<void> => {
     await apiClient.delete(`${adminPlansBasePath}/${id}`);
   },
+  activateSubscriptionPlan: async (id: string): Promise<SubscriptionPlan> => {
+    return await apiClient.patch<SubscriptionPlan>(
+      `${adminPlansBasePath}/plans/${id}/activate`,
+    );
+  },
+  deactivateSubscriptionPlan: async (id: string): Promise<SubscriptionPlan> => {
+    return await apiClient.patch<SubscriptionPlan>(
+      `${adminPlansBasePath}/plans/${id}/deactivate`,
+    );
+  },
 };

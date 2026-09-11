@@ -1,5 +1,4 @@
-import { useMemo } from "react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import {
@@ -37,6 +36,12 @@ import {
 import { formatGymRevenueFallbackForId } from "../lib/gym-list-display";
 import type { Gym } from "../types";
 
+const METRIC_BASE_VARS = {
+  "--success-500": "#22c55e",
+  "--error-400": "#dc5959",
+  "--grey-500": "#959595",
+} as Record<string, string>;
+
 function formatCityState(gym: Gym): string {
   const a = gym.address;
   if (!a) return "—";
@@ -59,6 +64,24 @@ function planLabelFromSubscription(
   return fallback;
 }
 
+function GymPageShell({ children }: { children: React.ReactNode }) {
+  return (
+    <SidebarProvider>
+      <AppSidebar variant="inset" />
+      <SidebarInset>
+        <SiteHeader />
+        <div className="flex flex-1 flex-col">
+          <div className="@container/main flex flex-1 flex-col gap-2">
+            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+              <div className="space-y-6 px-4 lg:px-6">{children}</div>
+            </div>
+          </div>
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
+  );
+}
+
 type GymDetailPageProps = {
   gymId: string;
 };
@@ -78,38 +101,36 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
     isLoading: registrationLoading,
   } = useGymRegistrationStatusQuery(gymId);
 
-  const metricBaseVars = useMemo(
-    () =>
-      ({
-        "--success-500": "#22c55e",
-        "--error-400": "#dc5959",
-        "--grey-500": "#959595",
-      }) as Record<string, string>,
-    [],
-  );
+  const invalidateGym = () => {
+    void queryClient.invalidateQueries({ queryKey: gymsQueryKeys.list() });
+    void queryClient.invalidateQueries({
+      queryKey: gymsQueryKeys.detail(gymId),
+    });
+    void queryClient.invalidateQueries({
+      queryKey: gymsQueryKeys.registrationStatus(gymId),
+    });
+  };
+
+  const stats = registration?.stats;
+
+  const totalMembers = useMemo(() => {
+    if (typeof data?.memberCount === "number") return data.memberCount;
+    if (typeof stats?.totalMembers === "number") return stats.totalMembers;
+    return 0;
+  }, [data?.memberCount, stats?.totalMembers]);
+
+  const activeMembers = useMemo(() => {
+    if (typeof data?.activeMemberCount === "number") return data.activeMemberCount;
+    if (typeof stats?.activeMemberships === "number") return stats.activeMemberships;
+    return 0;
+  }, [data?.activeMemberCount, stats?.activeMemberships]);
+
+  const totalTrainers = typeof stats?.totalTrainers === "number" ? stats.totalTrainers : 0;
+  const totalClasses = stats?.totalClasses ?? 0;
+  const checkInsToday = stats?.checkInsToday ?? 0;
 
   const gymKpiCards = useMemo(() => {
-    if (!data) {
-      return [];
-    }
-    const stats = registration?.stats;
-    const totalMembers =
-      typeof data.memberCount === "number"
-        ? data.memberCount
-        : typeof stats?.totalMembers === "number"
-          ? stats.totalMembers
-          : 0;
-    const activeMembers =
-      typeof data.activeMemberCount === "number"
-        ? data.activeMemberCount
-        : typeof stats?.activeMemberships === "number"
-          ? stats.activeMemberships
-          : 0;
-    const totalTrainers =
-      typeof stats?.totalTrainers === "number" ? stats.totalTrainers : 0;
-    const totalClasses = stats?.totalClasses ?? 0;
-    const checkInsToday = stats?.checkInsToday ?? 0;
-
+    if (!data) return [];
     return [
       {
         title: "Total members",
@@ -120,7 +141,7 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
         hoverShadowClass:
           "hover:shadow-[0_14px_30px_-20px_rgba(126,82,255,0.26)]",
         style: mergeSectionMetricCssVars({
-          ...metricBaseVars,
+          ...METRIC_BASE_VARS,
           "--purple-50": "#f2eeff",
           "--purple-500": "#7e52ff",
         }),
@@ -142,7 +163,7 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
         hoverShadowClass:
           "hover:shadow-[0_14px_30px_-20px_rgba(255,91,4,0.28)]",
         style: mergeSectionMetricCssVars({
-          ...metricBaseVars,
+          ...METRIC_BASE_VARS,
           "--primary-50": "#ffefe6",
           "--primary-500": "#ff5b04",
         }),
@@ -157,7 +178,7 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
         hoverShadowClass:
           "hover:shadow-[0_14px_30px_-20px_rgba(14,165,233,0.22)]",
         style: mergeSectionMetricCssVars({
-          ...metricBaseVars,
+          ...METRIC_BASE_VARS,
           "--sky-50": "#e0f2fe",
           "--sky-500": "#0ea5e9",
         }),
@@ -172,94 +193,49 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
         hoverShadowClass:
           "hover:shadow-[0_14px_30px_-20px_rgba(34,197,94,0.22)]",
         style: mergeSectionMetricCssVars({
-          ...metricBaseVars,
+          ...METRIC_BASE_VARS,
           "--success-50": "#ecfdf3",
           "--success-500": "#22c55e",
         }),
         bottomSlot: undefined,
       },
     ];
-  }, [data, registration, metricBaseVars]);
-
-  const invalidateGym = () => {
-    void queryClient.invalidateQueries({ queryKey: gymsQueryKeys.list() });
-    void queryClient.invalidateQueries({
-      queryKey: gymsQueryKeys.detail(gymId),
-    });
-    void queryClient.invalidateQueries({
-      queryKey: gymsQueryKeys.registrationStatus(gymId),
-    });
-  };
+  }, [data, totalMembers, activeMembers, totalTrainers, totalClasses, checkInsToday]);
 
   if (isLoading) {
     return (
-      <SidebarProvider>
-        <AppSidebar variant="inset" />
-        <SidebarInset>
-          <SiteHeader />
-          <div className="flex flex-1 flex-col">
-            <div className="@container/main flex flex-1 flex-col gap-2">
-              <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-                <div className="space-y-6 px-4 lg:px-6">
-                  <GymDetailPageSkeleton />
-                </div>
-              </div>
-            </div>
-          </div>
-        </SidebarInset>
-      </SidebarProvider>
+      <GymPageShell>
+        <GymDetailPageSkeleton />
+      </GymPageShell>
     );
   }
 
   if (error || !data) {
     return (
-      <SidebarProvider>
-        <AppSidebar variant="inset" />
-        <SidebarInset>
-          <SiteHeader />
-          <div className="px-4 py-6 lg:px-6">
-            <p className="text-destructive">
-              Error loading gym.{" "}
-              {error instanceof Error ? error.message : "Please try again."}
-            </p>
-            <Link
-              to="/dashboard/gyms"
-              className={cn(
-                buttonVariants({ variant: "outline", className: "mt-4" }),
-              )}
-            >
-              Back to Gyms
-            </Link>
-          </div>
-        </SidebarInset>
-      </SidebarProvider>
+      <GymPageShell>
+        <p className="text-destructive">
+          Error loading gym.{" "}
+          {error instanceof Error ? error.message : "Please try again."}
+        </p>
+        <Link
+          to="/dashboard/gyms"
+          className={cn(
+            buttonVariants({ variant: "outline", className: "mt-4" }),
+          )}
+        >
+          Back to Gyms
+        </Link>
+      </GymPageShell>
     );
   }
 
-  const { gym, locations, subscription } = data;
+  const { gym, locations, proposedLocations, subscription } = data;
 
   const displayPlan =
     planLabelFromSubscription(subscription, "Basic") ||
-    (gym as { subscriptionPlanName?: string | null }).subscriptionPlanName ||
+    gym.subscriptionPlanName ||
     "Basic";
 
-  const stats = registration?.stats;
-  const totalMembers =
-    typeof data.memberCount === "number"
-      ? data.memberCount
-      : typeof stats?.totalMembers === "number"
-        ? stats.totalMembers
-        : 0;
-  const activeMembers =
-    typeof data.activeMemberCount === "number"
-      ? data.activeMemberCount
-      : typeof stats?.activeMemberships === "number"
-        ? stats.activeMemberships
-        : 0;
-  const totalTrainers =
-    typeof stats?.totalTrainers === "number" ? stats.totalTrainers : 0;
-  const totalClasses = stats?.totalClasses ?? 0;
-  const checkInsToday = stats?.checkInsToday ?? 0;
   const monthlyRevenueDisplay =
     data.revenue && String(data.revenue).trim()
       ? formatMoneyDisplayAsNgn(data.revenue)
@@ -443,11 +419,13 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
                   <GymDetailTabPanels
                     gym={gym}
                     locations={locations}
+                    proposedLocations={proposedLocations ?? []}
                     subscription={subscription}
                     planLabel={displayPlan}
                     registrationDocuments={
                       registration?.registration?.documents ?? null
                     }
+                    registrationStatus={registration ?? null}
                     memberships={data.memberships ?? []}
                     trainers={gym.trainers}
                     metrics={{

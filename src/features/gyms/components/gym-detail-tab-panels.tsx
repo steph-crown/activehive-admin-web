@@ -23,6 +23,7 @@ import {
   IconBrandFacebook,
   IconBrandX,
   IconWorld,
+  IconMap2,
 } from "@tabler/icons-react";
 import { type ColumnDef } from "@tanstack/react-table";
 
@@ -44,6 +45,8 @@ import type {
   GymRegistrationStatusRegistration,
   GymSubscription,
   GymTrainer,
+  GymRegistrationStatusResponse,
+  ProposedLocation,
 } from "../types";
 
 function SectionTitle({ children }: { children: ReactNode }) {
@@ -85,8 +88,7 @@ type RegistrationDocuments =
   GymRegistrationStatusRegistration["documents"];
 
 function isProbablyUrl(value: string): boolean {
-  const v = value.trim();
-  return /^https?:\/\//i.test(v) || v.startsWith("/");
+  return /^https?:\/\//i.test(value.trim());
 }
 
 function DocumentValue({
@@ -259,6 +261,91 @@ function RegistrationDocumentsSection({
   );
 }
 
+function ApprovalDetailsCard({
+  gym,
+  registrationStatus,
+}: {
+  gym: Gym;
+  registrationStatus: GymRegistrationStatusResponse | null | undefined;
+}) {
+  if (!registrationStatus) return null;
+  const reg = registrationStatus.registration;
+  const approvalDetails = reg.approvalDetails;
+  const isApproved = gym.approvalStatus === "approved";
+  const isRejected = gym.approvalStatus === "rejected";
+  if (!isApproved && !isRejected) return null;
+  const reviewer = approvalDetails?.reviewedBy;
+  const reviewerName = reviewer
+    ? `${reviewer.firstName} ${reviewer.lastName}`.trim()
+    : null;
+  const reviewerEmail = reviewer?.email ?? null;
+  const reviewedAt = approvalDetails?.reviewedAt
+    ? formatDate(approvalDetails.reviewedAt)
+    : null;
+  return (
+    <Card className="rounded-md border-[#F4F4F4] bg-white p-6 shadow-none">
+      <div className="flex items-center gap-2">
+        <SectionTitle>
+          {isApproved ? "Approval details" : "Rejection details"}
+        </SectionTitle>
+        <Badge
+          variant="outline"
+          className={cn(
+            "capitalize",
+            isApproved && "border-emerald-200 bg-emerald-50 text-emerald-800",
+            isRejected && "border-red-200 bg-red-50 text-red-800",
+          )}
+        >
+          {isApproved ? "Approved" : "Rejected"}
+        </Badge>
+      </div>
+      <div className="mt-4 grid gap-5 sm:grid-cols-2">
+        {reviewerName && (
+          <LabelRow
+            icon={<IconUser className="size-5" />}
+            label="Reviewed by"
+            value={reviewerName}
+          />
+        )}
+        {reviewerEmail && (
+          <LabelRow
+            icon={<IconMail className="size-5" />}
+            label="Reviewer email"
+            value={reviewerEmail}
+          />
+        )}
+        {reviewedAt && (
+          <LabelRow
+            icon={<IconCalendar className="size-5" />}
+            label="Reviewed at"
+            value={reviewedAt}
+          />
+        )}
+        {isRejected && reg.rejectionReason && (
+          <div className="sm:col-span-2">
+            <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+              Rejection reason
+            </p>
+            <p className="mt-1 text-sm font-medium text-foreground">
+              {reg.rejectionReason}
+            </p>
+          </div>
+        )}
+        {isRejected && reg.adminComments && (
+          <div className="sm:col-span-2">
+            <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+              Admin comments
+            </p>
+            <p className="mt-1 text-sm font-medium text-foreground">
+              {reg.adminComments}
+            </p>
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+}
+
 const METRIC_BASE_VARS = {
   "--success-500": "#22c55e",
   "--error-400": "#dc5959",
@@ -268,9 +355,11 @@ const METRIC_BASE_VARS = {
 export type GymDetailTabPanelsProps = {
   gym: Gym;
   locations: GymLocation[];
+  proposedLocations?: ProposedLocation[];
   subscription: GymSubscription | null;
   planLabel: string;
   registrationDocuments: RegistrationDocuments;
+  registrationStatus?: GymRegistrationStatusResponse | null;
   memberships: GymMembership[];
   trainers: GymTrainer[];
   metrics: {
@@ -286,9 +375,11 @@ export type GymDetailTabPanelsProps = {
 export function GymDetailTabPanels({
   gym,
   locations,
+  proposedLocations = [],
   subscription,
   planLabel,
   registrationDocuments,
+  registrationStatus,
   memberships,
   trainers,
   metrics,
@@ -310,7 +401,7 @@ export function GymDetailTabPanels({
     ? "Trial"
     : subscription?.autoRenew
       ? "Monthly"
-      : "Monthly";
+      : "One-time";
   const nextBilling =
     subscription?.nextPaymentDate != null
       ? formatDate(subscription.nextPaymentDate)
@@ -580,6 +671,8 @@ export function GymDetailTabPanels({
             />
           </div>
         </Card>
+
+        <ApprovalDetailsCard gym={gym} registrationStatus={registrationStatus} />
       </TabsContent>
 
       <TabsContent value="documents" className="mt-4">
@@ -699,6 +792,153 @@ export function GymDetailTabPanels({
           emptyMessage="No trainers to show."
         />
       </TabsContent>
+
+      <TabsContent value="locations" className="mt-4">
+        {locations.length > 0 ? (
+          <div className="space-y-4">
+            {locations.map((loc) => {
+              const cityState = [
+                loc.address?.city?.trim(),
+                loc.address?.state?.trim(),
+              ]
+                .filter(Boolean)
+                .join(", ");
+              const fullAddress = [
+                loc.address?.street?.trim(),
+                cityState,
+                loc.address?.country?.trim(),
+              ]
+                .filter(Boolean)
+                .join(", ");
+
+              return (
+                <Card
+                  key={loc.id}
+                  className="rounded-md border-[#F4F4F4] bg-white p-6 shadow-none"
+                >
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h4 className="text-base font-semibold">
+                      {loc.locationName || "Unnamed location"}
+                    </h4>
+                    {loc.isHeadquarters && (
+                      <Badge
+                        variant="outline"
+                        className="border-primary/30 bg-primary/10 text-primary text-xs"
+                      >
+                        HQ
+                      </Badge>
+                    )}
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        "text-xs",
+                        loc.isActive
+                          ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                          : "text-muted-foreground",
+                      )}
+                    >
+                      {loc.isActive ? "Active" : "Inactive"}
+                    </Badge>
+                  </div>
+                  <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {fullAddress && (
+                      <LabelRow
+                        icon={<IconMapPin className="size-5" />}
+                        label="Address"
+                        value={fullAddress}
+                      />
+                    )}
+                    {loc.phone && (
+                      <LabelRow
+                        icon={<IconPhone className="size-5" />}
+                        label="Phone"
+                        value={loc.phone}
+                      />
+                    )}
+                    {loc.email && (
+                      <LabelRow
+                        icon={<IconMail className="size-5" />}
+                        label="Email"
+                        value={loc.email}
+                      />
+                    )}
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        ) : proposedLocations.length > 0 ? (
+          <div className="space-y-4">
+            <p className="text-muted-foreground text-xs">
+              These locations were submitted during onboarding and are pending admin approval.
+            </p>
+            {proposedLocations.map((loc) => {
+              const cityState = [loc.city?.trim(), loc.state?.trim()]
+                .filter(Boolean)
+                .join(", ");
+              const fullAddress = [loc.address?.trim(), cityState, loc.country?.trim()]
+                .filter(Boolean)
+                .join(", ");
+
+              return (
+                <Card
+                  key={`${loc.locationName}-${loc.address}`}
+                  className="rounded-md border-[#F4F4F4] bg-white p-6 shadow-none"
+                >
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h4 className="text-base font-semibold">
+                      {loc.locationName || "Unnamed location"}
+                    </h4>
+                    {loc.isHeadquarters && (
+                      <Badge
+                        variant="outline"
+                        className="border-primary/30 bg-primary/10 text-primary text-xs"
+                      >
+                        HQ
+                      </Badge>
+                    )}
+                    <Badge
+                      variant="outline"
+                      className="text-xs border-amber-200 bg-amber-50 text-amber-700"
+                    >
+                      Pending
+                    </Badge>
+                  </div>
+                  <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {fullAddress && (
+                      <LabelRow
+                        icon={<IconMapPin className="size-5" />}
+                        label="Address"
+                        value={fullAddress}
+                      />
+                    )}
+                    {loc.phone && (
+                      <LabelRow
+                        icon={<IconPhone className="size-5" />}
+                        label="Phone"
+                        value={loc.phone}
+                      />
+                    )}
+                    {loc.email && (
+                      <LabelRow
+                        icon={<IconMail className="size-5" />}
+                        label="Email"
+                        value={loc.email}
+                      />
+                    )}
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        ) : (
+          <Card className="rounded-md border-[#F4F4F4] bg-white p-6 shadow-none">
+            <p className="text-muted-foreground text-sm">
+              No locations on file for this gym.
+            </p>
+          </Card>
+        )}
+      </TabsContent>
     </>
   );
 }
@@ -707,6 +947,7 @@ export const GYM_DETAIL_TAB_ITEMS = [
   { value: "overview", label: "Overview", icon: IconBuilding },
   { value: "documents", label: "Documents", icon: IconFileText },
   { value: "members", label: "Members", icon: IconUsers },
+  { value: "locations", label: "Locations", icon: IconMap2 },
   { value: "activity", label: "Activity log", icon: IconActivity },
   { value: "subscription", label: "Subscription", icon: IconCreditCard },
   { value: "trainers", label: "Trainers", icon: IconBarbell },

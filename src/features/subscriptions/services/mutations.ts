@@ -67,6 +67,46 @@ export const useDeleteSubscriptionPlanMutation = () => {
   });
 };
 
+export const useActivateSubscriptionPlanMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      planType,
+    }: {
+      id: string;
+      planType: PlanAudience;
+    }) =>
+      subscriptionsApi
+        .activateSubscriptionPlan(id)
+        .then((data) => ({ ...data, planType })),
+    onSuccess: ({ planType }) => {
+      invalidatePlans(queryClient, planType);
+    },
+  });
+};
+
+export const useDeactivateSubscriptionPlanMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      planType,
+    }: {
+      id: string;
+      planType: PlanAudience;
+    }) =>
+      subscriptionsApi
+        .deactivateSubscriptionPlan(id)
+        .then((data) => ({ ...data, planType })),
+    onSuccess: ({ planType }) => {
+      invalidatePlans(queryClient, planType);
+    },
+  });
+};
+
 export const useRenewSubscriptionMutation = () => {
   const queryClient = useQueryClient();
 

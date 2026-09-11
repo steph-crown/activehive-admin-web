@@ -17,6 +17,7 @@ import type { SubscriptionPlan } from "../types";
 type SubscriptionPlansColumnCallbacks = {
   onEditPlan?: (plan: SubscriptionPlan) => void;
   onDeletePlan?: (plan: SubscriptionPlan) => void;
+  onToggleActive?: (plan: SubscriptionPlan, action: "activate" | "deactivate") => void;
   /** @default true */
   showPopularColumn?: boolean;
 };
@@ -27,6 +28,7 @@ const makeSubscriptionPlansColumns = (
   const {
     onEditPlan,
     onDeletePlan,
+    onToggleActive,
     showPopularColumn = true,
   } = callbacks;
 
@@ -96,10 +98,17 @@ const makeSubscriptionPlansColumns = (
   },
   {
     accessorKey: "isActive",
-    header: "Active",
+    header: "Status",
     cell: ({ row }) => (
-      <Badge variant={row.original.isActive ? "default" : "secondary"}>
-        {row.original.isActive ? "Yes" : "No"}
+      <Badge
+        variant="outline"
+        className={
+          row.original.isActive
+            ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+            : "border-slate-200 bg-slate-50 text-slate-600"
+        }
+      >
+        {row.original.isActive ? "Active" : "Inactive"}
       </Badge>
     ),
   },
@@ -129,6 +138,15 @@ const makeSubscriptionPlansColumns = (
             {onEditPlan && (
               <DropdownMenuItem onClick={() => onEditPlan(plan)}>
                 Edit
+              </DropdownMenuItem>
+            )}
+            {onToggleActive && (
+              <DropdownMenuItem
+                onClick={() =>
+                  onToggleActive(plan, plan.isActive ? "deactivate" : "activate")
+                }
+              >
+                {plan.isActive ? "Deactivate" : "Activate"}
               </DropdownMenuItem>
             )}
             {onDeletePlan && (
@@ -161,6 +179,7 @@ type SubscriptionPlansTableProps = {
   readonly data: SubscriptionPlan[];
   readonly onEditPlan?: (plan: SubscriptionPlan) => void;
   readonly onDeletePlan?: (plan: SubscriptionPlan) => void;
+  readonly onToggleActive?: (plan: SubscriptionPlan, action: "activate" | "deactivate") => void;
   readonly showPopularColumn?: boolean;
 };
 
@@ -168,6 +187,7 @@ export function SubscriptionPlansTable({
   data,
   onEditPlan,
   onDeletePlan,
+  onToggleActive,
   showPopularColumn = true,
 }: SubscriptionPlansTableProps) {
   return (
@@ -176,6 +196,7 @@ export function SubscriptionPlansTable({
       columns={makeSubscriptionPlansColumns({
         onEditPlan,
         onDeletePlan,
+        onToggleActive,
         showPopularColumn,
       })}
       enableDrag={false}

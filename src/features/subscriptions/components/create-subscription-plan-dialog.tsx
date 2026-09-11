@@ -1,7 +1,8 @@
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { Plus, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +35,14 @@ import { useToast } from "@/hooks/use-toast";
 import { BILLING_PERIODS, type BillingPeriod } from "../constants";
 import { useCreateSubscriptionPlanMutation } from "../services";
 
+const FEATURE_PLACEHOLDERS = [
+  "Unlimited member management",
+  "Class scheduling",
+  "Staff management",
+  "Analytics & reports",
+  "Mobile app access",
+];
+
 const createPlanSchema = yup.object({
   name: yup.string().required("Name is required"),
   description: yup.string().nullable(),
@@ -49,6 +58,7 @@ const createPlanSchema = yup.object({
   billingPeriod: yup.mixed<BillingPeriod>().oneOf(
     BILLING_PERIODS.map((p) => p.value) as BillingPeriod[],
   ),
+  hasTrial: yup.boolean().required(),
   trialDays: yup
     .number()
     .nullable()
@@ -57,9 +67,11 @@ const createPlanSchema = yup.object({
     )
     .min(0, "Trial days cannot be negative")
     .optional(),
-  hasTrial: yup.boolean().required(),
-  isDefault: yup.boolean().required(),
-  features: yup.string().nullable(),
+  features: yup
+    .array()
+    .of(yup.string().required())
+    .min(1, "At least one feature is required")
+    .required(),
 });
 
 type CreatePlanFormValues = yup.InferType<typeof createPlanSchema>;
@@ -87,12 +99,14 @@ export function CreateSubscriptionPlanDialog({
       planType: initialPlanType,
       price: "" as unknown as number,
       billingPeriod: "monthly",
-      trialDays: null,
       hasTrial: true,
-      isDefault: false,
-      features: "",
+      trialDays: null,
+      features: [""],
     },
   });
+
+  const hasTrial = useWatch({ control: form.control, name: "hasTrial" });
+  const features = useWatch({ control: form.control, name: "features" });
 
   useEffect(() => {
     if (open) {
@@ -102,33 +116,44 @@ export function CreateSubscriptionPlanDialog({
         planType: initialPlanType,
         price: "" as unknown as number,
         billingPeriod: "monthly",
-        trialDays: null,
         hasTrial: true,
-        isDefault: false,
-        features: "",
+        trialDays: null,
+        features: [""],
       });
     }
   }, [open, initialPlanType, form]);
 
+  const addFeature = () => {
+    form.setValue("features", [...(features ?? []), ""]);
+  };
+
+  const removeFeature = (index: number) => {
+    const current = features ?? [];
+    form.setValue(
+      "features",
+      current.filter((_, i) => i !== index),
+    );
+  };
+
+  const updateFeature = (index: number, value: string) => {
+    const current = [...(features ?? [])];
+    current[index] = value;
+    form.setValue("features", current);
+  };
+
   const onSubmit = async (values: CreatePlanFormValues) => {
     try {
-      const features =
-        values.features
-          ?.split("\n")
-          .map((f) => f.trim())
-          .filter(Boolean) ?? [];
-
       await createPlan({
         name: values.name,
         description: values.description ?? null,
         planType: values.planType,
         price: values.price,
         billingPeriod: values.billingPeriod ?? "monthly",
-        features,
-        trialDays: values.trialDays ?? null,
+        features: (values.features ?? []).filter(Boolean),
+        trialDays: values.hasTrial ? (values.trialDays ?? null) : null,
         hasTrial: values.hasTrial,
         isActive: true,
-        isDefault: values.isDefault,
+        isDefault: false,
         isPopular: false,
         sortOrder: null,
       });
@@ -273,11 +298,31 @@ export function CreateSubscriptionPlanDialog({
                   </FormItem>
                 )}
               />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="hasTrial"
+              render={({ field }) => (
+                <FormItem className="min-w-0">
+                  <FormLabel>Has Trial</FormLabel>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {hasTrial && (
               <FormField
                 control={form.control}
                 name="trialDays"
                 render={({ field }) => (
-                  <FormItem className="min-w-0 sm:col-span-2">
+                  <FormItem className="min-w-0">
                     <FormLabel>Trial Days</FormLabel>
                     <FormControl>
                       <Input
@@ -292,60 +337,51 @@ export function CreateSubscriptionPlanDialog({
                   </FormItem>
                 )}
               />
-            </div>
+            )}
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="hasTrial"
-                render={({ field }) => (
-                  <FormItem className="min-w-0">
-                    <FormLabel>Has Trial</FormLabel>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="isDefault"
-                render={({ field }) => (
-                  <FormItem className="min-w-0">
-                    <FormLabel>Default Plan</FormLabel>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <FormField
-              control={form.control}
-              name="features"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Features (one per line)</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder={"Profile visibility\nMember messaging\nClass scheduling"}
-                      {...field}
-                      value={field.value ?? ""}
+            <div>
+              <FormLabel>Features</FormLabel>
+              <div className="mt-2 space-y-2">
+                {(features ?? []).map((feat, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <Input
+                      placeholder={
+                        FEATURE_PLACEHOLDERS[index % FEATURE_PLACEHOLDERS.length]
+                      }
+                      value={feat ?? ""}
+                      onChange={(e) => updateFeature(index, e.target.value)}
                     />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+                    {(features ?? []).length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="shrink-0 text-destructive hover:text-destructive"
+                        onClick={() => removeFeature(index)}
+                      >
+                        <X className="size-4" />
+                        <span className="sr-only">Remove feature</span>
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+              {form.formState.errors.features && (
+                <p className="text-destructive mt-1.5 text-sm">
+                  {form.formState.errors.features.message as string}
+                </p>
               )}
-            />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-2 gap-1.5"
+                onClick={addFeature}
+              >
+                <Plus className="size-4" />
+                Add feature
+              </Button>
+            </div>
 
             <DialogFooter>
               <Button
@@ -366,4 +402,3 @@ export function CreateSubscriptionPlanDialog({
     </Dialog>
   );
 }
-

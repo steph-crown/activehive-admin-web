@@ -17,6 +17,7 @@ import { SubscriptionPlansTable } from "./subscription-plans-table";
 import { CreateSubscriptionPlanDialog } from "./create-subscription-plan-dialog";
 import { EditSubscriptionPlanDialog } from "./edit-subscription-plan-dialog";
 import { ConfirmDeleteSubscriptionPlanDialog } from "./confirm-delete-subscription-plan-dialog";
+import { ConfirmToggleSubscriptionPlanDialog } from "./confirm-toggle-subscription-plan-dialog";
 
 type Audience = "gym_owner" | "trainer";
 
@@ -36,6 +37,10 @@ export function SubscriptionPlansPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [editPlan, setEditPlan] = useState<SubscriptionPlan | null>(null);
   const [deletePlan, setDeletePlan] = useState<SubscriptionPlan | null>(null);
+  const [togglePlan, setTogglePlan] = useState<{
+    plan: SubscriptionPlan;
+    action: "activate" | "deactivate";
+  } | null>(null);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [dateFilter, setDateFilter] = useState("");
@@ -98,8 +103,8 @@ export function SubscriptionPlansPage() {
                     </p>
                   </div>
                   <Button onClick={() => setCreateOpen(true)}>
-                    <IconPlus className="mr-2 h-4 w-4" />
-                    Create Subscription
+                    <IconPlus className="h-4 w-4" />
+                    Create Plan
                   </Button>
                 </div>
 
@@ -117,6 +122,12 @@ export function SubscriptionPlansPage() {
                   plan={deletePlan}
                   open={deletePlan != null}
                   onOpenChange={(open) => !open && setDeletePlan(null)}
+                />
+                <ConfirmToggleSubscriptionPlanDialog
+                  plan={togglePlan?.plan ?? null}
+                  action={togglePlan?.action ?? "activate"}
+                  open={togglePlan != null}
+                  onOpenChange={(open) => !open && setTogglePlan(null)}
                 />
 
                 <TableFilterBar
@@ -159,7 +170,8 @@ export function SubscriptionPlansPage() {
                     <TableCardSkeleton rows={7} columns={5} />
                   ) : plansError ? (
                     <div className="text-destructive">
-                      Error loading subscription plans. Check console for details.
+                      Error loading subscription plans. Check console for
+                      details.
                     </div>
                   ) : (
                     <SubscriptionPlansTable
@@ -167,6 +179,9 @@ export function SubscriptionPlansPage() {
                       showPopularColumn={false}
                       onEditPlan={(plan) => setEditPlan(plan)}
                       onDeletePlan={(plan) => setDeletePlan(plan)}
+                      onToggleActive={(plan, action) =>
+                        setTogglePlan({ plan, action })
+                      }
                     />
                   )}
                 </div>

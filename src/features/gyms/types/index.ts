@@ -77,7 +77,7 @@ export type Gym = {
   revenue?: string | null;
 };
 
-export type GymLocationAddress = UserAddress;
+export type GymLocationAddress = Omit<UserAddress, "street"> & { street?: string | null };
 
 export type GymLocation = {
   id: string;
@@ -108,9 +108,23 @@ export type GymSubscription = {
   [key: string]: unknown;
 };
 
+export type ProposedLocation = {
+  locationName: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+  phone: string;
+  email: string;
+  isHeadquarters: boolean;
+  coverImage: string | null;
+};
+
 export type GymDetailResponse = {
   gym: Gym;
   locations: GymLocation[];
+  proposedLocations: ProposedLocation[];
   staffMembers: unknown[];
   memberships: GymMembership[];
   subscription: GymSubscription | null;
@@ -154,7 +168,14 @@ export type GymRegistrationStatusRegistration = {
   stepData: GymRegistrationStepData;
   isApproved: boolean;
   approvalDetails?: {
-    reviewedBy?: string | null;
+    id?: string;
+    status?: string;
+    reviewedBy?: {
+      id: string;
+      firstName: string;
+      lastName: string;
+      email: string;
+    } | null;
     reviewedAt?: string | null;
   } | null;
   rejectionReason?: string | null;

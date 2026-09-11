@@ -1,4 +1,10 @@
 import { useMemo, useState } from "react";
+import {
+  IconActivity,
+  IconCircleCheckFilled,
+  IconCreditCard,
+  IconX,
+} from "@tabler/icons-react";
 
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { TableCardSkeleton } from "@/components/loader/page-skeleton";
@@ -6,6 +12,10 @@ import {
   TableFilterBar,
   TableFilterSelect,
 } from "@/components/molecules/table-filter-bar";
+import {
+  mergeSectionMetricCssVars,
+  SectionMetricCard,
+} from "@/features/dashboard/components/section-metric-card";
 import { AppSidebar } from "@/features/dashboard/components/app-sidebar";
 import { SiteHeader } from "@/features/dashboard/components/site-header";
 import { useSubscriptionsQuery } from "../services";
@@ -14,11 +24,8 @@ import type { Subscription } from "../types";
 import { SubscriptionsTable } from "./subscriptions-table";
 
 const SUBSCRIPTION_STATUS_OPTIONS = [
-  { value: "all", label: "All statuses" },
   { value: "active", label: "Active" },
   { value: "cancelled", label: "Cancelled" },
-  { value: "trialing", label: "Trialing" },
-  { value: "past_due", label: "Past due" },
   { value: "expired", label: "Expired" },
 ];
 
@@ -27,6 +34,12 @@ const SUBSCRIBER_TYPE_OPTIONS = [
   { value: "gym_owner", label: "Gym owners" },
   { value: "trainer", label: "Trainers" },
 ];
+
+const METRIC_BASE_VARS = {
+  "--success-500": "#22c55e",
+  "--error-400": "#dc5959",
+  "--grey-500": "#959595",
+} as Record<string, string>;
 
 function matchesSubscriberType(row: Subscription, filter: string): boolean {
   if (filter === "all") return true;
@@ -40,7 +53,7 @@ export function SubscriptionsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [subscriptionStatusFilter, setSubscriptionStatusFilter] =
-    useState("all");
+    useState("active");
   const [subscriberTypeFilter, setSubscriberTypeFilter] = useState("all");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -48,8 +61,7 @@ export function SubscriptionsPage() {
   const apiParams = useMemo<SubscriptionsListParams>(() => {
     const params: SubscriptionsListParams = { page, limit };
     if (searchQuery) params.search = searchQuery;
-    if (subscriptionStatusFilter !== "all")
-      params.status = subscriptionStatusFilter;
+    params.status = subscriptionStatusFilter;
     if (dateFilter) params.dateFrom = dateFilter;
     return params;
   }, [page, limit, searchQuery, subscriptionStatusFilter, dateFilter]);
@@ -80,6 +92,71 @@ export function SubscriptionsPage() {
                       Monitor platform subscriptions for gym owners and trainers.
                     </p>
                   </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+                  <SectionMetricCard
+                    title="Total subscriptions"
+                    value="0"
+                    icon={<IconCreditCard className="size-6" />}
+                    iconBgVar="var(--blue-50)"
+                    iconColorVar="var(--blue-500)"
+                    percentChange={0}
+                    isPositive
+                    comparisonText="vs last period"
+                    hoverShadowClass="hover:shadow-[0_14px_30px_-20px_rgba(59,130,246,0.22)]"
+                    style={mergeSectionMetricCssVars({
+                      ...METRIC_BASE_VARS,
+                      "--blue-50": "#eff6ff",
+                      "--blue-500": "#3b82f6",
+                    })}
+                  />
+                  <SectionMetricCard
+                    title="Active"
+                    value="0"
+                    icon={<IconCircleCheckFilled className="size-6" />}
+                    iconBgVar="var(--success-50)"
+                    iconColorVar="var(--success-500)"
+                    percentChange={0}
+                    isPositive
+                    comparisonText="vs last period"
+                    hoverShadowClass="hover:shadow-[0_14px_30px_-20px_rgba(34,197,94,0.22)]"
+                    style={mergeSectionMetricCssVars({
+                      ...METRIC_BASE_VARS,
+                      "--success-50": "#ecfdf3",
+                    })}
+                  />
+                  <SectionMetricCard
+                    title="Cancelled"
+                    value="0"
+                    icon={<IconX className="size-6" />}
+                    iconBgVar="var(--error-50)"
+                    iconColorVar="var(--error-400)"
+                    percentChange={0}
+                    isPositive
+                    comparisonText="vs last period"
+                    hoverShadowClass="hover:shadow-[0_14px_30px_-20px_rgba(220,89,89,0.22)]"
+                    style={mergeSectionMetricCssVars({
+                      ...METRIC_BASE_VARS,
+                      "--error-50": "#fff0f0",
+                    })}
+                  />
+                  <SectionMetricCard
+                    title="Trial / Expired"
+                    value="0"
+                    icon={<IconActivity className="size-6" />}
+                    iconBgVar="var(--amber-50)"
+                    iconColorVar="var(--amber-500)"
+                    percentChange={0}
+                    isPositive
+                    comparisonText="vs last period"
+                    hoverShadowClass="hover:shadow-[0_14px_30px_-20px_rgba(245,158,11,0.22)]"
+                    style={mergeSectionMetricCssVars({
+                      ...METRIC_BASE_VARS,
+                      "--amber-50": "#fffbeb",
+                      "--amber-500": "#f59e0b",
+                    })}
+                  />
                 </div>
 
                 {isLoading ? (

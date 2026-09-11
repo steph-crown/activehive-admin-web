@@ -7,3 +7,4 @@ export * from "./subscription-plans-table";
 export * from "./create-subscription-plan-dialog";
 export * from "./edit-subscription-plan-dialog";
 export * from "./confirm-delete-subscription-plan-dialog";
+export * from "./confirm-toggle-subscription-plan-dialog";

@@ -98,13 +98,12 @@ export function GymsPage() {
   );
 
   const summary = useMemo(() => {
-    const rows = listRows;
-    const totalGyms = response?.pagination.total ?? rows.length;
-    const activeGyms = rows.filter((g) => g.isActive).length;
-    const pendingApproval = rows.filter(
+    const totalGyms = response?.pagination.total ?? listRows.length;
+    const activeGyms = listRows.filter((g) => g.isActive).length;
+    const pendingApproval = listRows.filter(
       (g) => g.approvalStatus === "pending",
     ).length;
-    const totalMembers = rows.reduce(
+    const totalMembers = listRows.reduce(
       (sum, g) => sum + g.displayMemberTotal,
       0,
     );
