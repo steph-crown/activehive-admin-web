@@ -1,5 +1,6 @@
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import {
   useActivateStaffMutation,
   useDeactivateStaffMutation,
@@ -67,11 +68,7 @@ export function ConfirmStaffActionDialog({
       showSuccess("Success", `${titles[action]} successful`);
       onOpenChange(false);
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Action failed. Please try again.";
-      showError("Error", message);
+      showError("Error", getApiErrorMessage(error, "Action failed. Please try again."));
     }
   };
 

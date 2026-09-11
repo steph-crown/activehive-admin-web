@@ -56,3 +56,20 @@ export type SubscriptionPlan = {
   isPopular: boolean;
   sortOrder: number | null;
 };
+
+export type SubscriptionRenewalHistory = {
+  id: string;
+  subscriptionId: string;
+  previousPlanId: string | null;
+  newPlanId: string | null;
+  previousPlan: SubscriptionPlan | null;
+  newPlan: SubscriptionPlan | null;
+  previousStatus: string;
+  newStatus: string;
+  previousSubscriptionEndDate: string | null;
+  newSubscriptionEndDate: string | null;
+  amountPaid: number | null;
+  promoCode: string | null;
+  renewedBy: string | null;
+  createdAt: string;
+};

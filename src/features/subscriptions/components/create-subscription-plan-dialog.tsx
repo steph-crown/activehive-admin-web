@@ -3,6 +3,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { Plus, X } from "lucide-react";
+import { getApiErrorMessage } from "@/lib/get-api-error-message";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -171,11 +172,7 @@ export function CreateSubscriptionPlanDialog({
       showSuccess("Success", "Subscription plan created successfully");
       onOpenChange(false);
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Failed to create subscription plan. Please try again.";
-      showError("Error", message);
+      showError("Error", getApiErrorMessage(error, "Failed to create subscription plan. Please try again."));
     }
   };
 

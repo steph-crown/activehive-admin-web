@@ -1,5 +1,6 @@
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import {
   useActivateSubscriptionPlanMutation,
   useDeactivateSubscriptionPlanMutation,
@@ -42,11 +43,7 @@ export function ConfirmToggleSubscriptionPlanDialog({
       }
       onOpenChange(false);
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : `Failed to ${action} plan. Please try again.`;
-      showError("Error", message);
+      showError("Error", getApiErrorMessage(error, `Failed to ${action} plan. Please try again.`));
     }
   };
 

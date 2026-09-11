@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import {
   useActivateLocationMutation,
   useDeactivateLocationMutation,
@@ -52,11 +53,7 @@ export function ConfirmLocationStatusDialog({
       showSuccess("Success", `${confirmLabel}d location successfully`);
       onOpenChange(false);
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Action failed. Please try again.";
-      showError("Error", message);
+      showError("Error", getApiErrorMessage(error, "Action failed. Please try again."));
     }
   };
 

@@ -10,6 +10,7 @@ import { TableCardSkeleton } from "@/components/loader/page-skeleton";
 import { AppSidebar } from "@/features/dashboard/components/app-sidebar";
 import { SiteHeader } from "@/features/dashboard/components/site-header";
 import { useToast } from "@/hooks/use-toast";
+import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import { IconPlus } from "@tabler/icons-react";
 import type {
   CreateChallengePayload,
@@ -46,10 +47,6 @@ const STATUS_FILTER_OPTIONS = [
   { value: "archived", label: "Archived" },
 ];
 
-function getErrorMessage(error: unknown, fallback: string): string {
-  if (error instanceof Error && error.message) return error.message;
-  return fallback;
-}
 
 export function ChallengesPage() {
   const { showSuccess, showError } = useToast();
@@ -95,7 +92,7 @@ export function ChallengesPage() {
       onError: (err) => {
         showError(
           "Could not create challenge",
-          getErrorMessage(err, "Please try again."),
+          getApiErrorMessage(err, "Please try again."),
         );
       },
     });
@@ -110,7 +107,7 @@ export function ChallengesPage() {
       onError: (err) => {
         showError(
           "Could not update challenge",
-          getErrorMessage(err, "Please try again."),
+          getApiErrorMessage(err, "Please try again."),
         );
       },
     });
@@ -127,7 +124,7 @@ export function ChallengesPage() {
       onError: (err) => {
         showError(
           "Could not delete challenge",
-          getErrorMessage(err, "Please try again."),
+          getApiErrorMessage(err, "Please try again."),
         );
       },
     });

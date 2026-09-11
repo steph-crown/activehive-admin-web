@@ -1,4 +1,5 @@
 import { useParams } from "react-router-dom";
+import { getApiErrorMessage } from "@/lib/get-api-error-message";
 
 import {
   Card,
@@ -51,7 +52,7 @@ export function SubscriptionPlanDetailPage() {
           <div className="px-4 lg:px-6 py-6">
             <p className="text-destructive">
               Failed to load subscription plan.{" "}
-              {error instanceof Error ? error.message : "Please try again."}
+              {getApiErrorMessage(error, "Please try again.")}
             </p>
           </div>
         </SidebarInset>

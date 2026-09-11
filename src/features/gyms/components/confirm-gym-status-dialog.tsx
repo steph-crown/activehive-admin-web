@@ -1,5 +1,6 @@
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import { useActivateGymMutation, useDeactivateGymMutation } from "../services";
 import type { Gym } from "../types";
 
@@ -47,11 +48,7 @@ export function ConfirmGymStatusDialog({
       showSuccess("Success", `${confirmLabel}d gym successfully`);
       onOpenChange(false);
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Action failed. Please try again.";
-      showError("Error", message);
+      showError("Error", getApiErrorMessage(error, "Action failed. Please try again."));
     }
   };
 

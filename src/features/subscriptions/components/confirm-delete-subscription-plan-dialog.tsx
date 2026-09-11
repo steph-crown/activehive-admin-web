@@ -1,5 +1,6 @@
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import { useDeleteSubscriptionPlanMutation } from "../services";
 import type { SubscriptionPlan } from "../types";
 
@@ -29,11 +30,7 @@ export function ConfirmDeleteSubscriptionPlanDialog({
       showSuccess("Success", "Subscription plan deleted successfully");
       onOpenChange(false);
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Failed to delete subscription plan. Please try again.";
-      showError("Error", message);
+      showError("Error", getApiErrorMessage(error, "Failed to delete subscription plan. Please try again."));
     }
   };
 

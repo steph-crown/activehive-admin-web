@@ -4,8 +4,13 @@ import {
   subscriptionsApi,
   type CreateSubscriptionPlanPayload,
   type UpdateSubscriptionPlanPayload,
+  type RenewSubscriptionPayload,
 } from "./api";
-import { subscriptionPlansQueryKeys, subscriptionsQueryKeys } from "./queries";
+import {
+  adminSubscriptionPlansQueryKeys,
+  subscriptionPlansQueryKeys,
+  subscriptionsQueryKeys,
+} from "./queries";
 
 type PlanAudience = "gym_owner" | "trainer";
 
@@ -15,6 +20,12 @@ const invalidatePlans = (
 ) => {
   queryClient.invalidateQueries({
     queryKey: subscriptionPlansQueryKeys.list(planType),
+  });
+  queryClient.invalidateQueries({
+    queryKey: adminSubscriptionPlansQueryKeys.list(planType),
+  });
+  queryClient.invalidateQueries({
+    queryKey: adminSubscriptionPlansQueryKeys.list(),
   });
 };
 
@@ -111,8 +122,13 @@ export const useRenewSubscriptionMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (subscriptionId: string) =>
-      subscriptionsApi.renewSubscription(subscriptionId),
+    mutationFn: ({
+      subscriptionId,
+      payload,
+    }: {
+      subscriptionId: string;
+      payload?: RenewSubscriptionPayload;
+    }) => subscriptionsApi.renewSubscription(subscriptionId, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: subscriptionsQueryKeys.list(),

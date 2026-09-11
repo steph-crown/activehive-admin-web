@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import { ArrowLeft } from "lucide-react";
 import {
   IconBarbellFilled,
@@ -215,7 +216,7 @@ export function GymDetailPage({ gymId }: GymDetailPageProps) {
       <GymPageShell>
         <p className="text-destructive">
           Error loading gym.{" "}
-          {error instanceof Error ? error.message : "Please try again."}
+          {getApiErrorMessage(error, "Please try again.")}
         </p>
         <Link
           to="/dashboard/gyms"

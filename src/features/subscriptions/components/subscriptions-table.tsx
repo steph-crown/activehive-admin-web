@@ -1,6 +1,7 @@
  
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
+import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import { type ColumnDef } from "@tanstack/react-table";
 import {
   IconCircleCheckFilled,
@@ -159,7 +160,7 @@ export function SubscriptionsTable({
   const {
     mutate: renew,
     isPending,
-    variables: renewingId,
+    variables: renewingVars,
   } = useRenewSubscriptionMutation();
   const { showSuccess, showError } = useToast();
 
@@ -171,7 +172,7 @@ export function SubscriptionsTable({
         cell: ({ row }) => {
           const subscription = row.original;
           const canRenew = isExpiredSubscriptionStatus(subscription.status);
-          const isRenewingThis = isPending && renewingId === subscription.id;
+          const isRenewingThis = isPending && renewingVars?.subscriptionId === subscription.id;
 
           return (
             <DropdownMenu>
@@ -197,7 +198,7 @@ export function SubscriptionsTable({
                     <DropdownMenuItem
                       disabled={isPending}
                       onSelect={() => {
-                        renew(subscription.id, {
+                        renew({ subscriptionId: subscription.id }, {
                           onSuccess: () => {
                             showSuccess(
                               "Subscription renewed",
@@ -205,11 +206,7 @@ export function SubscriptionsTable({
                             );
                           },
                           onError: (error) => {
-                            const message =
-                              error instanceof Error
-                                ? error.message
-                                : "Could not renew this subscription.";
-                            showError("Renewal failed", message);
+                            showError("Renewal failed", getApiErrorMessage(error, "Could not renew this subscription."));
                           },
                         });
                       }}
@@ -230,7 +227,7 @@ export function SubscriptionsTable({
         },
       },
     ],
-    [isPending, renewingId, renew, showError, showSuccess],
+    [isPending, renewingVars, renew, showError, showSuccess],
   );
 
   return (

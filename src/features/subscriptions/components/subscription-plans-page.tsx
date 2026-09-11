@@ -11,7 +11,7 @@ import { AppSidebar } from "@/features/dashboard/components/app-sidebar";
 import { SiteHeader } from "@/features/dashboard/components/site-header";
 import { rowMatchesDateField, rowMatchesSearch } from "@/lib/table-filters";
 import { IconPlus } from "@tabler/icons-react";
-import { useSubscriptionPlansQuery } from "../services";
+import { useAdminSubscriptionPlansQuery } from "../services";
 import type { SubscriptionPlan } from "../types";
 import { SubscriptionPlansTable } from "./subscription-plans-table";
 import { CreateSubscriptionPlanDialog } from "./create-subscription-plan-dialog";
@@ -51,7 +51,7 @@ export function SubscriptionPlansPage() {
     data: plans,
     isLoading: plansLoading,
     error: plansError,
-  } = useSubscriptionPlansQuery(audience);
+  } = useAdminSubscriptionPlansQuery(audience);
 
   const billingOptions = useMemo(() => {
     const periods = new Set<string>();

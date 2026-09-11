@@ -6,6 +6,7 @@ import * as yup from "yup";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
+import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import {
   Dialog,
   DialogContent,
@@ -85,11 +86,7 @@ export function EditTrainerDialog({
       showSuccess("Success", "Trainer updated successfully");
       onOpenChange(false);
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Failed to update trainer. Please try again.";
-      showError("Error", message);
+      showError("Error", getApiErrorMessage(error, "Failed to update trainer. Please try again."));
     }
   };
 

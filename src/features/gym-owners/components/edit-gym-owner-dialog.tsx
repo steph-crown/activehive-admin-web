@@ -6,6 +6,7 @@ import * as yup from "yup";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
+import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import {
   Dialog,
   DialogContent,
@@ -87,11 +88,7 @@ export function EditGymOwnerDialog({
       showSuccess("Success", "Gym owner updated successfully");
       onOpenChange(false);
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Failed to update gym owner. Please try again.";
-      showError("Error", message);
+      showError("Error", getApiErrorMessage(error, "Failed to update gym owner. Please try again."));
     }
   };
 

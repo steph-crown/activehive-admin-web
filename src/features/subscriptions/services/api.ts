@@ -1,7 +1,7 @@
 import { apiClient } from "@/lib/api-client";
 import type { PaginatedResponse } from "@/lib/types";
 import type { BillingPeriod } from "../constants";
-import type { Subscription, SubscriptionPlan } from "../types";
+import type { Subscription, SubscriptionPlan, SubscriptionRenewalHistory } from "../types";
 
 const subscriptionsBasePath = "/api/admin/subscriptions";
 const publicPlansPath = "/api/subscription-plans/active";
@@ -25,9 +25,8 @@ export type CreateSubscriptionPlanPayload = {
 export type UpdateSubscriptionPlanPayload =
   Partial<CreateSubscriptionPlanPayload>;
 
-/** POST `/api/admin/subscriptions/:id/renew` — optional body for plan change / promo (backend-specific). */
 export type RenewSubscriptionPayload = {
-  subscriptionPlanId?: string;
+  planId?: string;
   promoCode?: string | null;
 };
 
@@ -95,6 +94,27 @@ export const subscriptionsApi = {
   deactivateSubscriptionPlan: async (id: string): Promise<SubscriptionPlan> => {
     return await apiClient.patch<SubscriptionPlan>(
       `${adminPlansBasePath}/plans/${id}/deactivate`,
+    );
+  },
+
+  /** Admin-only: returns ALL plans (active and inactive) for the given type. */
+  getAllPlansAdmin: async (
+    planType?: "gym_owner" | "trainer",
+  ): Promise<SubscriptionPlan[]> => {
+    return await apiClient.get<SubscriptionPlan[]>(adminPlansBasePath, {
+      params: planType ? { planType } : undefined,
+    });
+  },
+
+  getSubscriptionById: async (id: string): Promise<Subscription> => {
+    return await apiClient.get<Subscription>(`${subscriptionsBasePath}/${id}`);
+  },
+
+  getRenewalHistory: async (
+    subscriptionId: string,
+  ): Promise<SubscriptionRenewalHistory[]> => {
+    return await apiClient.get<SubscriptionRenewalHistory[]>(
+      `${adminPlansBasePath}/subscriptions/${subscriptionId}/renewal-history`,
     );
   },
 };

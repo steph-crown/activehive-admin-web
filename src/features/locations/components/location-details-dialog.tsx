@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { getApiErrorMessage } from "@/lib/get-api-error-message";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -77,7 +78,7 @@ export function LocationDetailsDialog({
               <DialogTitle>Location</DialogTitle>
               <DialogDescription className="text-destructive">
                 Failed to load location.{" "}
-                {error instanceof Error ? error.message : "Please try again."}
+                {getApiErrorMessage(error, "Please try again.")}
               </DialogDescription>
             </DialogHeader>
           </>
