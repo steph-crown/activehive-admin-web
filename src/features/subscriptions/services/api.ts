@@ -22,7 +22,8 @@ export type CreateSubscriptionPlanPayload = {
   sortOrder: number | null;
 };
 
-export type UpdateSubscriptionPlanPayload = Partial<CreateSubscriptionPlanPayload>;
+export type UpdateSubscriptionPlanPayload =
+  Partial<CreateSubscriptionPlanPayload>;
 
 /** POST `/api/admin/subscriptions/:id/renew` — optional body for plan change / promo (backend-specific). */
 export type RenewSubscriptionPayload = {
@@ -39,8 +40,13 @@ export type SubscriptionsListParams = {
 };
 
 export const subscriptionsApi = {
-  getSubscriptions: async (params: SubscriptionsListParams = {}): Promise<PaginatedResponse<Subscription>> => {
-    return await apiClient.get<PaginatedResponse<Subscription>>(subscriptionsBasePath, { params });
+  getSubscriptions: async (
+    params: SubscriptionsListParams = {},
+  ): Promise<PaginatedResponse<Subscription>> => {
+    return await apiClient.get<PaginatedResponse<Subscription>>(
+      subscriptionsBasePath,
+      { params },
+    );
   },
   renewSubscription: async (
     id: string,
@@ -54,9 +60,12 @@ export const subscriptionsApi = {
   getActivePlans: async (
     planType: "gym_owner" | "trainer",
   ): Promise<SubscriptionPlan[]> => {
-    return await apiClient.get<SubscriptionPlan[]>(publicPlansPath, {
-      params: { planType },
-    });
+    const res = await apiClient.get<
+      SubscriptionPlan[] | { data: SubscriptionPlan[] }
+    >(publicPlansPath, { params: { planType } });
+    return Array.isArray(res)
+      ? res
+      : ((res as { data: SubscriptionPlan[] }).data ?? []);
   },
   createSubscriptionPlan: async (
     payload: CreateSubscriptionPlanPayload,
