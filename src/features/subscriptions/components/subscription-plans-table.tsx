@@ -50,8 +50,12 @@ const makeSubscriptionPlansColumns = (
   {
     accessorKey: "description",
     header: "Description",
+    size: 180,
     cell: ({ row }) => (
-      <span className="text-sm text-muted-foreground">
+      <span
+        className="text-sm text-muted-foreground block max-w-[180px] truncate"
+        title={row.original.description ?? undefined}
+      >
         {row.original.description ?? "—"}
       </span>
     ),
