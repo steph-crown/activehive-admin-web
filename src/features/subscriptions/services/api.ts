@@ -1,7 +1,7 @@
 import { apiClient } from "@/lib/api-client";
 import type { PaginatedResponse } from "@/lib/types";
 import type { BillingPeriod } from "../constants";
-import type { Subscription, SubscriptionPlan, SubscriptionRenewalHistory } from "../types";
+import type { Subscription, SubscriptionDetail, SubscriptionPlan, SubscriptionRenewalHistory } from "../types";
 
 const subscriptionsBasePath = "/api/admin/subscriptions";
 const publicPlansPath = "/api/subscription-plans/active";
@@ -128,9 +128,8 @@ export const subscriptionsApi = {
     });
   },
 
-  getSubscriptionById: async (id: string): Promise<Subscription> => {
-    return await apiClient.get<Subscription>(`${subscriptionsBasePath}/${id}`);
-  },
+  getSubscriptionById: async (id: string): Promise<SubscriptionDetail> =>
+    apiClient.get<SubscriptionDetail>(`${subscriptionsBasePath}/${id}`),
 
   getRenewalHistory: async (
     subscriptionId: string,

@@ -4,6 +4,7 @@ import type { SubscriptionsListParams, SubscriptionStats, PlanFeatureOption } fr
 import type { PaginatedResponse } from "@/lib/types";
 import type {
   Subscription,
+  SubscriptionDetail,
   SubscriptionPlan,
   SubscriptionRenewalHistory,
 } from "../types";
@@ -63,7 +64,7 @@ export const useSubscriptionsQuery = (params: SubscriptionsListParams = {}) =>
   });
 
 export const useSubscriptionDetailQuery = (id: string | undefined) =>
-  useQuery<Subscription>({
+  useQuery<SubscriptionDetail>({
     queryKey: subscriptionsQueryKeys.detail(id ?? ""),
     queryFn: () => subscriptionsApi.getSubscriptionById(id!),
     enabled: Boolean(id),

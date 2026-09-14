@@ -9,10 +9,21 @@ export type SubscriptionGymOwner = {
   [key: string]: unknown;
 };
 
+export type SubscriptionTrainer = {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  status: string;
+};
+
 export type SubscriptionGym = {
   id: string;
   name: string;
+  description?: string | null;
+  isActive?: boolean;
   address: GymAddress | null;
+  owner?: SubscriptionGymOwner | null;
   [key: string]: unknown;
 };
 
@@ -42,6 +53,7 @@ export type Subscription = {
   createdAt: string;
   updatedAt: string;
   gymOwner: SubscriptionGymOwner | null;
+  trainer: SubscriptionTrainer | null;
   gym: SubscriptionGym | null;
   platformPlan: SubscriptionPlan | null;
 };
@@ -63,6 +75,22 @@ export type SubscriptionPlan = {
   isDefault: boolean;
   isPopular: boolean;
   sortOrder: number | null;
+};
+
+export type SubscriptionDetail = {
+  gym: { id: string; name: string };
+  owner: { id: string; name: string; email: string };
+  status: string;
+  plan: { id: string; name: string };
+  pricing: { amount: string | number; currency: string; billingPeriod: string };
+  trialStartDate: string | null;
+  trialEndDate: string | null;
+  subscriptionStartDate: string | null;
+  subscriptionEndDate: string | null;
+  nextPaymentDate: string | null;
+  autoRenew: boolean;
+  cancellationReason: string | null;
+  cancelledAt: string | null;
 };
 
 export type SubscriptionRenewalHistory = {
