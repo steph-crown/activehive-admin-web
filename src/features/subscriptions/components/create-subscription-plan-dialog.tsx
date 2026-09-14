@@ -7,7 +7,7 @@ import { getApiErrorMessage } from "@/lib/get-api-error-message";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
+import { MultiSelect } from "@/components/molecules/multi-select";
 import {
   Dialog,
   DialogContent,
@@ -187,14 +187,6 @@ export function CreateSubscriptionPlanDialog({
     const current = [...(features ?? [])];
     current[index] = value;
     form.setValue("features", current, shouldValidate);
-  };
-
-  const toggleFlag = (value: string) => {
-    const current = featureFlags ?? [];
-    const next = current.includes(value)
-      ? current.filter((f) => f !== value)
-      : [...current, value];
-    form.setValue("featureFlags", next, shouldValidate);
   };
 
   const onSubmit = async (values: CreatePlanFormValues) => {
@@ -445,25 +437,17 @@ export function CreateSubscriptionPlanDialog({
             </div>
 
             {/* Enforced capability flags */}
-            {availableFlags.length > 0 && (
-              <div>
-                <FormLabel>Feature Flags <span className="text-muted-foreground font-normal text-xs">(enforced by backend)</span></FormLabel>
-                <div className="mt-2 space-y-2">
-                  {availableFlags.map((flag) => (
-                    <label
-                      key={flag.value}
-                      className="flex items-center gap-2.5 cursor-pointer"
-                    >
-                      <Checkbox
-                        checked={(featureFlags ?? []).includes(flag.value)}
-                        onCheckedChange={() => toggleFlag(flag.value)}
-                      />
-                      <span className="text-sm">{flag.label}</span>
-                    </label>
-                  ))}
-                </div>
+            <div>
+              <FormLabel>Feature Flags <span className="text-muted-foreground font-normal text-xs">(enforced by backend)</span></FormLabel>
+              <div className="mt-2">
+                <MultiSelect
+                  options={availableFlags}
+                  value={(featureFlags ?? []).filter((f): f is string => f !== undefined)}
+                  onChange={(next) => form.setValue("featureFlags", next, shouldValidate)}
+                  placeholder="Select capabilities..."
+                />
               </div>
-            )}
+            </div>
 
             {/* Numeric limits */}
             <div>
