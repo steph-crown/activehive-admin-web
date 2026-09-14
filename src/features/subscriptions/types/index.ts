@@ -36,10 +36,14 @@ export type Subscription = {
   cancellationReason: string | null;
   subscribedBy?: string | null;
   isTrial?: boolean;
+  gracePeriodDays: number | null;
+  gracePeriodEndDate: string | null;
+  actualDeactivationDate: string | null;
   createdAt: string;
   updatedAt: string;
   gymOwner: SubscriptionGymOwner | null;
   gym: SubscriptionGym | null;
+  platformPlan: SubscriptionPlan | null;
 };
 
 export type SubscriptionPlan = {

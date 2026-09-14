@@ -19,14 +19,71 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { DataTable } from "@/components/data-table/data-table";
 import { useToast } from "@/hooks/use-toast";
 import { formatDate } from "@/lib/utils";
+import type { SubscriptionPlan } from "../types";
 import type { Subscription } from "../types";
 import { useRenewSubscriptionMutation } from "../services";
 
 function isExpiredSubscriptionStatus(status: string): boolean {
   return status?.trim().toLowerCase() === "expired";
+}
+
+function PlanCell({ plan, fallback }: { plan: SubscriptionPlan | null; fallback: string | null }) {
+  const name = plan?.name ?? fallback;
+  if (!name) return <span className="text-muted-foreground">—</span>;
+
+  const badge = (
+    <Badge variant="outline" className="text-muted-foreground cursor-default px-1.5">
+      {name}
+    </Badge>
+  );
+
+  if (!plan) return badge;
+
+  const price = Number(plan.price);
+  const priceStr = Number.isFinite(price) ? `₦${price.toLocaleString()}` : plan.price;
+  const period = plan.billingPeriod ?? "";
+  const limits = [
+    plan.maxStaff != null ? `${plan.maxStaff} staff` : null,
+    plan.maxLocations != null ? `${plan.maxLocations} location${plan.maxLocations === 1 ? "" : "s"}` : null,
+    plan.maxClassesPerMonth != null ? `${plan.maxClassesPerMonth} classes/mo` : null,
+  ].filter(Boolean);
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{badge}</TooltipTrigger>
+      <TooltipContent
+        side="right"
+        className="bg-popover text-popover-foreground border shadow-md w-56 space-y-2 rounded-md p-3 text-xs"
+      >
+        <p className="font-semibold text-sm">{plan.name}</p>
+        <p className="text-muted-foreground">
+          {priceStr} / {period} · {plan.planType.replace("_", " ")}
+        </p>
+        {plan.description && (
+          <p className="text-muted-foreground line-clamp-2">{plan.description}</p>
+        )}
+        {limits.length > 0 && (
+          <p className="text-muted-foreground">Limits: {limits.join(", ")}</p>
+        )}
+        {(plan.featureFlags ?? []).length > 0 && (
+          <p className="text-muted-foreground">
+            Flags: {(plan.featureFlags ?? []).join(", ")}
+          </p>
+        )}
+        {plan.trialDays != null && plan.trialDays > 0 && (
+          <p className="text-muted-foreground">{plan.trialDays}-day trial</p>
+        )}
+      </TooltipContent>
+    </Tooltip>
+  );
 }
 
 const baseColumns: ColumnDef<Subscription>[] = [
@@ -53,22 +110,11 @@ const baseColumns: ColumnDef<Subscription>[] = [
     },
   },
   {
-    accessorKey: "plan",
+    accessorKey: "platformPlan",
     header: "Plan",
-    cell: ({ row }) => {
-      const plan = row.original.plan;
-      if (plan == null || plan === "") {
-        return <span className="text-muted-foreground">—</span>;
-      }
-      return (
-        <Badge
-          variant="outline"
-          className="text-muted-foreground px-1.5 capitalize"
-        >
-          {plan}
-        </Badge>
-      );
-    },
+    cell: ({ row }) => (
+      <PlanCell plan={row.original.platformPlan} fallback={row.original.plan} />
+    ),
   },
   {
     accessorKey: "status",
