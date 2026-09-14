@@ -50,6 +50,10 @@ export type SubscriptionPlan = {
   price: string;
   billingPeriod: string;
   features: string[] | null;
+  featureFlags: string[] | null;
+  maxStaff: number | null;
+  maxLocations: number | null;
+  maxClassesPerMonth: number | null;
   trialDays: number | null;
   isActive: boolean;
   isDefault: boolean;

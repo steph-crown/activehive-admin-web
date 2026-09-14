@@ -7,6 +7,7 @@ import { getApiErrorMessage } from "@/lib/get-api-error-message";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -34,7 +35,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { BILLING_PERIODS, type BillingPeriod } from "../constants";
-import { useCreateSubscriptionPlanMutation } from "../services";
+import { useCreateSubscriptionPlanMutation, usePlanFeatureFlagsQuery } from "../services";
 
 const FEATURE_PLACEHOLDERS = [
   "Unlimited member management",
@@ -81,6 +82,31 @@ const createPlanSchema = yup.object({
       (arr) => Boolean((arr ?? []).some((f) => f?.trim())),
     )
     .required(),
+  featureFlags: yup.array().of(yup.string()).optional(),
+  maxStaff: yup
+    .number()
+    .nullable()
+    .transform((value, originalValue) =>
+      originalValue === "" || Number.isNaN(value) ? null : value,
+    )
+    .min(0, "Must be 0 or more")
+    .optional(),
+  maxLocations: yup
+    .number()
+    .nullable()
+    .transform((value, originalValue) =>
+      originalValue === "" || Number.isNaN(value) ? null : value,
+    )
+    .min(0, "Must be 0 or more")
+    .optional(),
+  maxClassesPerMonth: yup
+    .number()
+    .nullable()
+    .transform((value, originalValue) =>
+      originalValue === "" || Number.isNaN(value) ? null : value,
+    )
+    .min(0, "Must be 0 or more")
+    .optional(),
 });
 
 type CreatePlanFormValues = yup.InferType<typeof createPlanSchema>;
@@ -99,6 +125,7 @@ export function CreateSubscriptionPlanDialog({
   const { showSuccess, showError } = useToast();
   const { mutateAsync: createPlan, isPending } =
     useCreateSubscriptionPlanMutation();
+  const { data: availableFlags = [] } = usePlanFeatureFlagsQuery();
 
   const form = useForm<CreatePlanFormValues>({
     resolver: yupResolver(createPlanSchema) as any,
@@ -111,11 +138,16 @@ export function CreateSubscriptionPlanDialog({
       hasTrial: true,
       trialDays: null,
       features: [""],
+      featureFlags: [],
+      maxStaff: null,
+      maxLocations: null,
+      maxClassesPerMonth: null,
     },
   });
 
   const hasTrial = useWatch({ control: form.control, name: "hasTrial" });
   const features = useWatch({ control: form.control, name: "features" });
+  const featureFlags = useWatch({ control: form.control, name: "featureFlags" });
 
   useEffect(() => {
     if (open) {
@@ -128,6 +160,10 @@ export function CreateSubscriptionPlanDialog({
         hasTrial: true,
         trialDays: null,
         features: [""],
+        featureFlags: [],
+        maxStaff: null,
+        maxLocations: null,
+        maxClassesPerMonth: null,
       });
     }
   }, [open, initialPlanType, form]);
@@ -153,6 +189,14 @@ export function CreateSubscriptionPlanDialog({
     form.setValue("features", current, shouldValidate);
   };
 
+  const toggleFlag = (value: string) => {
+    const current = featureFlags ?? [];
+    const next = current.includes(value)
+      ? current.filter((f) => f !== value)
+      : [...current, value];
+    form.setValue("featureFlags", next, shouldValidate);
+  };
+
   const onSubmit = async (values: CreatePlanFormValues) => {
     try {
       await createPlan({
@@ -162,6 +206,10 @@ export function CreateSubscriptionPlanDialog({
         price: values.price,
         billingPeriod: values.billingPeriod ?? "monthly",
         features: (values.features ?? []).filter((f): f is string => Boolean(f)),
+        featureFlags: (values.featureFlags ?? []).filter((f): f is string => Boolean(f)),
+        maxStaff: values.maxStaff ?? null,
+        maxLocations: values.maxLocations ?? null,
+        maxClassesPerMonth: values.maxClassesPerMonth ?? null,
         trialDays: values.hasTrial ? (values.trialDays ?? null) : null,
         hasTrial: values.hasTrial,
         isActive: true,
@@ -351,8 +399,9 @@ export function CreateSubscriptionPlanDialog({
               />
             )}
 
+            {/* Marketing features (free-text display copy) */}
             <div>
-              <FormLabel>Features</FormLabel>
+              <FormLabel>Features <span className="text-muted-foreground font-normal text-xs">(displayed to users)</span></FormLabel>
               <div className="mt-2 space-y-2">
                 {(features ?? []).map((feat, index) => (
                   <div key={index} className="flex items-center gap-2">
@@ -393,6 +442,100 @@ export function CreateSubscriptionPlanDialog({
                 <Plus className="size-4" />
                 Add feature
               </Button>
+            </div>
+
+            {/* Enforced capability flags */}
+            {availableFlags.length > 0 && (
+              <div>
+                <FormLabel>Feature Flags <span className="text-muted-foreground font-normal text-xs">(enforced by backend)</span></FormLabel>
+                <div className="mt-2 space-y-2">
+                  {availableFlags.map((flag) => (
+                    <label
+                      key={flag.value}
+                      className="flex items-center gap-2.5 cursor-pointer"
+                    >
+                      <Checkbox
+                        checked={(featureFlags ?? []).includes(flag.value)}
+                        onCheckedChange={() => toggleFlag(flag.value)}
+                      />
+                      <span className="text-sm">{flag.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Numeric limits */}
+            <div>
+              <FormLabel>Plan Limits <span className="text-muted-foreground font-normal text-xs">(leave blank for unlimited)</span></FormLabel>
+              <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <FormField
+                  control={form.control}
+                  name="maxStaff"
+                  render={({ field }) => (
+                    <FormItem className="min-w-0">
+                      <FormLabel className="text-xs font-normal text-muted-foreground">Max staff</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min="0"
+                          placeholder="Unlimited"
+                          {...field}
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(e.target.value === "" ? null : Number(e.target.value))
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="maxLocations"
+                  render={({ field }) => (
+                    <FormItem className="min-w-0">
+                      <FormLabel className="text-xs font-normal text-muted-foreground">Max locations</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min="0"
+                          placeholder="Unlimited"
+                          {...field}
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(e.target.value === "" ? null : Number(e.target.value))
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="maxClassesPerMonth"
+                  render={({ field }) => (
+                    <FormItem className="min-w-0">
+                      <FormLabel className="text-xs font-normal text-muted-foreground">Max classes/month</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min="0"
+                          placeholder="Unlimited"
+                          {...field}
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(e.target.value === "" ? null : Number(e.target.value))
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
 
             </div>

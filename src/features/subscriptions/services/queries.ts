@@ -1,6 +1,6 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { subscriptionsApi } from "./api";
-import type { SubscriptionsListParams } from "./api";
+import type { SubscriptionsListParams, SubscriptionStats, PlanFeatureOption } from "./api";
 import type { PaginatedResponse } from "@/lib/types";
 import type {
   Subscription,
@@ -12,6 +12,11 @@ export const subscriptionsQueryKeys = {
   all: ["subscriptions"] as const,
   list: () => [...subscriptionsQueryKeys.all, "list"] as const,
   detail: (id: string) => [...subscriptionsQueryKeys.all, "detail", id] as const,
+  stats: () => [...subscriptionsQueryKeys.all, "stats"] as const,
+};
+
+export const planFeatureFlagsQueryKeys = {
+  all: ["plan-feature-flags"] as const,
 };
 
 /** Public active-plans endpoint — used by plan picker modals shown to gym owners/trainers. */
@@ -35,6 +40,20 @@ export const renewalHistoryQueryKeys = {
   bySubscription: (id: string) =>
     [...renewalHistoryQueryKeys.all, id] as const,
 };
+
+export const useSubscriptionStatsQuery = () =>
+  useQuery<SubscriptionStats>({
+    queryKey: subscriptionsQueryKeys.stats(),
+    queryFn: () => subscriptionsApi.getStats(),
+    staleTime: 60_000,
+  });
+
+export const usePlanFeatureFlagsQuery = () =>
+  useQuery<PlanFeatureOption[]>({
+    queryKey: planFeatureFlagsQueryKeys.all,
+    queryFn: () => subscriptionsApi.getFeatureFlags(),
+    staleTime: Infinity,
+  });
 
 export const useSubscriptionsQuery = (params: SubscriptionsListParams = {}) =>
   useQuery<PaginatedResponse<Subscription>>({

@@ -18,7 +18,7 @@ import {
 } from "@/features/dashboard/components/section-metric-card";
 import { AppSidebar } from "@/features/dashboard/components/app-sidebar";
 import { SiteHeader } from "@/features/dashboard/components/site-header";
-import { useSubscriptionsQuery } from "../services";
+import { useSubscriptionsQuery, useSubscriptionStatsQuery } from "../services";
 import type { SubscriptionsListParams } from "../services/api";
 import type { Subscription } from "../types";
 import { SubscriptionsTable } from "./subscriptions-table";
@@ -67,6 +67,7 @@ export function SubscriptionsPage() {
   }, [page, limit, searchQuery, subscriptionStatusFilter, dateFilter]);
 
   const { data: response, isLoading, error } = useSubscriptionsQuery(apiParams);
+  const { data: stats } = useSubscriptionStatsQuery();
 
   // subscriberTypeFilter has no API support — applied client-side on current page.
   const filteredSubscriptions = useMemo(() => {
@@ -97,13 +98,13 @@ export function SubscriptionsPage() {
                 <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
                   <SectionMetricCard
                     title="Total subscriptions"
-                    value="0"
+                    value={stats ? String(stats.total) : "—"}
                     icon={<IconCreditCard className="size-6" />}
                     iconBgVar="var(--blue-50)"
                     iconColorVar="var(--blue-500)"
                     percentChange={0}
                     isPositive
-                    comparisonText="vs last period"
+                    comparisonText="all time"
                     hoverShadowClass="hover:shadow-[0_14px_30px_-20px_rgba(59,130,246,0.22)]"
                     style={mergeSectionMetricCssVars({
                       ...METRIC_BASE_VARS,
@@ -113,13 +114,13 @@ export function SubscriptionsPage() {
                   />
                   <SectionMetricCard
                     title="Active"
-                    value="0"
+                    value={stats ? String(stats.active) : "—"}
                     icon={<IconCircleCheckFilled className="size-6" />}
                     iconBgVar="var(--success-50)"
                     iconColorVar="var(--success-500)"
                     percentChange={0}
                     isPositive
-                    comparisonText="vs last period"
+                    comparisonText="currently active"
                     hoverShadowClass="hover:shadow-[0_14px_30px_-20px_rgba(34,197,94,0.22)]"
                     style={mergeSectionMetricCssVars({
                       ...METRIC_BASE_VARS,
@@ -128,13 +129,13 @@ export function SubscriptionsPage() {
                   />
                   <SectionMetricCard
                     title="Cancelled"
-                    value="0"
+                    value={stats ? String(stats.cancelled) : "—"}
                     icon={<IconX className="size-6" />}
                     iconBgVar="var(--error-50)"
                     iconColorVar="var(--error-400)"
                     percentChange={0}
-                    isPositive
-                    comparisonText="vs last period"
+                    isPositive={false}
+                    comparisonText="cancelled"
                     hoverShadowClass="hover:shadow-[0_14px_30px_-20px_rgba(220,89,89,0.22)]"
                     style={mergeSectionMetricCssVars({
                       ...METRIC_BASE_VARS,
@@ -143,13 +144,13 @@ export function SubscriptionsPage() {
                   />
                   <SectionMetricCard
                     title="Trial / Expired"
-                    value="0"
+                    value={stats ? String(stats.trialOrExpired) : "—"}
                     icon={<IconActivity className="size-6" />}
                     iconBgVar="var(--amber-50)"
                     iconColorVar="var(--amber-500)"
                     percentChange={0}
-                    isPositive
-                    comparisonText="vs last period"
+                    isPositive={false}
+                    comparisonText="trial or expired"
                     hoverShadowClass="hover:shadow-[0_14px_30px_-20px_rgba(245,158,11,0.22)]"
                     style={mergeSectionMetricCssVars({
                       ...METRIC_BASE_VARS,

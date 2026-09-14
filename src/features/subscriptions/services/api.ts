@@ -14,6 +14,10 @@ export type CreateSubscriptionPlanPayload = {
   price: number;
   billingPeriod: BillingPeriod;
   features: string[];
+  featureFlags?: string[];
+  maxStaff?: number | null;
+  maxLocations?: number | null;
+  maxClassesPerMonth?: number | null;
   trialDays: number | null;
   hasTrial: boolean;
   isActive: boolean;
@@ -38,7 +42,25 @@ export type SubscriptionsListParams = {
   dateFrom?: string;
 };
 
+export type SubscriptionStats = {
+  total: number;
+  active: number;
+  cancelled: number;
+  trialOrExpired: number;
+  byStatus: Record<string, number>;
+};
+
+export type PlanFeatureOption = {
+  value: string;
+  label: string;
+};
+
 export const subscriptionsApi = {
+  getStats: async (): Promise<SubscriptionStats> =>
+    apiClient.get<SubscriptionStats>(`${adminPlansBasePath}/stats`),
+
+  getFeatureFlags: async (): Promise<PlanFeatureOption[]> =>
+    apiClient.get<PlanFeatureOption[]>(`${adminPlansBasePath}/feature-flags`),
   getSubscriptions: async (
     params: SubscriptionsListParams = {},
   ): Promise<PaginatedResponse<Subscription>> => {
